@@ -296,7 +296,10 @@
                         </select>
                     </div>
 
-                    <button class="sf-btn" style="background:#16a34a;" onclick="calcFollowing()">🚀 วิเคราะห์</button>
+                    <div style="display:flex; gap:5px; justify-content:center; align-items:center; margin-top:10px;">
+    <button class="sf-btn" style="background:#16a34a;" onclick="calcFollowing()">🚀 วิเคราะห์</button>
+    <button class="sf-btn" style="background:#ffffff; color:#16a34a; border:1px solid #16a34a; box-shadow:none;" onclick="copyFollowResult()">📋 Copy</button>
+</div>
                 </div>
             </div>
             
@@ -480,6 +483,8 @@
 </div>
 
 <script>
+let currentFollowStr = ""; // ตัวแปรสำหรับเก็บเลข 10 ตัว
+
     // --- WORKER: Dynamic Patterns ---
     const workerScript = `
     self.onmessage = function(e) {
@@ -1099,6 +1104,7 @@ function calcFollowing() {
     `;
 
     let sorted = counts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c);
+    currentFollowStr = sorted.map(item => item.n).join('');
     let html = "";
     sorted.forEach(item => {
         let percent = Math.round((item.c / foundCount) * 100);
@@ -1262,6 +1268,15 @@ function autoFillInputs() {
     function copyFlowVin(type) { let arr = (type === 'up') ? window.currentVinUpArr : window.currentVinDownArr; let label = (type === 'up') ? 'วินบน' : 'วินล่าง'; if (!arr || arr.length === 0) return; let limit = window.currentVinLimit || 5; let total = arr.length; let formattedContent = ""; for (let i = 0; i < arr.length; i += limit) formattedContent += arr.slice(i, i + limit).join(' - ') + "\n"; let txt = `${label}ตรง จำนวน ${total} ตัว\n------------------\n${formattedContent}\nขอให้โชคดี ถูกหวย`; copyText(txt); }
     function copyText(t) { navigator.clipboard.writeText(t).then(()=>{ const el=document.getElementById('toast'); el.style.display='block'; setTimeout(()=>el.style.display='none', 1000); }); }
     function parseInputText(text) { let nums = text.match(/\d+/g); if(!nums) return {rounds:[], textFormat:""}; let rounds=[], tempUp=null, idx=1; nums.forEach(n => { if(n.length===5) rounds.push({i:idx++, up:n.substring(0,3), down:n.substring(3,5)}); else if(n.length===3) tempUp=n; else if(n.length===2 && tempUp) { rounds.push({i:idx++, up:tempUp, down:n}); tempUp=null; } }); if(rounds.length) return {rounds:rounds, textFormat:rounds.map(r=>`${r.up} ${r.down}`).join('\n')}; return {rounds:[], textFormat:""}; }
+
+function copyFollowResult() {
+    if (!currentFollowStr) {
+        alert("กรุณากดปุ่ม 'วิเคราะห์' ก่อนคัดลอก");
+        return;
+    }
+    copyText(currentFollowStr);
+}
+
 </script>
 </body>
 </html>
