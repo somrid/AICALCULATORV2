@@ -741,6 +741,8 @@
         const intData = currentData.map(r => [parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), parseInt(r.down[0]), parseInt(r.down[1])]);
 
         renderFlowDashboard(intData); calculateStructure(intData); 
+// ✅ เพิ่มบรรทัดนี้ เพื่อให้ดึงเลขล่าสุดมาใส่ทุกครั้งที่กดคำนวณ
+        autoFillInputs();
         document.getElementById('vinFlowSection').style.display = 'block'; calcVinFlow();
         if(!document.getElementById('rangeEnd').value) updateRangeFromCount();
 
@@ -1198,6 +1200,64 @@ function calcPairFollow() {
     });
     
     outputDiv.innerHTML = html;
+}
+// --- ฟังก์ชันเสริม: ดึงเลขงวดล่าสุด (ตัวล่างสุด) มาใส่ช่องเงื่อนไขอัตโนมัติ ---
+
+function getLatestRound() {
+    if (!currentData || currentData.length === 0) return null;
+    // แก้ไขตรงนี้: ดึงตัวสุดท้ายของ Array (งวดล่าสุดที่อยู่ล่างสุด)
+    return currentData[currentData.length - 1]; 
+}
+
+// 1. ดึงเลขเดี่ยว (Single Digit)
+function setFollowFromLatest() {
+    const latest = getLatestRound();
+    if (!latest) return;
+    
+    const sPos = parseInt(document.getElementById('sourcePos').value);
+    let val = NaN;
+
+    // ดึงค่าตามตำแหน่งที่เลือก
+    if (sPos === 0) val = parseInt(latest.up[0]);      // ร้อย
+    else if (sPos === 1) val = parseInt(latest.up[1]); // สิบบน
+    else if (sPos === 2) val = parseInt(latest.up[2]); // หน่วยบน
+    else if (sPos === 3) val = parseInt(latest.down[0]); // สิบล่าง
+    else if (sPos === 4) val = parseInt(latest.down[1]); // หน่วยล่าง
+    else if (sPos === 5) val = (parseInt(latest.up[1]) + parseInt(latest.up[2])) % 10; // แต้มบน
+    else if (sPos === 6) val = (parseInt(latest.down[0]) + parseInt(latest.down[1])) % 10; // แต้มล่าง
+
+    // อัปเดตค่าในช่อง input
+    if (!isNaN(val)) {
+        document.getElementById('followNum').value = val;
+    }
+}
+
+// 2. ดึงเลขคู่ (Pair)
+function setPairFromLatest() {
+    const latest = getLatestRound();
+    if (!latest) return;
+
+    const sPos = document.getElementById('pairSourcePos').value;
+    let val = "";
+
+    if (sPos === 'up') {
+        // บน: เอาหลักสิบ+หน่วย (ตัวที่ 2 และ 3 ของสตริง 3 ตัว)
+        val = latest.up.substring(1, 3);
+    } else {
+        // ล่าง: เอาทั้งหมด
+        val = latest.down;
+    }
+
+    // อัปเดตค่าในช่อง input
+    if (val) {
+        document.getElementById('pairInput').value = val;
+    }
+}
+
+// 3. ฟังก์ชันรวม (เรียกใช้ตอนกดคำนวณ)
+function autoFillInputs() {
+    setFollowFromLatest();
+    setPairFromLatest();
 }
     function copyFlowVin(type) { let arr = (type === 'up') ? window.currentVinUpArr : window.currentVinDownArr; let label = (type === 'up') ? 'วินบน' : 'วินล่าง'; if (!arr || arr.length === 0) return; let limit = window.currentVinLimit || 5; let total = arr.length; let formattedContent = ""; for (let i = 0; i < arr.length; i += limit) formattedContent += arr.slice(i, i + limit).join(' - ') + "\n"; let txt = `${label}ตรง จำนวน ${total} ตัว\n------------------\n${formattedContent}\nขอให้โชคดี ถูกหวย`; copyText(txt); }
     function copyText(t) { navigator.clipboard.writeText(t).then(()=>{ const el=document.getElementById('toast'); el.style.display='block'; setTimeout(()=>el.style.display='none', 1000); }); }
