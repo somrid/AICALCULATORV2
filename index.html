@@ -153,6 +153,51 @@
         body.dark-mode .row-line { border-color: #334155; }
         body.dark-mode .num-match { color: #f472b6; }
         .num-normal { opacity: 0.8; }
+/* === คัดลอกส่วนนี้ไปวางใน <style> ของ github1 === */
+
+/* กำหนดตัวแปรสีเขียว */
+:root { --green-active: #10b981; }
+body.dark-mode { --green-active: #059669; }
+
+/* จัดการ Layout ปุ่ม */
+.grid-targets { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
+    gap: 8px; 
+    margin-bottom: 20px; 
+}
+
+/* ดีไซน์ปุ่มทรงมน */
+.btn-target { 
+    background: var(--c-bg); 
+    border: 1px solid var(--border); 
+    color: var(--txt-l); 
+    padding: 8px 10px; 
+    border-radius: 20px; /* ความมน */
+    cursor: pointer; 
+    font-size: 13px; 
+    font-weight: 700; 
+    white-space: nowrap; 
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* เอฟเฟกต์ตอนชี้เมาส์ */
+.btn-target:hover { 
+    transform: translateY(-2px); 
+    border-color: var(--green-active); 
+    color: var(--green-active); 
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.15); 
+}
+
+/* เอฟเฟกต์ตอนกดเลือก (สีเขียว) */
+.btn-target.active { 
+    background: var(--green-active) !important; 
+    border-color: var(--green-active) !important; 
+    color: white !important; 
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); 
+    transform: translateY(-1px);
+}
     </style>
 </head>
 <body>
@@ -424,17 +469,17 @@
         </div>
 
         <div class="grid-targets">
-            <button class="btn-target active" onclick="setTarget('hundred')">💯 หลักร้อย</button>
-            <button class="btn-target" onclick="setTarget('tens_up')">⬆️ สิบบน</button>
-            <button class="btn-target" onclick="setTarget('units_up')">↗️ หน่วยบน</button>
-            <button class="btn-target" onclick="setTarget('tens_down')">⬇️ สิบล่าง</button>
-            <button class="btn-target" onclick="setTarget('units_down')">↘️ หน่วยล่าง</button>
-            <button class="btn-target" style="color:var(--p); border-color:var(--p);" onclick="setTarget('tf_up')">🎲 พิกัดบน</button>
-            <button class="btn-target" style="color:var(--p); border-color:var(--p);" onclick="setTarget('tf_down')">🎲 พิกัดล่าง</button>
-            <button class="btn-target" style="color:#6610f2; border-color:#6610f2;" onclick="setTarget('pair_up')">🍒 วินบน (2)</button>
-            <button class="btn-target" style="color:#6610f2; border-color:#6610f2;" onclick="setTarget('pair_down')">🍒 วินล่าง (2)</button>
-            <button class="btn-target" style="color:#dc3545; border-color:#dc3545;" onclick="setTarget('any_no_hundred')">🎲 บน/ล่าง*</button>
-        </div>
+    <button class="btn-target active" onclick="setTarget('hundred', this)">💯 หลักร้อย</button>
+    <button class="btn-target" onclick="setTarget('tens_up', this)">⬆️ สิบบน</button>
+    <button class="btn-target" onclick="setTarget('units_up', this)">↗️ หน่วยบน</button>
+    <button class="btn-target" onclick="setTarget('tens_down', this)">⬇️ สิบล่าง</button>
+    <button class="btn-target" onclick="setTarget('units_down', this)">↘️ หน่วยล่าง</button>
+    <button class="btn-target" style="color:var(--p); border-color:var(--p);" onclick="setTarget('tf_up', this)">🎲 พิกัดบน</button>
+    <button class="btn-target" style="color:var(--p); border-color:var(--p);" onclick="setTarget('tf_down', this)">🎲 พิกัดล่าง</button>
+    <button class="btn-target" style="color:#6610f2; border-color:#6610f2;" onclick="setTarget('pair_up', this)">🍒 วินบน</button>
+    <button class="btn-target" style="color:#6610f2; border-color:#6610f2;" onclick="setTarget('pair_down', this)">🍒 วินล่าง</button>
+    <button class="btn-target" style="color:#dc3545; border-color:#dc3545;" onclick="setTarget('any_no_hundred', this)">🎲 บน/ล่าง*</button>
+</div>
 
         <button class="btn-add" style="background:var(--p); width:200px; display:block; margin:0 auto;" onclick="runProgram()">🚀 คำนวณใหม่</button>
     </div>
@@ -651,7 +696,22 @@ let currentFollowStr = ""; // ตัวแปรสำหรับเก็บ�
     // HANDLERS
     function setMode(m) { displayMode=m; updateUI(); runProgram(); }
     function setHunt(h) { isHuntingMode=h; updateUI(); if(isHuntingMode) setMode('all'); else runProgram(); }
-    function setTarget(t) { document.querySelectorAll('.btn.active').forEach(b=>{ if(b.onclick && b.onclick.toString().includes('setTarget')) b.classList.remove('active')}); event.target.classList.add('active'); currentTarget=t; runProgram(); }
+    /* === คัดลอกฟังก์ชันนี้ไปทับ function setTarget เดิม ใน github1 === */
+function setTarget(val, btn) { 
+    // ลบสีเขียวออกจากปุ่มทั้งหมด
+    document.querySelectorAll('.btn-target').forEach(b => b.classList.remove('active'));
+    
+    // ใส่สีเขียวให้ปุ่มที่เพิ่งกด
+    if(btn) {
+        btn.classList.add('active'); 
+    } else if(event && event.target) {
+        event.target.classList.add('active');
+    }
+    
+    // สั่งคำนวณ (ใช้ Logic เดิมของ github1)
+    currentTarget = val; 
+    runProgram(); 
+}
     function setStep(mode, btn) { currentStepMode = mode; document.querySelectorAll('.btn-step').forEach(b => b.classList.remove('active')); btn.classList.add('active'); runProgram(); }
     function setLen(n, btn) { currentLen = n; document.querySelectorAll('.btn-len').forEach(b => b.classList.remove('active')); btn.classList.add('active'); runProgram(); }
     
@@ -801,7 +861,7 @@ let currentFollowStr = ""; // ตัวแปรสำหรับเก็บ�
         let displayFormulas = [...pinned, ...unpinned];
 
         // --- แก้ไขจุดนี้: เปลี่ยนปุ่ม Copy ให้เหมือน Auto Flow Vin (ใช้ class btn-tiny และลบไอคอนออก) ---
-        let html = `<table><thead><tr><th style="min-width:160px; z-index:100; left:0;">งวด / ผล <button class="btn-tiny" onclick="copyHistoryColumn()" title="Copy Results">Copy</button></th>`;
+        let html = `<table><thead><tr><th style="min-width:160px; z-index:100; left:0;">ผล <button class="btn-tiny" onclick="copyHistoryColumn()" title="Copy Results">Copy</button></th>`;
         
         displayFormulas.forEach((f,i) => {
             let isPinned = pinnedList.includes(f.name);
@@ -826,7 +886,7 @@ let currentFollowStr = ""; // ตัวแปรสำหรับเก็บ�
             let item = displayFormulas[0].history[i];
             let isPred = (i === hLen-1);
             if(isPred) html += `<tr><td style="background:#fef08a;">🔮 ทำนาย</td>`;
-            else { let tr = data[item.rowIdx+1]; html += `<tr><td>${tr.i}. ${tr.up}-${tr.down}</td>`; }
+            else { let tr = data[item.rowIdx+1]; html += `<tr><td>${tr.up}-${tr.down}</td>`; }
             displayFormulas.forEach(f => {
                 let h = f.history[i];
                 let d = h.nums.join('');
