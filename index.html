@@ -478,7 +478,7 @@ body.dark-mode { --green-active: #059669; }
     <button class="btn-target" style="color:var(--p); border-color:var(--p);" onclick="setTarget('tf_down', this)">🎲 พิกัดล่าง</button>
     <button class="btn-target" style="color:#6610f2; border-color:#6610f2;" onclick="setTarget('pair_up', this)">🍒 วินบน</button>
     <button class="btn-target" style="color:#6610f2; border-color:#6610f2;" onclick="setTarget('pair_down', this)">🍒 วินล่าง</button>
-    <button class="btn-target" style="color:#dc3545; border-color:#dc3545;" onclick="setTarget('any_no_hundred', this)">🎲 บน/ล่าง*</button>
+    <button class="btn-target" style="color:#dc3545; border-color:#dc3545;" onclick="setTarget('any_no_hundred', this)">🎲 บน/ล่าง</button>
 </div>
 
         <button class="btn-add" style="background:var(--p); width:200px; display:block; margin:0 auto;" onclick="runProgram()">🚀 คำนวณใหม่</button>
@@ -697,19 +697,32 @@ let currentFollowStr = ""; // ตัวแปรสำหรับเก็บ�
     function setMode(m) { displayMode=m; updateUI(); runProgram(); }
     function setHunt(h) { isHuntingMode=h; updateUI(); if(isHuntingMode) setMode('all'); else runProgram(); }
     /* === คัดลอกฟังก์ชันนี้ไปทับ function setTarget เดิม ใน github1 === */
-function setTarget(val, btn) { 
-    // ลบสีเขียวออกจากปุ่มทั้งหมด
+function setTarget(t, btn) { 
+    // ส่วนจัดการสีปุ่ม (Active)
     document.querySelectorAll('.btn-target').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active'); 
+    else if(event && event.target) event.target.classList.add('active');
     
-    // ใส่สีเขียวให้ปุ่มที่เพิ่งกด
-    if(btn) {
-        btn.classList.add('active'); 
-    } else if(event && event.target) {
-        event.target.classList.add('active');
-    }
+    // กำหนดค่าเป้าหมายสำหรับคำนวณ
+    currentTarget = t; 
+
+    // ✅ เพิ่มส่วนนี้: แปลงรหัสเป็นชื่อไทย เพื่อไปแสดงในปุ่ม Copy
+    const labelMap = {
+        'hundred': 'หลักร้อย', 
+        'tens_up': 'สิบบน', 
+        'units_up': 'หน่วยบน',
+        'tens_down': 'สิบล่าง', 
+        'units_down': 'หน่วยล่าง',
+        'tf_up': 'พิกัดบน', 
+        'tf_down': 'พิกัดล่าง',
+        'pair_up': 'วินบน', 
+        'pair_down': 'วินล่าง',
+        'any_no_hundred': 'บน/ล่าง*'
+    };
+    // อัปเดตชื่อที่จะเอาไปแสดง
+    currentTargetLabel = labelMap[t] || t;
     
-    // สั่งคำนวณ (ใช้ Logic เดิมของ github1)
-    currentTarget = val; 
+    // สั่งคำนวณใหม่
     runProgram(); 
 }
     function setStep(mode, btn) { currentStepMode = mode; document.querySelectorAll('.btn-step').forEach(b => b.classList.remove('active')); btn.classList.add('active'); runProgram(); }
@@ -1340,4 +1353,3 @@ function copyFollowResult() {
 </script>
 </body>
 </html>
-
