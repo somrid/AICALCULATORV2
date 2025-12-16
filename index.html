@@ -432,13 +432,14 @@ body.dark-mode { --green-active: #059669; }
                 <span style="font-size:13px; font-weight:700; color:#2563eb;">งวด</span>
             </div>
             <div style="display:flex; align-items:center; gap:5px; border-left:2px solid #e2e8f0; padding-left:10px;">
-                <span style="color:#dc2626; font-weight:800;">⛔ ผิด ≤</span>
-                <input type="number" id="maxLoss" placeholder="-" onchange="runProgram()" title="สูตรต้องผิดรวมไม่เกินนี้" style="width:50px; text-align:center; padding:4px; border:2px solid #ef4444; border-radius:6px; font-weight:bold; color:#b91c1c;">
-            </div>
-            <div style="display:flex; align-items:center; gap:5px;">
-                <span style="color:#dc2626; font-weight:800;">📉 ซ้ำ ≤</span>
-                <input type="number" id="maxConsLoss" placeholder="-" onchange="runProgram()" title="สูตรต้องไม่ผิดติดกันเกินนี้" style="width:50px; text-align:center; padding:4px; border:2px solid #ef4444; border-radius:6px; font-weight:bold; color:#b91c1c;">
-            </div>
+    <span style="color:#dc2626; font-weight:800;">⛔ ผิด ≤</span>
+    <input type="number" id="maxLoss" placeholder="-" onkeyup="filterAndRender()" onchange="filterAndRender()" title="สูตรต้องผิดรวมไม่เกินนี้" style="width:50px; text-align:center; padding:4px; border:2px solid #ef4444; border-radius:6px; font-weight:bold; color:#b91c1c;">
+</div>
+
+<div style="display:flex; align-items:center; gap:5px;">
+    <span style="color:#dc2626; font-weight:800;">📉 ซ้ำ ≤</span>
+    <input type="number" id="maxConsLoss" placeholder="-" onkeyup="filterAndRender()" onchange="filterAndRender()" title="สูตรต้องไม่ผิดติดกันเกินนี้" style="width:50px; text-align:center; padding:4px; border:2px solid #ef4444; border-radius:6px; font-weight:bold; color:#b91c1c;">
+</div>
             <div style="display:flex; align-items:center; gap:5px; border-left:2px solid #e2e8f0; padding-left:10px;">
                 <span style="color:#9333ea; font-weight:800;">✂️ ตัดเลข:</span>
                 <input type="text" id="killDigits" placeholder="เช่น 05" onchange="runProgram()" style="width:70px; text-align:center; padding:4px; border:2px solid #a855f7; border-radius:6px; font-weight:bold; color:#6b21a8;">
@@ -532,11 +533,24 @@ body.dark-mode { --green-active: #059669; }
 let currentFollowStr = ""; // ตัวแปรสำหรับเก็บเลข 10 ตัว
 
     // --- WORKER: Dynamic Patterns ---
+    // --- WORKER: Dynamic Patterns + Instant Filter Logic ---
     const workerScript = `
     self.onmessage = function(e) {
-        const { intData, targetType, len, displayMode, startIdx, endIdx, manualLimit, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize } = e.data;
-        let results = findFormulasLite(intData, targetType, len, displayMode, startIdx, endIdx, manualLimit, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize);
-        self.postMessage({status:'success', data:results});
+        try {
+            // รับค่า parameters (รวม forwardTest)
+            const { intData, targetType, len, displayMode, startIdx, endIdx, manualLimit, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize, forwardTest } = e.data;
+            
+            // ✅ 1. กำหนดเป้าหมายจำนวนสูตร: 
+            // ถ้า Manual: เอาตามที่กรอก (หรือ 100), ถ้า Auto: หาเผื่อ 2000 สูตร
+            const targetCount = (displayMode === 'all') ? (manualLimit || 100) : 2000;
+            
+            // เรียกฟังก์ชันคำนวณ (ส่ง targetCount ไปด้วย)
+            let results = findFormulasLite(intData, targetType, len, displayMode, startIdx, endIdx, targetCount, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize, forwardTest);
+            
+            self.postMessage({status:'success', data:results});
+        } catch(err) {
+            self.postMessage({status:'error', msg:err.message});
+        }
     };
 
     function sfc32(a, b, c, d) {
@@ -547,37 +561,24 @@ let currentFollowStr = ""; // ตัวแปรสำหรับเก็บ�
         }
     }
 
-    // Dynamic Additives based on Step Mode
-    // ✅ นำฟังก์ชันนี้ไปวางทับ function getAdditives(len, mode) {...} ของเดิม
     function getAdditives(len, mode) {
         let arr = [];
-
-        // สูตรข้าม 5 (Step 5)
+        // รองรับ Step 5 (ข้าม 5 / เลขเงา)
         if (mode === 'step5') {
-            // 1. หาจำนวนครึ่งหนึ่งปัดขึ้น (เช่น เลือก 5 ตัว -> หาร 2 ได้ 2.5 -> ปัดเป็น 3 ตัว)
             let baseLen = Math.ceil(len / 2);
-            
-            // 2. สร้างชุดแรก (เลขเรียงปกติ)
             for (let i = 0; i < baseLen; i++) arr.push(i);
-            
-            // 3. สร้างชุดสอง (เลขชุดแรก + 5)
             for (let i = 0; i < baseLen; i++) arr.push((i + 5) % 10);
-            
-            // 4. ตัดส่วนเกินออกให้เหลือเท่าจำนวนที่ต้องการ (เช่น ได้มา 6 ตัว ตัดเหลือ 5 ตัว)
             return arr.slice(0, len);
         }
-
-        // สูตรเดิม (เรียง, คี่, คู่, ข้าม3)
+        // รูปแบบเดิม
         let step = 1; let start = 0;
-        if(mode === 'odd') { start=1; step=2; } 
-        else if(mode === 'even') { start=0; step=2; } 
-        else if(mode === 'step3') { start=0; step=3; }
-        
+        if(mode === 'odd') { start=1; step=2; } else if(mode === 'even') { start=0; step=2; } else if(mode === 'step3') { start=0; step=3; }
         for(let i=0; i<len; i++) arr.push((start + (i*step)) % 10);
         return arr;
     }
 
     function getTargetValue(roundArr, type) {
+        if (!roundArr) return [];
         if(type==='hundred') return [roundArr[0]]; if(type==='tens_up') return [roundArr[1]]; if(type==='units_up') return [roundArr[2]];
         if(type==='tens_down') return [roundArr[3]]; if(type==='units_down') return [roundArr[4]];
         if(type==='tf_up') return [roundArr[1], roundArr[2]]; if(type==='tf_down') return [roundArr[3], roundArr[4]]; 
@@ -593,11 +594,16 @@ let currentFollowStr = ""; // ตัวแปรสำหรับเก็บ�
         return match > 0; 
     }
 
-    function findFormulasLite(intData, targetType, len, displayMode, startIdx, endIdx, manualLimit, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize) {
-        let totalChecks = intData.length - 1;
-        const targetVals = [];
-        for(let i=0; i < totalChecks; i++) targetVals.push(getTargetValue(intData[i+1], targetType));
+    // ฟังก์ชันคำนวณหลัก (แก้ไขให้ส่งข้อมูลกลับทั้งหมด ไม่ตัดทิ้ง)
+    function findFormulasLite(intData, targetType, len, displayMode, startIdx, endIdx, targetCount, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize, forwardTest) {
+        let activeEndIdx = Math.min(endIdx - (forwardTest || 0), intData.length - 2);
+        if (activeEndIdx < startIdx) activeEndIdx = startIdx;
         
+        const targetVals = new Array(intData.length).fill(null);
+        for(let i=1; i < intData.length; i++) {
+             targetVals[i] = getTargetValue(intData[i-1], targetType);
+        }
+
         let randFunc = Math.random;
         if (displayMode === 'all' || isHuntingMode) {
              let seedVal = 12345 + (targetType.length * 100) + len;
@@ -606,16 +612,15 @@ let currentFollowStr = ""; // ตัวแปรสำหรับเก็บ�
 
         const positions = [0, 1, 2, 3, 4]; const operators = ['+', '-', '*']; const constants = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]; 
         let allResults = [];
-        const MAX_SEARCH = 2000; 
-        
         let additives = getAdditives(len, stepMode);
 
-        for (let r = 0; r < MAX_SEARCH; r++) {
+        // ✅ 2. วนลูปหาจนกว่าจะครบจำนวน targetCount (ไม่สนใจ MaxSearch เดิม)
+        for (let r = 0; r < targetCount; r++) {
             let p1 = positions[Math.floor(randFunc() * 5)]; let p2 = positions[Math.floor(randFunc() * 5)];
             let op = operators[Math.floor(randFunc() * 3)]; let con = constants[Math.floor(randFunc() * 10)]; let m1 = Math.floor(randFunc() * 5) + 1;
             
             const baseSums = new Int8Array(intData.length);
-            for(let i=1; i<intData.length; i++) { 
+            for(let i=0; i<intData.length; i++) { 
                 let v1 = intData[i][p1]; let v2 = intData[i][p2]; let res = 0;
                 if (op === '+') res = (v1 * m1) + v2; else if (op === '-') res = (v1 * m1) - v2; else if (op === '*') res = (v1 * m1) * v2;
                 if (isNaN(res)) res = 0;
@@ -625,69 +630,87 @@ let currentFollowStr = ""; // ตัวแปรสำหรับเก็บ�
             let name = \`(\${m1>1?m1+'x':''}\${['ร','ส','น','ลส','ลน'][p1]} \${op} \${['ร','ส','น','ลส','ลน'][p2]}) + \${con}\`;
 
             for(let start=0; start<=9; start++) {
-                let score=0;
-                // Fast Score Check
-                for(let i=startIdx; i<=endIdx; i++) { 
-                    if(i >= totalChecks) continue;
+                let score=0; 
+                let currentLoss = 0;
+                let maxCons = 0;
+                let totalLoss = 0;
+                let loopStart = Math.max(1, startIdx);
+
+                for(let i=loopStart; i<=activeEndIdx; i++) { 
                     let numsToCheck = [];
                     for(let k=0; k<len; k++) numsToCheck.push((baseSums[i]+start+additives[k])%10);
-                    if(checkWin(targetVals[i], numsToCheck, targetType)) score++;
+                    
+                    if (targetVals[i]) {
+                        if(checkWin(targetVals[i], numsToCheck, targetType)) {
+                            score++;
+                            currentLoss = 0;
+                        } else {
+                            currentLoss++;
+                            totalLoss++;
+                            if(currentLoss > maxCons) maxCons = currentLoss;
+                        }
+                    }
                 }
                 
-                allResults.push({ name: name+" (R"+start+")", score: score, p1, p2, op, con, m1, start, baseSums });
+                // ✅ 3. บันทึกผลทั้งหมดทันที (ไม่ต้องมี if ตรวจสอบ maxLoss)
+                // เราจะไปกรองที่หน้าจอแทน
+                allResults.push({ 
+                    name: name+" (R"+start+")", 
+                    score: score, 
+                    totalLoss: totalLoss, // ส่งค่าผิดรวมไป
+                    maxCons: maxCons,     // ส่งค่าผิดซ้ำไป
+                    p1, p2, op, con, m1, start, baseSums 
+                });
+                
+                // ถ้าได้ครบจำนวนแล้ว หยุดทันที
+                if (allResults.length >= targetCount) break;
             }
+             if (allResults.length >= targetCount) break;
         }
         
+        allResults.sort((a,b)=>b.score-a.score);
+        
         if (displayMode === 'auto') {
-            allResults.sort((a,b)=>b.score-a.score);
             allResults = allResults.slice(0, 5);
-        } else {
-            // Manual Pagination Logic
-            let startIndex = (page - 1) * pageSize;
-            let endIndex = startIndex + pageSize;
-            allResults = allResults.slice(startIndex, endIndex);
         }
 
-        // Full History Generation only for selected results
         return allResults.map(res => {
             let history = [];
             let currentNums = null; let huntCount = 0;
             
-            for(let i=1; i<intData.length; i++) {
-                 let isLast = i === intData.length - 1;
+            for(let i=1; i < intData.length; i++) {
                  let numsToCheck = [];
-                 let isWin = false;
+                 for(let k=0; k<len; k++) numsToCheck.push((res.baseSums[i]+res.start+additives[k])%10);
                  
-                 // Logic
-                 if (isHuntingMode) {
-                    if (currentNums === null) { 
-                        for(let k=0; k<len; k++) numsToCheck.push((res.baseSums[i]+res.start+additives[k])%10); 
-                        currentNums=numsToCheck; huntCount=1; 
-                    } else { numsToCheck = currentNums; }
-                 } else { 
-                    for(let k=0; k<len; k++) numsToCheck.push((res.baseSums[i]+res.start+additives[k])%10); 
-                 }
+                 let target = getTargetValue(intData[i-1], targetType);
+                 let isWin = checkWin(target, numsToCheck, targetType);
+                 let record = { nums: numsToCheck, win: isWin, rowIdx: i-1 }; 
                  
-                 if (!isLast) {
-                     isWin = checkWin(targetVals[i], numsToCheck, targetType);
-                     let record = { nums: numsToCheck, win: isWin, rowIdx: i };
-                     if (isHuntingMode) { record.huntRound = huntCount; record.huntMax = huntMax; }
-                     
-                     // *** FIX: ONLY ADD HISTORY IF WITHIN RANGE ***
-                     if (i >= startIdx && i <= endIdx) {
-                        history.push(record);
-                     }
-                     
-                     if (isHuntingMode) {
-                        if (isWin) currentNums = null; 
-                        else { if (huntCount < huntMax) huntCount++; else currentNums = null; }
-                     }
-                 } else {
-                     // Prediction row (Always add)
-                     history.push({ nums: numsToCheck, win: null, rowIdx: i });
+                 if (i > activeEndIdx) record.isTest = true;
+                 
+                 if (i >= startIdx && i <= endIdx) {
+                    history.push(record);
                  }
             }
-            return { name: res.name, score: res.score, history: history, isDimmed: false };
+            
+            let p1=res.p1, p2=res.p2, op=res.op, con=res.con, m1=res.m1;
+            let v1 = intData[0][p1]; let v2 = intData[0][p2]; let val = 0;
+            if (op === '+') val = (v1 * m1) + v2; else if (op === '-') val = (v1 * m1) - v2; else if (op === '*') val = (v1 * m1) * v2;
+            let base0 = Math.floor(Math.abs(val) + con) % 10;
+            
+            let predNums = [];
+            for(let k=0; k<len; k++) predNums.push((base0+res.start+additives[k])%10);
+            
+            history.push({ nums: predNums, win: null, rowIdx: -1 });
+
+            return { 
+                name: res.name, 
+                score: res.score, 
+                totalLoss: res.totalLoss, 
+                maxCons: res.maxCons,
+                history: history, 
+                isDimmed: false 
+            };
         });
     }
     `;
@@ -702,6 +725,44 @@ let currentFollowStr = ""; // ตัวแปรสำหรับเก็บ�
     let currentPage = 1;
     let pageSize = 10;
     let lastCalculatedResults = []; // Store for copy function
+// ✅ 1. เพิ่มตัวแปรนี้ไว้เก็บสูตรทั้งหมดที่หามาได้ (ก่อนกรอง)
+    let globalRawResults = [];
+    let currentData = []; // ประกาศเผื่อไว้ถ้ายังไม่มี (ปกติจะมีบรรทัดล่างๆ แต่ย้ายมาไว้กลุ่มเดียวกันได้)
+
+    // ✅ 2. เพิ่มฟังก์ชันนี้สำหรับกรองสูตรทันที (Instant Filter)
+    function filterAndRender() {
+        // ถ้ายังไม่มีข้อมูลสูตร ให้จบการทำงาน
+        if (!globalRawResults || globalRawResults.length === 0) return;
+
+        // ดึงค่าจากช่องกรอง (ถ้าว่างให้ถือว่าไม่จำกัด = 999)
+        let maxL = document.getElementById('maxLoss').value === "" ? 999 : parseInt(document.getElementById('maxLoss').value);
+        let maxC = document.getElementById('maxConsLoss').value === "" ? 999 : parseInt(document.getElementById('maxConsLoss').value);
+
+        // กรองข้อมูลจากตัวแปรกลาง (globalRawResults)
+        let filtered = globalRawResults.filter(f => f.totalLoss <= maxL && f.maxCons <= maxC);
+        
+        // อัปเดตหน้าและการแสดงผล
+        lastCalculatedResults = filtered; // อัปเดตตัวแปรแสดงผลปัจจุบัน
+        
+        // คำนวณหน้าใหม่ (Pagination)
+        let maxPage = Math.ceil(filtered.length / pageSize);
+        if (currentPage > maxPage) currentPage = (maxPage > 0 ? maxPage : 1);
+        if (currentPage < 1) currentPage = 1;
+        
+        updatePageInfo(); // อัปเดตเลขหน้า
+        
+        // ตัดแบ่งหน้าเพื่อแสดงผล
+        let startIndex = (currentPage - 1) * pageSize;
+        let endIndex = startIndex + pageSize;
+        let pageResults = filtered.slice(startIndex, endIndex);
+
+        // แสดงผลตาราง
+        if (filtered.length === 0) {
+            document.getElementById('resultContainer').innerHTML = `<div style="text-align:center; padding:20px; color:#dc2626;">ไม่พบสูตรตามเงื่อนไข (ลองเพิ่มจำนวนสูตร หรือลดเงื่อนไข)</div>`;
+        } else {
+            renderTable(currentData, pageResults);
+        }
+    }
 
     function changeLottoType() { saveCurrentData(); currentLottoType = document.getElementById('lottoSelector').value; loadCurrentData(); updateRenameButton(); }
     function updateRenameButton() { let customName = localStorage.getItem('lottoName_' + currentLottoType); let select = document.getElementById('lottoSelector'); let option = select.querySelector(`option[value="${currentLottoType}"]`); if (customName && option) { let originalText = option.text; let flag = originalText.split(' ')[0]; option.text = flag + ' ' + customName; } }
@@ -865,17 +926,28 @@ function setTarget(t, btn) {
         const safetyTimeout = setTimeout(() => { document.getElementById('loading').style.display='none'; if(myWorker) myWorker.terminate(); alert("⚠️ ใช้เวลานานเกินไป"); }, 300000);
         
         myWorker.onmessage = function(e) {
-            clearTimeout(safetyTimeout);
-            if(e.data.status === 'error') { document.getElementById('loading').style.display='none'; return; }
-            lastResults = e.data.data;
-            lastCalculatedResults = e.data.data; 
-            renderTable(currentData, lastResults);
-            calculateBottomConsensus(lastResults);
-            document.getElementById('loading').style.display='none';
-            document.getElementById('tableWrapper').style.display='block';
-            document.getElementById('consensusSection').style.display='block';
-            if(displayMode==='all') document.getElementById('tableFooterControls').style.display = 'flex';
-        };
+    clearTimeout(safetyTimeout);
+    if(e.data.status === 'error') { 
+        document.getElementById('loading').style.display='none'; 
+        console.error(e.data.msg);
+        return; 
+    }
+    
+    // ✅ จุดสำคัญ: เก็บข้อมูลดิบทั้งหมดลงตัวแปรกลางก่อน
+    globalRawResults = e.data.data;
+    
+    // ✅ เรียกฟังก์ชันกรองทันที (เพื่อให้แสดงผลตามเงื่อนไขที่ตั้งไว้หน้าจอ)
+    filterAndRender();
+    
+    // คำนวณเลขชน (ใช้ 5 สูตรแรกจากข้อมูลดิบ หรือข้อมูลที่กรองแล้วก็ได้ ในที่นี้ใช้ดิบเพื่อความแม่นยำรวม)
+    calculateBottomConsensus(globalRawResults.slice(0, 5)); 
+    
+    document.getElementById('loading').style.display='none';
+    document.getElementById('tableWrapper').style.display='block';
+    document.getElementById('consensusSection').style.display='block';
+    if(displayMode==='all') document.getElementById('tableFooterControls').style.display = 'flex';
+    document.getElementById('copyArea').style.display='block';
+};
         myWorker.postMessage(params);
     }
 
@@ -978,14 +1050,26 @@ function setTarget(t, btn) {
     }
 
     // --- แก้ไข: คัดลอกงวด/ผล ตามจำนวน "ล่าสุด" ---
-    function copyHistoryColumn() {
-        if (!currentData || currentData.length === 0) return alert("ไม่มีข้อมูล");
-        let txt = "งวดที่ / ผล\n------------------\n";
-        currentData.forEach(r => {
-            txt += `${r.i}. ${r.up}-${r.down}\n`;
-        });
-        copyText(txt);
-    }
+    // ✅ 3. ฟังก์ชัน Smart Copy (คัดลอกเฉพาะผล ตามจำนวน "ล่าสุด")
+function copyHistoryColumn() {
+    if (!currentData || currentData.length === 0) return alert("ไม่มีข้อมูล");
+    
+    // 1. ดึงจำนวนจากช่อง "ล่าสุด"
+    let limit = parseInt(document.getElementById('rangeCount').value) || currentData.length;
+    
+    // 2. ตัดข้อมูลเอาเฉพาะส่วนท้ายสุด (ล่าสุด)
+    let start = Math.max(0, currentData.length - limit);
+    let subset = currentData.slice(start);
+    
+    let txt = "ผล\n------------------\n";
+    
+    // 3. วนลูปเก็บเฉพาะเลข "บน-ล่าง"
+    subset.forEach(r => {
+        txt += `${r.up}-${r.down}\n`;
+    });
+    
+    copyText(txt);
+}
     
     // --- OTHER HELPERS ---
     function togglePin(name) { if(pinnedList.includes(name)) pinnedList = pinnedList.filter(n => n !== name); else { if(pinnedList.length >= 5) { alert("เต็ม 5 สูตร"); return; } pinnedList.push(name); } if(lastResults.length > 0) renderTable(currentData, lastResults); }
