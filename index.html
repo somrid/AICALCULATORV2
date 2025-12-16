@@ -198,6 +198,58 @@ body.dark-mode { --green-active: #059669; }
     box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); 
     transform: translateY(-1px);
 }
+/* === CSS ส่วนวิเคราะห์สถิติ (Frequency & Structure) === */
+    .stat-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+    .stat-box { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--c-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    /* ✅ แก้ไข CSS ส่วนหัวกล่องสถิติ (ให้มีปุ่ม Copy ชิดขวา) */
+    .stat-box-header { 
+        padding: 8px 12px; 
+        color: white; 
+        font-weight: 700; 
+        font-size: 16px; 
+        display: flex; 
+        justify-content: space-between; /* ดันปุ่มไปขวาสุด */
+        align-items: center;
+    }
+    .stat-box-body { padding: 10px; max-height: 300px; overflow-y: auto; }
+    
+    /* สถิติออกบ่อย (Frequency) */
+    .freq-row { display: flex; align-items: flex-start; margin-bottom: 8px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 5px; }
+    .freq-count { 
+        min-width: 40px; height: 30px; background: #f1f5f9; color: var(--txt-l); font-weight: 800; 
+        border-radius: 8px; display: flex; align-items: center; justify-content: center;
+        margin-right: 10px; font-size: 14px; border: 1px solid #cbd5e1;
+    }
+    .freq-nums { flex: 1; display: flex; flex-wrap: wrap; gap: 8px; }
+    .freq-badge { 
+        font-size: 16px; font-weight: 700; color: var(--p); padding: 2px 6px; 
+        background: rgba(37, 99, 235, 0.05); border-radius: 6px;
+    }
+
+    /* ตารางเจาะลึก (Structure Table) */
+    .table-clean-wrapper { padding: 10px; overflow-x: auto; }
+    .clean-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .clean-table th, .clean-table td { padding: 8px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    .clean-table th { background: #f8fafc; color: var(--txt-l); font-weight: 700; width: 20%; white-space: nowrap; }
+    .clean-table td.count-col { width: 15%; text-align: center; font-weight: 800; color: var(--p); background: rgba(0,0,0,0.02); }
+    .clean-table td.nums-col { width: 65%; }
+    
+    /* Badge ตัวเลขในตาราง */
+    .num-badge {
+        display: inline-block; padding: 2px 6px; margin: 2px; border-radius: 4px;
+        background: #f1f5f9; color: var(--txt); font-weight: 600; font-size: 13px; border: 1px solid #cbd5e1;
+    }
+    .num-badge.hot { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
+
+    /* Dark Mode Overrides */
+    body.dark-mode .freq-row { border-color: #334155; }
+    body.dark-mode .freq-count { background: #1e293b; border-color: #475569; color: #cbd5e1; }
+    body.dark-mode .freq-badge { color: #60a5fa; background: rgba(96, 165, 250, 0.1); }
+    body.dark-mode .clean-table th { background: #334155; color: #cbd5e1; border-color: #475569; }
+    body.dark-mode .clean-table td { border-color: #334155; color: var(--txt); }
+    body.dark-mode .clean-table td.count-col { background: #1e293b; }
+    body.dark-mode .num-badge { background: #1e293b; border-color: #475569; color: #cbd5e1; }
+    body.dark-mode .num-badge.hot { background: #7f1d1d; color: #fca5a5; border-color: #991b1b; }
     </style>
 </head>
 <body>
@@ -523,7 +575,65 @@ body.dark-mode { --green-active: #059669; }
             </div>
         </div>
     </div>
+<div class="collapsible-container" style="margin-top: 20px;">
+        <div class="collapsible-header" onclick="toggleSection('statFullContent', 'statIcon')">
+            <span>📊 วิเคราะห์สถิติเชิงลึก (Frequency & Structure)</span><span id="statIcon">▼</span>
+        </div>
+        <div id="statFullContent" class="collapsible-content">
+            
+            <div class="label-head" style="font-size:16px; margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:5px;">
+                📈 อันดับเลขออกบ่อย (Frequency)
+            </div>
+            <div class="stat-grid-container" style="margin-bottom: 20px;">
+                <div class="stat-box">
+                    <div class="stat-box-header bg-hundred">
+                        <span>3 ตัวบน</span>
+                        <button class="btn-tiny" onclick="copyFreqStats('freq3Up', '3 ตัวบน')">Copy</button>
+                    </div>
+                    <div id="freq3Up" class="stat-box-body">รอผลคำนวณ...</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-header bg-tens-up">
+                        <span>2 ตัวบน</span>
+                        <button class="btn-tiny" onclick="copyFreqStats('freq2Up', '2 ตัวบน')">Copy</button>
+                    </div>
+                    <div id="freq2Up" class="stat-box-body">รอผลคำนวณ...</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-header bg-tens-down">
+                        <span>2 ตัวล่าง</span>
+                        <button class="btn-tiny" onclick="copyFreqStats('freq2Down', '2 ตัวล่าง')">Copy</button>
+                    </div>
+                    <div id="freq2Down" class="stat-box-body">รอผลคำนวณ...</div>
+                </div>
+            </div>
 
+            <div class="label-head" style="font-size:16px; margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:5px;">
+                🏗️ เจาะลึกโครงสร้าง คู่/คี่ & สูง/ต่ำ
+            </div>
+            <div class="dashboard-grid">
+                <div class="stat-box">
+                    <div class="stat-box-header bg-tens-up">
+                        <span>2 ตัวบน (Up)</span>
+                        <button class="btn-tiny" onclick="copyStructStats('tableStructUp', '2 ตัวบน')">Copy</button>
+                    </div>
+                    <div class="table-clean-wrapper">
+                        <table class="clean-table" id="tableStructUp"></table>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-header bg-tens-down">
+                        <span>2 ตัวล่าง (Down)</span>
+                        <button class="btn-tiny" onclick="copyStructStats('tableStructDown', '2 ตัวล่าง')">Copy</button>
+                    </div>
+                    <div class="table-clean-wrapper">
+                        <table class="clean-table" id="tableStructDown"></table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
     <div style="height:50px;"></div>
     <div id="toast" class="toast">✅ คัดลอกเรียบร้อย!</div>
     <input type="hidden" id="manualLimitInput" value="100">
@@ -906,6 +1016,17 @@ function setTarget(t, btn) {
 // ✅ เพิ่มบรรทัดนี้ เพื่อให้ดึงเลขล่าสุดมาใส่ทุกครั้งที่กดคำนวณ
         autoFillInputs();
         document.getElementById('vinFlowSection').style.display = 'block'; calcVinFlow();
+renderFlowDashboard(intData); calculateStructure(intData); 
+        
+        // ✅ เพิ่มบรรทัดนี้ เพื่อให้ดึงเลขล่าสุดมาใส่ทุกครั้งที่กดคำนวณ
+        autoFillInputs();
+        
+        document.getElementById('vinFlowSection').style.display = 'block'; calcVinFlow();
+        
+        // ✅✅✅ วางคำสั่งใหม่ตรงนี้ครับ (วิเคราะห์สถิติรวม) ✅✅✅
+        calcAllStats(); 
+        
+        if(!document.getElementById('rangeEnd').value) updateRangeFromCount();
         if(!document.getElementById('rangeEnd').value) updateRangeFromCount();
 
         const params = {
@@ -1456,7 +1577,117 @@ function copyFollowResult() {
     }
     copyText(currentFollowStr);
 }
+// === ฟังก์ชันวิเคราะห์สถิติรวม (Frequency & Structure) ===
+    function calcAllStats() {
+        if (!currentData || currentData.length === 0) return;
 
+        // --- ส่วนที่ 1: เตรียมข้อมูล ---
+        let c3Up = {}, c2Up = {}, c2Down = {};
+        currentData.forEach(r => {
+            if(r.up) c3Up[r.up] = (c3Up[r.up] || 0) + 1;
+            if(r.up && r.up.length >= 2) {
+                let twoUp = r.up.substring(r.up.length - 2);
+                c2Up[twoUp] = (c2Up[twoUp] || 0) + 1;
+            }
+            if(r.down) c2Down[r.down] = (c2Down[r.down] || 0) + 1;
+        });
+
+        // --- ส่วนที่ 2: แสดงผล Frequency (ออกบ่อย) ---
+        const renderFreq = (countsObj, elementId) => {
+            let groups = {};
+            for (let num in countsObj) {
+                let count = countsObj[num];
+                if (!groups[count]) groups[count] = [];
+                groups[count].push(num);
+            }
+            let sortedCounts = Object.keys(groups).sort((a, b) => b - a);
+            let html = "";
+            sortedCounts.forEach(count => {
+                let nums = groups[count].sort();
+                let numsHtml = nums.map(n => `<span class="freq-badge">${n}</span>`).join("");
+                html += `<div class="freq-row"><div class="freq-count" title="ออก ${count} ครั้ง">${count}</div><div class="freq-nums">${numsHtml}</div></div>`;
+            });
+            if (html === "") html = "<div style='text-align:center; opacity:0.5;'>ไม่มีข้อมูลซ้ำ</div>";
+            document.getElementById(elementId).innerHTML = html;
+        };
+        renderFreq(c3Up, 'freq3Up');
+        renderFreq(c2Up, 'freq2Up');
+        renderFreq(c2Down, 'freq2Down');
+
+        // --- ส่วนที่ 3: แสดงผล Structure Deep Dive (คู่/คี่ สูง/ต่ำ) ---
+        const renderStructTable = (countsObj, tableId) => {
+            let groups = {
+                'even': { name: 'คู่ (Even)', nums: [], total: 0 },
+                'odd':  { name: 'คี่ (Odd)', nums: [], total: 0 },
+                'high': { name: 'สูง (50-99)', nums: [], total: 0 },
+                'low':  { name: 'ต่ำ (00-49)', nums: [], total: 0 }
+            };
+            for (let num in countsObj) {
+                let count = countsObj[num];
+                let val = parseInt(num);
+                let item = { n: num, c: count };
+                if (val % 2 === 0) { groups.even.nums.push(item); groups.even.total += count; }
+                else { groups.odd.nums.push(item); groups.odd.total += count; }
+                if (val >= 50) { groups.high.nums.push(item); groups.high.total += count; }
+                else { groups.low.nums.push(item); groups.low.total += count; }
+            }
+            
+            let html = `<thead><tr><th>กลุ่ม</th><th style="text-align:center;">รวม</th><th>เลขที่ออก (เรียงตามความบ่อย)</th></tr></thead><tbody>`;
+            ['even', 'odd', 'high', 'low'].forEach(key => {
+                let g = groups[key];
+                g.nums.sort((a, b) => b.c - a.c); // เรียงตามความบ่อย
+                let numsHtml = g.nums.map(x => {
+                    let hotClass = x.c >= 3 ? 'hot' : '';
+                    return `<span class="num-badge ${hotClass}">${x.n} (${x.c})</span>`;
+                }).join('');
+                html += `<tr><td>${g.name}</td><td class="count-col">${g.total}</td><td class="nums-col">${numsHtml || '-'}</td></tr>`;
+            });
+            html += `</tbody>`;
+            document.getElementById(tableId).innerHTML = html;
+        };
+        renderStructTable(c2Up, 'tableStructUp');
+        renderStructTable(c2Down, 'tableStructDown');
+    }
+// ✅ ฟังก์ชันคัดลอกส่วน Frequency
+    function copyFreqStats(elementId, title) {
+        let el = document.getElementById(elementId);
+        if (!el || el.innerText.includes('รอผล')) return alert('ไม่มีข้อมูล');
+        
+        let rows = el.querySelectorAll('.freq-row');
+        let txt = `📈 สถิติออกบ่อย: ${title}\n------------------\n`;
+        
+        rows.forEach(r => {
+            let count = r.querySelector('.freq-count').innerText;
+            let badges = r.querySelectorAll('.freq-badge');
+            let nums = Array.from(badges).map(b => b.innerText).join(', ');
+            txt += `ออก ${count} ครั้ง: ${nums}\n`;
+        });
+        
+        txt += `\nBy โปรแกรมคำนวณตัวเลข`;
+        copyText(txt);
+    }
+
+    // ✅ ฟังก์ชันคัดลอกส่วน Structure
+    function copyStructStats(tableId, title) {
+        let el = document.getElementById(tableId);
+        if (!el || !el.querySelector('tbody')) return alert('ไม่มีข้อมูล');
+        
+        let rows = el.querySelectorAll('tbody tr');
+        let txt = `🏗️ โครงสร้าง: ${title}\n------------------\n`;
+        
+        rows.forEach(r => {
+            let cols = r.querySelectorAll('td');
+            if(cols.length >= 3) {
+                let group = cols[0].innerText; // ชื่อกลุ่ม
+                let total = cols[1].innerText; // ยอดรวม
+                let nums = cols[2].innerText.replace(/\n/g, ' ').trim(); // เลขที่ออก
+                txt += `${group} (รวม ${total}): ${nums}\n`;
+            }
+        });
+        
+        txt += `\nBy โปรแกรมคำนวณตัวเลข`;
+        copyText(txt);
+    }
 </script>
 </body>
 </html>
