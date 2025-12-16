@@ -12,8 +12,8 @@
 
     <style>
         /* CSS STYLE */
-        :root { --bg: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); --c-bg: #ffffff; --txt: #1e293b; --txt-l: #475569; --p: #2563eb; --border: #cbd5e1; }
-        body.dark-mode { --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); --c-bg: #1e293b; --txt: #f1f5f9; --txt-l: #cbd5e1; --border: #475569; }
+        :root { --bg: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); --c-bg: #ffffff; --txt: #1e293b; --txt-l: #475569; --p: #2563eb; --border: #cbd5e1; --green-active: #10b981; }
+        body.dark-mode { --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); --c-bg: #1e293b; --txt: #f1f5f9; --txt-l: #cbd5e1; --border: #475569; --green-active: #059669; }
         * { font-family: 'Sarabun', sans-serif !important; box-sizing: border-box; }
         body { background: var(--bg); padding: 20px; color: var(--txt); transition: 0.3s; margin: 0; }
         .container { max-width: 1400px; margin: 0 auto; background: var(--c-bg); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border); position: relative; }
@@ -106,10 +106,15 @@
         .btn-sort.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
         
         .grid-targets { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-bottom: 20px; }
-        .btn-target { background: var(--c-bg); border: 2px solid var(--border); color: var(--txt-l); padding: 10px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; }
-        .btn-target:hover { border-color: var(--p); color: var(--p); }
-        .btn-target.active { background: #eff6ff; border-color: var(--p); color: #1e40af; }
-        body.dark-mode .btn-target.active { background: #1e3a8a; color: #93c5fd; }
+        .btn-target { 
+            background: var(--c-bg); border: 1px solid var(--border); color: var(--txt-l); 
+            padding: 8px 10px; border-radius: 20px; cursor: pointer; 
+            font-size: 13px; font-weight: 700; white-space: nowrap; 
+            transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .btn-target:hover { transform: translateY(-2px); border-color: var(--green-active); color: var(--green-active); box-shadow: 0 4px 6px rgba(16, 185, 129, 0.15); }
+        .btn-target.active { background: var(--green-active) !important; border-color: var(--green-active) !important; color: white !important; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); transform: translateY(-1px); }
+        
         input[type=number], input[type=text] { padding: 5px; border-radius: 5px; border: 1px solid var(--border); text-align: center; background: var(--c-bg); color: var(--txt); width: 50px; font-size: 14px; font-weight: 600; }
         
         .table-wrapper { margin-top: 20px; width: 100%; border-radius: 15px; border: 1px solid var(--border); overflow: auto; position: relative; }
@@ -153,103 +158,83 @@
         body.dark-mode .row-line { border-color: #334155; }
         body.dark-mode .num-match { color: #f472b6; }
         .num-normal { opacity: 0.8; }
-/* === คัดลอกส่วนนี้ไปวางใน <style> ของ github1 === */
 
-/* กำหนดตัวแปรสีเขียว */
-:root { --green-active: #10b981; }
-body.dark-mode { --green-active: #059669; }
+        /* === CSS ส่วนวิเคราะห์สถิติ (Frequency & Structure) === */
+        .stat-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .stat-box { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--c-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        .stat-box-header { 
+            padding: 8px 12px; 
+            color: white; 
+            font-weight: 700; 
+            font-size: 16px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        .stat-box-body { padding: 10px; max-height: 300px; overflow-y: auto; }
+        
+        /* สถิติออกบ่อย (Frequency) */
+        .freq-row { display: flex; align-items: flex-start; margin-bottom: 8px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 5px; }
+        .freq-count { 
+            min-width: 40px; height: 30px; background: #f1f5f9; color: var(--txt-l); font-weight: 800; 
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            margin-right: 10px; font-size: 14px; border: 1px solid #cbd5e1;
+        }
+        .freq-nums { flex: 1; display: flex; flex-wrap: wrap; gap: 8px; }
+        .freq-badge { 
+            font-size: 16px; font-weight: 700; color: var(--p); padding: 2px 6px; 
+            background: rgba(37, 99, 235, 0.05); border-radius: 6px;
+        }
 
-/* จัดการ Layout ปุ่ม */
-.grid-targets { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
-    gap: 8px; 
-    margin-bottom: 20px; 
-}
+        /* ตารางเจาะลึก (Structure Table) */
+        .table-clean-wrapper { padding: 10px; overflow-x: auto; }
+        .clean-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .clean-table th, .clean-table td { padding: 8px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        .clean-table th { background: #f8fafc; color: var(--txt-l); font-weight: 700; width: 20%; white-space: nowrap; }
+        .clean-table td.count-col { width: 15%; text-align: center; font-weight: 800; color: var(--p); background: rgba(0,0,0,0.02); }
+        .clean-table td.nums-col { width: 65%; }
+        
+        /* Badge ตัวเลขในตาราง */
+        .num-badge {
+            display: inline-block; padding: 2px 6px; margin: 2px; border-radius: 4px;
+            background: #f1f5f9; color: var(--txt); font-weight: 600; font-size: 13px; border: 1px solid #cbd5e1;
+        }
+        .num-badge.hot { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
 
-/* ดีไซน์ปุ่มทรงมน */
-.btn-target { 
-    background: var(--c-bg); 
-    border: 1px solid var(--border); 
-    color: var(--txt-l); 
-    padding: 8px 10px; 
-    border-radius: 20px; /* ความมน */
-    cursor: pointer; 
-    font-size: 13px; 
-    font-weight: 700; 
-    white-space: nowrap; 
-    transition: all 0.2s;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
+        /* Dark Mode Overrides */
+        body.dark-mode .freq-row { border-color: #334155; }
+        body.dark-mode .freq-count { background: #1e293b; border-color: #475569; color: #cbd5e1; }
+        body.dark-mode .freq-badge { color: #60a5fa; background: rgba(96, 165, 250, 0.1); }
+        body.dark-mode .clean-table th { background: #334155; color: #cbd5e1; border-color: #475569; }
+        body.dark-mode .clean-table td { border-color: #334155; color: var(--txt); }
+        body.dark-mode .clean-table td.count-col { background: #1e293b; }
+        body.dark-mode .num-badge { background: #1e293b; border-color: #475569; color: #cbd5e1; }
+        body.dark-mode .num-badge.hot { background: #7f1d1d; color: #fca5a5; border-color: #991b1b; }
 
-/* เอฟเฟกต์ตอนชี้เมาส์ */
-.btn-target:hover { 
-    transform: translateY(-2px); 
-    border-color: var(--green-active); 
-    color: var(--green-active); 
-    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.15); 
-}
-
-/* เอฟเฟกต์ตอนกดเลือก (สีเขียว) */
-.btn-target.active { 
-    background: var(--green-active) !important; 
-    border-color: var(--green-active) !important; 
-    color: white !important; 
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); 
-    transform: translateY(-1px);
-}
-/* === CSS ส่วนวิเคราะห์สถิติ (Frequency & Structure) === */
-    .stat-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
-    .stat-box { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--c-bg); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    /* ✅ แก้ไข CSS ส่วนหัวกล่องสถิติ (ให้มีปุ่ม Copy ชิดขวา) */
-    .stat-box-header { 
-        padding: 8px 12px; 
-        color: white; 
-        font-weight: 700; 
-        font-size: 16px; 
-        display: flex; 
-        justify-content: space-between; /* ดันปุ่มไปขวาสุด */
-        align-items: center;
+        /* --- CSS กราฟแท่งพลัง (Structure Power Bar V2) --- */
+        .struct-bar-container { display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 4px; }
+        .struct-track { flex: 1; height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+        .struct-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+        
+        /* สีของกราฟแต่ละกลุ่ม */
+        .bar-even { background: #3b82f6; } /* ฟ้า */
+        .bar-odd { background: #f59e0b; }  /* ส้ม */
+        .bar-high { background: #10b981; } /* เขียว */
+        .bar-low { background: #ef4444; }  /* แดง */
+        
+        .percent-text { font-size: 11px; color: var(--txt-l); font-weight: 700; width: 35px; text-align: right; }
+        body.dark-mode .struct-track { background: #334155; }
+/* ✅ ปรับขนาด Auto Flow Vin ให้เท่ากับ Dashboard (Flow & Structure) */
+    .vin-head { 
+        padding: 6px 10px !important;  /* เดิม 10px -> ลดเหลือ 6px เท่า Flow */
+        font-size: 14px !important;    /* เดิม 15px -> ลดเหลือ 14px เท่า Flow */
     }
-    .stat-box-body { padding: 10px; max-height: 300px; overflow-y: auto; }
-    
-    /* สถิติออกบ่อย (Frequency) */
-    .freq-row { display: flex; align-items: flex-start; margin-bottom: 8px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 5px; }
-    .freq-count { 
-        min-width: 40px; height: 30px; background: #f1f5f9; color: var(--txt-l); font-weight: 800; 
-        border-radius: 8px; display: flex; align-items: center; justify-content: center;
-        margin-right: 10px; font-size: 14px; border: 1px solid #cbd5e1;
+    .vin-body { 
+        padding: 10px !important;      /* เดิม 15px -> ลดเหลือ 10px เท่า Flow */
+        font-size: 14px !important;    /* เดิม 16px -> ลดเหลือ 14px ให้ดูพอดี */
+        line-height: 1.5 !important;   /* เดิม 1.8  -> ลดช่องว่างระหว่างบรรทัดลง */
     }
-    .freq-nums { flex: 1; display: flex; flex-wrap: wrap; gap: 8px; }
-    .freq-badge { 
-        font-size: 16px; font-weight: 700; color: var(--p); padding: 2px 6px; 
-        background: rgba(37, 99, 235, 0.05); border-radius: 6px;
-    }
-
-    /* ตารางเจาะลึก (Structure Table) */
-    .table-clean-wrapper { padding: 10px; overflow-x: auto; }
-    .clean-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .clean-table th, .clean-table td { padding: 8px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-    .clean-table th { background: #f8fafc; color: var(--txt-l); font-weight: 700; width: 20%; white-space: nowrap; }
-    .clean-table td.count-col { width: 15%; text-align: center; font-weight: 800; color: var(--p); background: rgba(0,0,0,0.02); }
-    .clean-table td.nums-col { width: 65%; }
-    
-    /* Badge ตัวเลขในตาราง */
-    .num-badge {
-        display: inline-block; padding: 2px 6px; margin: 2px; border-radius: 4px;
-        background: #f1f5f9; color: var(--txt); font-weight: 600; font-size: 13px; border: 1px solid #cbd5e1;
-    }
-    .num-badge.hot { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
-
-    /* Dark Mode Overrides */
-    body.dark-mode .freq-row { border-color: #334155; }
-    body.dark-mode .freq-count { background: #1e293b; border-color: #475569; color: #cbd5e1; }
-    body.dark-mode .freq-badge { color: #60a5fa; background: rgba(96, 165, 250, 0.1); }
-    body.dark-mode .clean-table th { background: #334155; color: #cbd5e1; border-color: #475569; }
-    body.dark-mode .clean-table td { border-color: #334155; color: var(--txt); }
-    body.dark-mode .clean-table td.count-col { background: #1e293b; }
-    body.dark-mode .num-badge { background: #1e293b; border-color: #475569; color: #cbd5e1; }
-    body.dark-mode .num-badge.hot { background: #7f1d1d; color: #fca5a5; border-color: #991b1b; }
     </style>
 </head>
 <body>
@@ -294,23 +279,7 @@ body.dark-mode { --green-active: #059669; }
         </div>
     </div>
 
-    <div class="collapsible-container">
-        <div class="collapsible-header" onclick="toggleSection('dashAnalytics', 'dashIcon1')">
-            <span>📊 แดชบอร์ดวิเคราะห์ผล (Flow & Structure)</span><span id="dashIcon1">▼</span>
-        </div>
-        <div id="dashAnalytics" class="collapsible-content">
-            <div class="dashboard-grid">
-                <div class="flow-section" id="flowPanel" style="display:none;">
-                    <div class="label-head" style="justify-content:center;">🌊 เลขไหล (Flow 10 หลัก)</div>
-                    <div id="flowGridWrapper" class="flow-grid-wrapper"></div>
-                </div>
-                <div class="structure-section" id="structurePanel" style="display:none;">
-                    <div class="label-head" style="justify-content:center;">📊 โครงสร้าง (Structure)</div>
-                    <div id="structGridWrapper" class="struct-grid-wrapper"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 
     <div class="collapsible-container" style="margin-top: 20px;">
         <div class="collapsible-header" onclick="toggleSection('dashSmartFlow', 'dashIcon2')">
@@ -552,30 +521,58 @@ body.dark-mode { --green-active: #059669; }
         <div id="consensusContent" style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;"></div>
     </div>
     
-    <div id="copyArea" class="copy-container" style="display:none;">
-        <button class="btn-line" onclick="copyToLine()">📋 คัดลอกผลทั้งหมด</button>
-    </div>
 
-    <div class="vin-flow-section" id="vinFlowSection" style="display:none;">
-        <div class="vin-header">
-            <div class="vin-title">💰 จับวินเลขไหล (Auto Flow Vin)</div>
-            <div>
-                ตัดกี่ตัว: <input type="number" id="vinFlowLimit" value="5" min="2" max="9" onchange="calcVinFlow()" style="width:40px;"> 
-                ตัดแต้ม: <input type="text" id="vinFlowSumKill" placeholder="05" onkeyup="calcVinFlow()" style="width:50px;">
-            </div>
+<div class="collapsible-container">
+        <div class="collapsible-header" onclick="toggleSection('dashAnalytics', 'dashIcon1')">
+            <span>📊 แดชบอร์ดวิเคราะห์ผล (Flow & Structure)</span><span id="dashIcon1">▼</span>
         </div>
-        <div class="vin-grid">
-            <div class="vin-box">
-                <div class="vin-head bg-vin-up"><span>🍒 วินบน</span><button class="btn-tiny" onclick="copyFlowVin('up')">Copy</button></div>
-                <div id="vinFlowUpContent" class="vin-body">...</div>
-            </div>
-            <div class="vin-box">
-                <div class="vin-head bg-vin-down"><span>🍒 วินล่าง</span><button class="btn-tiny" onclick="copyFlowVin('down')">Copy</button></div>
-                <div id="vinFlowDownContent" class="vin-body">...</div>
+        <div id="dashAnalytics" class="collapsible-content">
+            <div class="dashboard-grid">
+                <div class="flow-section" id="flowPanel" style="display:none;">
+                    <div class="label-head" style="justify-content:center;">🌊 เลขไหล (Flow 10 หลัก)</div>
+                    <div id="flowGridWrapper" class="flow-grid-wrapper"></div>
+                </div>
+                <div class="structure-section" id="structurePanel" style="display:none;">
+                    <div class="label-head" style="justify-content:center;">📊 โครงสร้าง (Structure)</div>
+                    <div id="structGridWrapper" class="struct-grid-wrapper"></div>
+                </div>
             </div>
         </div>
     </div>
-<div class="collapsible-container" style="margin-top: 20px;">
+    <div class="collapsible-container" id="vinFlowSection" style="margin-top: 20px; display:none;">
+        
+        <div class="collapsible-header" onclick="toggleSection('vinFlowContent', 'vinFlowIcon')">
+            <span>💰 จับวินเลขไหล (Auto Flow Vin)</span>
+            <span id="vinFlowIcon">▼</span>
+        </div>
+
+        <div id="vinFlowContent" class="collapsible-content">
+            
+            <div style="background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span style="font-size: 14px; font-weight: 700; color: var(--txt-l);">✂️ ตัดกี่ตัว:</span>
+                    <input type="number" id="vinFlowLimit" value="5" min="2" max="9" onchange="calcVinFlow()" style="width:50px; padding: 4px; border: 1px solid var(--border); border-radius: 4px; text-align: center;"> 
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span style="font-size: 14px; font-weight: 700; color: var(--txt-l);">🚫 ตัดแต้ม:</span>
+                    <input type="text" id="vinFlowSumKill" placeholder="เช่น 05" onkeyup="calcVinFlow()" style="width:70px; padding: 4px; border: 1px solid var(--border); border-radius: 4px; text-align: center;">
+                </div>
+            </div>
+
+            <div class="vin-grid">
+                <div class="vin-box">
+                    <div class="vin-head bg-vin-up"><span>🍒 วินบน</span><button class="btn-tiny" onclick="copyFlowVin('up')">Copy</button></div>
+                    <div id="vinFlowUpContent" class="vin-body">...</div>
+                </div>
+                <div class="vin-box">
+                    <div class="vin-head bg-vin-down"><span>🍒 วินล่าง</span><button class="btn-tiny" onclick="copyFlowVin('down')">Copy</button></div>
+                    <div id="vinFlowDownContent" class="vin-body">...</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="collapsible-container" style="margin-top: 20px;">
         <div class="collapsible-header" onclick="toggleSection('statFullContent', 'statIcon')">
             <span>📊 วิเคราะห์สถิติเชิงลึก (Frequency & Structure)</span><span id="statIcon">▼</span>
         </div>
@@ -1577,11 +1574,11 @@ function copyFollowResult() {
     }
     copyText(currentFollowStr);
 }
-// === ฟังก์ชันวิเคราะห์สถิติรวม (Frequency & Structure) ===
+// === ฟังก์ชันวิเคราะห์สถิติรวม (Frequency + Structure V2 มีกราฟ) ===
     function calcAllStats() {
         if (!currentData || currentData.length === 0) return;
 
-        // --- ส่วนที่ 1: เตรียมข้อมูล ---
+        // --- 1. เตรียมข้อมูล ---
         let c3Up = {}, c2Up = {}, c2Down = {};
         currentData.forEach(r => {
             if(r.up) c3Up[r.up] = (c3Up[r.up] || 0) + 1;
@@ -1592,7 +1589,7 @@ function copyFollowResult() {
             if(r.down) c2Down[r.down] = (c2Down[r.down] || 0) + 1;
         });
 
-        // --- ส่วนที่ 2: แสดงผล Frequency (ออกบ่อย) ---
+        // --- 2. แสดงผล Frequency (เหมือนเดิม) ---
         const renderFreq = (countsObj, elementId) => {
             let groups = {};
             for (let num in countsObj) {
@@ -1614,39 +1611,77 @@ function copyFollowResult() {
         renderFreq(c2Up, 'freq2Up');
         renderFreq(c2Down, 'freq2Down');
 
-        // --- ส่วนที่ 3: แสดงผล Structure Deep Dive (คู่/คี่ สูง/ต่ำ) ---
-        const renderStructTable = (countsObj, tableId) => {
+        // --- 3. แสดงผล Structure V2 (มีกราฟแท่ง) ---
+        const renderStructTableV2 = (countsObj, tableId) => {
             let groups = {
-                'even': { name: 'คู่ (Even)', nums: [], total: 0 },
-                'odd':  { name: 'คี่ (Odd)', nums: [], total: 0 },
-                'high': { name: 'สูง (50-99)', nums: [], total: 0 },
-                'low':  { name: 'ต่ำ (00-49)', nums: [], total: 0 }
+                'even': { id:'even', name:'คู่ (Even)', nums:[], total:0, color:'bar-even' },
+                'odd':  { id:'odd', name:'คี่ (Odd)', nums:[], total:0, color:'bar-odd' },
+                'high': { id:'high', name:'สูง (50-99)', nums:[], total:0, color:'bar-high' },
+                'low':  { id:'low', name:'ต่ำ (00-49)', nums:[], total:0, color:'bar-low' }
             };
+
             for (let num in countsObj) {
                 let count = countsObj[num];
                 let val = parseInt(num);
                 let item = { n: num, c: count };
+                
                 if (val % 2 === 0) { groups.even.nums.push(item); groups.even.total += count; }
                 else { groups.odd.nums.push(item); groups.odd.total += count; }
+                
                 if (val >= 50) { groups.high.nums.push(item); groups.high.total += count; }
                 else { groups.low.nums.push(item); groups.low.total += count; }
             }
+
+            // คำนวณ %
+            let totalEO = groups.even.total + groups.odd.total || 1;
+            let totalHL = groups.high.total + groups.low.total || 1;
+
+            let html = `<thead><tr><th style="width:40%;">กลุ่ม & สถิติ</th><th>เลขที่ออก (เรียงตามความบ่อย)</th></tr></thead><tbody>`;
             
-            let html = `<thead><tr><th>กลุ่ม</th><th style="text-align:center;">รวม</th><th>เลขที่ออก (เรียงตามความบ่อย)</th></tr></thead><tbody>`;
-            ['even', 'odd', 'high', 'low'].forEach(key => {
+            const createRow = (key, compareTotal) => {
                 let g = groups[key];
-                g.nums.sort((a, b) => b.c - a.c); // เรียงตามความบ่อย
+                g.nums.sort((a, b) => b.c - a.c);
+                
+                let percent = Math.round((g.total / compareTotal) * 100);
+                let isWinner = percent >= 50; 
+                let winBadge = isWinner && percent > 50 ? '🏆' : '';
+                let opacity = g.total === 0 ? '0.5' : '1';
+
                 let numsHtml = g.nums.map(x => {
                     let hotClass = x.c >= 3 ? 'hot' : '';
                     return `<span class="num-badge ${hotClass}">${x.n} (${x.c})</span>`;
                 }).join('');
-                html += `<tr><td>${g.name}</td><td class="count-col">${g.total}</td><td class="nums-col">${numsHtml || '-'}</td></tr>`;
-            });
+
+                // สร้าง HTML แบบมีกราฟและ Class ระบุชื่อกลุ่ม (เพื่อใช้ Copy ได้ง่าย)
+                return `
+                    <tr style="opacity:${opacity}">
+                        <td style="vertical-align:top; border-right:1px solid var(--border);">
+                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:2px;">
+                                <span class="struct-name" style="font-weight:bold;">${g.name} ${winBadge}</span>
+                                <span class="struct-count" style="font-weight:800; color:var(--p);">${g.total} ครั้ง</span>
+                            </div>
+                            <div class="struct-bar-container">
+                                <div class="struct-track"><div class="struct-fill ${g.color}" style="width:${percent}%"></div></div>
+                                <div class="percent-text">${percent}%</div>
+                            </div>
+                        </td>
+                        <td class="nums-col" style="vertical-align:middle; padding-left:10px;">${numsHtml || '-'}</td>
+                    </tr>
+                `;
+            };
+
+            html += createRow('even', totalEO);
+            html += createRow('odd', totalEO);
+            html += `<tr><td colspan="2" style="background:var(--bg); height:4px; padding:0; border:none;"></td></tr>`;
+            html += createRow('high', totalHL);
+            html += createRow('low', totalHL);
+
             html += `</tbody>`;
             document.getElementById(tableId).innerHTML = html;
         };
-        renderStructTable(c2Up, 'tableStructUp');
-        renderStructTable(c2Down, 'tableStructDown');
+
+        renderStructTableV2(c2Up, 'tableStructUp');
+        renderStructTableV2(c2Down, 'tableStructDown');
     }
 // ✅ ฟังก์ชันคัดลอกส่วน Frequency
     function copyFreqStats(elementId, title) {
@@ -1667,7 +1702,7 @@ function copyFollowResult() {
         copyText(txt);
     }
 
-    // ✅ ฟังก์ชันคัดลอกส่วน Structure
+    // ✅ ฟังก์ชันคัดลอกส่วน Structure (รองรับ V2 มีกราฟ)
     function copyStructStats(tableId, title) {
         let el = document.getElementById(tableId);
         if (!el || !el.querySelector('tbody')) return alert('ไม่มีข้อมูล');
@@ -1676,12 +1711,20 @@ function copyFollowResult() {
         let txt = `🏗️ โครงสร้าง: ${title}\n------------------\n`;
         
         rows.forEach(r => {
-            let cols = r.querySelectorAll('td');
-            if(cols.length >= 3) {
-                let group = cols[0].innerText; // ชื่อกลุ่ม
-                let total = cols[1].innerText; // ยอดรวม
-                let nums = cols[2].innerText.replace(/\n/g, ' ').trim(); // เลขที่ออก
-                txt += `${group} (รวม ${total}): ${nums}\n`;
+            // ข้ามแถวเส้นคั่น
+            if(r.cells.length < 2) return;
+
+            // ดึงชื่อกลุ่มและจำนวนครั้งจาก span ที่เราเตรียมไว้
+            let nameEl = r.querySelector('.struct-name');
+            let countEl = r.querySelector('.struct-count');
+            let numsEl = r.querySelector('.nums-col');
+
+            if(nameEl && countEl && numsEl) {
+                let name = nameEl.innerText.replace('🏆', '').trim();
+                let count = countEl.innerText;
+                let nums = numsEl.innerText.replace(/\n/g, ' ').trim();
+                
+                txt += `${name} (${count}): ${nums}\n`;
             }
         });
         
