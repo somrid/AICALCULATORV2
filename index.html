@@ -382,36 +382,43 @@
     <div id="pairFollowContent" class="collapsible-content">
         <div class="smart-flow-box" style="margin-top:0; border:none; box-shadow:none; background:#ecfdf5; border:2px dashed #059669;">
             <div class="sf-header">
-               <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
-                    <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #a7f3d0;">
-                        <span style="font-weight:bold; color:#059669;">ถ้า 2 ตัว</span>
-                        <select id="pairSourcePos" class="btn" style="padding:2px 5px;">
-                            <option value="up">บน (ท้าย)</option>
+               <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center;">
+                    
+                    <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #a7f3d0; display:flex; align-items:center; gap:5px;">
+                        <span style="font-weight:bold; color:#059669; font-size:13px;">ถ้า 2 ตัว</span>
+                        <select id="pairSourcePos" class="btn" style="padding:2px;">
+                            <option value="up">บน</option>
                             <option value="down">ล่าง</option>
                         </select>
-                        <span>ออกเลข</span>
-                        <input type="number" id="pairInput" class="btn" style="width:60px; padding:2px 5px;" placeholder="เช่น 85">
+                        <input type="number" id="pairInput" class="btn" style="width:50px; padding:2px;" placeholder="เช่น 85">
                     </div>
                     
-                    <span style="font-size:20px; color:#059669;">👉</span>
+                    <span style="font-size:16px; color:#059669;">👉</span>
                     
-                    <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #fef9c3;">
-                        <span>ดู 2 ตัว</span>
-                        <select id="pairTargetPos" class="btn" style="padding:2px 5px;">
-                            <option value="up">บน (ท้าย)</option>
+                    <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #fef9c3; display:flex; align-items:center; gap:5px;">
+                        <span style="font-size:13px;">ดู 2 ตัว</span>
+                        <select id="pairTargetPos" class="btn" style="padding:2px;">
+                            <option value="up">บน</option>
                             <option value="down">ล่าง</option>
                         </select>
+                    </div>
+
+                    <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #3b82f6; display:flex; align-items:center; gap:5px;">
+                        <span style="font-weight:bold; color:#2563eb; font-size:13px;">เอา:</span>
+                        <input type="number" id="winLength" value="7" min="3" max="9" class="btn" style="width:40px; padding:2px; color:#2563eb; border-color:#2563eb;">
+                        <span style="font-size:12px;">ตัว</span>
                     </div>
                     
                     <button class="sf-btn" style="background:#059669;" onclick="calcPairFollow()">🚀 วิเคราะห์</button>
+                    <button class="sf-btn" style="background:#ffffff; color:#059669; border:1px solid #059669; box-shadow:none;" onclick="copyPairWinResult()">📋 Copy</button>
                </div>
             </div>
             
-            <div id="pairHlPrediction" style="margin-top:15px; padding:10px; background:white; border-radius:10px; display:none; border:1px solid #e2e8f0; text-align:center;"></div>
+            <div id="pairWinPrediction" style="margin-top:15px; display:none; grid-template-columns: 1fr; gap:10px;"></div>
+            <div id="pairHlPrediction" style="margin-top:10px; padding:10px; background:white; border-radius:10px; display:none; border:1px solid #e2e8f0; text-align:center;"></div>
             <div id="pairOutput" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap:10px; margin-top:15px;"></div>
         </div>
     </div>
-</div>
 
     <div class="control-panel">
         <div class="display-mode-group">
@@ -638,6 +645,8 @@
 
 <script>
 let currentFollowStr = ""; // ตัวแปรสำหรับเก็บเลข 10 ตัว
+// ประกาศตัวแปรเก็บค่า (ถ้ายังไม่มี ให้เอาไปวางไว้บนสุดของ script รวมกับตัวแปรอื่นๆ)
+let currentPairWinStr = "";
 
     // --- WORKER: Dynamic Patterns ---
     // --- WORKER: Dynamic Patterns + Instant Filter Logic ---
@@ -1448,8 +1457,10 @@ function calcFollowing() {
     outputDiv.innerHTML = html + `<div style="grid-column:1/-1; text-align:center; font-size:12px; margin-top:10px; color:#64748b;">จากสถิติย้อนหลัง ${foundCount} ครั้ง</div>`;
 }
 
-// --- ฟังก์ชัน 2: วิเคราะห์เลขตามแบบจับคู่ (Pair Follow) ---
+// --- ฟังก์ชัน 2: วิเคราะห์เลขตาม + สูตรวิน + ระบบ Copy มีป๊อปอัป ---
 function calcPairFollow() {
+    currentPairWinStr = ""; // ล้างค่าเก่าทิ้งก่อน
+
     if (!currentData || currentData.length < 2) return alert("ข้อมูลไม่เพียงพอ");
     
     let inputVal = document.getElementById('pairInput').value;
@@ -1458,6 +1469,9 @@ function calcPairFollow() {
     
     let sPos = document.getElementById('pairSourcePos').value;
     let tPos = document.getElementById('pairTargetPos').value;
+    
+    // รับค่าจำนวนวิน (ถ้าไม่มีให้เอา 7 ตัว)
+    let wantLen = parseInt(document.getElementById('winLength').value) || 7;
     
     const getPair = (row, type) => {
         if(type === 'up') {
@@ -1474,9 +1488,10 @@ function calcPairFollow() {
     ]);
 
     let counts = Array(100).fill(0);
+    let digitCounts = Array(10).fill(0);
     let foundCount = 0;
-    let lowCount = 0; 
-    let highCount = 0; 
+    let lowCount = 0, highCount = 0; 
+    let resultsList = []; 
     
     for(let i=1; i<intData.length; i++) {
         let cur = getPair(intData[i], sPos);
@@ -1485,6 +1500,13 @@ function calcPairFollow() {
             if(!isNaN(next)) {
                 counts[next]++;
                 foundCount++;
+                resultsList.push(next);
+                
+                let d1 = Math.floor(next / 10);
+                let d2 = next % 10;
+                digitCounts[d1]++;
+                digitCounts[d2]++;
+
                 if(next >= 50) highCount++; else lowCount++;
             }
         }
@@ -1492,13 +1514,55 @@ function calcPairFollow() {
     
     const outputDiv = document.getElementById('pairOutput');
     const hlDiv = document.getElementById('pairHlPrediction');
+    const winDiv = document.getElementById('pairWinPrediction');
 
     if (foundCount === 0) {
         outputDiv.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red;">ไม่พบประวัติคู่ ${targetPair}</div>`;
         hlDiv.style.display = 'none';
+        winDiv.style.display = 'none';
         return;
     }
 
+    // --- คำนวณเลขวิน ---
+    let sortedDigits = digitCounts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c);
+    
+    // ตัดเอาตามจำนวนที่ระบุ
+    let mainSet = sortedDigits.slice(0, wantLen).map(x => x.n);
+    
+    // ✅ 1. เก็บค่าเลขวินลงตัวแปร (เพื่อรอให้ปุ่ม Copy เรียกใช้)
+    currentPairWinStr = mainSet.join('');
+
+    // หาตัวกัน
+    let reserveDigit = sortedDigits[wantLen] ? sortedDigits[wantLen].n : null;
+    let reserveSet = [...mainSet];
+    if (reserveDigit !== null) reserveSet.push(reserveDigit);
+
+    let mainWinCount = 0;
+    resultsList.forEach(res => {
+        let d1 = Math.floor(res / 10), d2 = res % 10;
+        if(mainSet.includes(d1) && mainSet.includes(d2)) mainWinCount++;
+    });
+    
+    let mainAcc = Math.round((mainWinCount/foundCount)*100);
+    let reserveText = reserveDigit !== null ? `(กัน +${reserveDigit})` : ``;
+
+    winDiv.style.display = 'grid';
+    winDiv.innerHTML = `
+        <div style="background:white; padding:10px; border-radius:10px; border:1px solid #10b981; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+            <div style="font-weight:bold; color:#059669; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+                <span>🎯 วินไหล (${wantLen} ตัว)</span>
+                <span style="font-size:12px; background:#dcfce7; padding:2px 8px; border-radius:10px; color:#15803d;">เข้า ${mainWinCount}/${foundCount} (${mainAcc}%)</span>
+            </div>
+            <div style="font-size:20px; font-weight:800; color:#1e293b; letter-spacing:4px; text-align:center; margin:8px 0;">
+                ${mainSet.join('')}
+            </div>
+            <div style="font-size:12px; color:#64748b; text-align:center;">
+                ${reserveText}
+            </div>
+        </div>
+    `;
+
+    // แสดงผล High/Low (เหมือนเดิม)
     let highP = Math.round((highCount / foundCount) * 100);
     let lowP = 100 - highP;
     hlDiv.style.display = 'block';
@@ -1508,26 +1572,34 @@ function calcPairFollow() {
             <div style="width:${lowP}%; background:#f59e0b; color:white; font-size:12px; display:flex; align-items:center; justify-content:center;">ต่ำ ${lowP}%</div>
             <div style="width:${highP}%; background:#10b981; color:white; font-size:12px; display:flex; align-items:center; justify-content:center;">สูง ${highP}%</div>
         </div>
-        <div style="font-size:12px; color:#64748b; margin-top:3px;">(00-49 | 50-99)</div>
     `;
 
+    // แสดงผลคู่เลข (เหมือนเดิม)
     let sorted = counts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c).slice(0, 10);
     let html = "";
-    
     sorted.forEach(item => {
         if(item.c === 0) return;
         let pairStr = item.n.toString().padStart(2, '0');
         let percent = Math.round((item.c / foundCount) * 100);
-        
         html += `
             <div style="text-align:center; padding:5px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">
-                <div style="font-size:20px; font-weight:bold; color:#059669;">${pairStr}</div>
-                <div style="font-size:12px; color:#64748b;">${percent}% (${item.c})</div>
+                <div style="font-size:18px; font-weight:bold; color:#059669;">${pairStr}</div>
+                <div style="font-size:11px; color:#64748b;">${percent}% (${item.c})</div>
             </div>
         `;
     });
-    
     outputDiv.innerHTML = html;
+}
+
+// ✅ 2. ฟังก์ชันนี้แหละครับ ที่ทำให้มีป๊อปอัปเด้งขึ้นมา!
+// เพราะมันไปเรียก copyText() ที่มีระบบแจ้งเตือน Toast อยู่แล้ว
+function copyPairWinResult() {
+    if (!currentPairWinStr) {
+        alert("กรุณากดปุ่ม 'วิเคราะห์' เพื่อคำนวณก่อนคัดลอก");
+        return;
+    }
+    // เรียกใช้ฟังก์ชันกลาง เพื่อให้แสดงป๊อปอัป "✅ คัดลอกเรียบร้อย!"
+    copyText(currentPairWinStr);
 }
 // --- ฟังก์ชันเสริม: ดึงเลขงวดล่าสุด (ตัวล่างสุด) มาใส่ช่องเงื่อนไขอัตโนมัติ ---
 
