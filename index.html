@@ -453,6 +453,7 @@ body.dark-mode { --green-active: #059669; }
                 <button class="btn-step" onclick="setStep('odd', this)">คี่</button>
                 <button class="btn-step" onclick="setStep('even', this)">คู่</button>
                 <button class="btn-step" onclick="setStep('step3', this)">ข้าม3</button>
+		<button class="btn-step" onclick="setStep('step5', this)">ข้าม5</button>
             </div>
             <div style="display:flex; gap:3px; align-items:center;">
                 <span style="font-weight:bold; font-size:13px;">จำนวน:</span>
@@ -547,9 +548,31 @@ let currentFollowStr = ""; // ตัวแปรสำหรับเก็บ�
     }
 
     // Dynamic Additives based on Step Mode
+    // ✅ นำฟังก์ชันนี้ไปวางทับ function getAdditives(len, mode) {...} ของเดิม
     function getAdditives(len, mode) {
-        let arr = []; let step = 1; let start = 0;
-        if(mode === 'odd') { start=1; step=2; } else if(mode === 'even') { start=0; step=2; } else if(mode === 'step3') { start=0; step=3; }
+        let arr = [];
+
+        // สูตรข้าม 5 (Step 5)
+        if (mode === 'step5') {
+            // 1. หาจำนวนครึ่งหนึ่งปัดขึ้น (เช่น เลือก 5 ตัว -> หาร 2 ได้ 2.5 -> ปัดเป็น 3 ตัว)
+            let baseLen = Math.ceil(len / 2);
+            
+            // 2. สร้างชุดแรก (เลขเรียงปกติ)
+            for (let i = 0; i < baseLen; i++) arr.push(i);
+            
+            // 3. สร้างชุดสอง (เลขชุดแรก + 5)
+            for (let i = 0; i < baseLen; i++) arr.push((i + 5) % 10);
+            
+            // 4. ตัดส่วนเกินออกให้เหลือเท่าจำนวนที่ต้องการ (เช่น ได้มา 6 ตัว ตัดเหลือ 5 ตัว)
+            return arr.slice(0, len);
+        }
+
+        // สูตรเดิม (เรียง, คี่, คู่, ข้าม3)
+        let step = 1; let start = 0;
+        if(mode === 'odd') { start=1; step=2; } 
+        else if(mode === 'even') { start=0; step=2; } 
+        else if(mode === 'step3') { start=0; step=3; }
+        
         for(let i=0; i<len; i++) arr.push((start + (i*step)) % 10);
         return arr;
     }
