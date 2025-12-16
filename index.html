@@ -877,7 +877,32 @@ let currentFollowStr = ""; // ตัวแปรสำหรับเก็บ�
     function saveCurrentData() { localStorage.setItem('lottoData_' + currentLottoType, document.getElementById('inputData').value); }
     function loadCurrentData() { const saved = localStorage.getItem('lottoData_' + currentLottoType) || ""; document.getElementById('inputData').value = saved; updateDbCount(); updateRenameButton(); if(saved.trim()) { setTimeout(() => { const totalRounds = document.getElementById('rangeEnd').max; if(totalRounds) document.getElementById('rangeEnd').value = totalRounds; updateRangeFromCount(); }, 100); } }
     function toggleTheme() { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); }
-    function toggleEditData() { const box = document.getElementById('inputData'); const btn = document.getElementById('btnEdit'); isEditing = !isEditing; box.readOnly = !isEditing; if(isEditing) { box.style.borderColor = '#f97316'; btn.innerText = '💾 บันทึก'; btn.style.background = '#16a34a'; } else { box.style.borderColor = '#cbd5e1'; btn.innerText = '✏️ แก้ไข'; btn.style.background = '#f59e0b'; saveCurrentData(); if(box.value.trim()) { updateDbCount(); runProgram(); } } }
+    function toggleEditData() { 
+        const box = document.getElementById('inputData'); 
+        const btn = document.getElementById('btnEdit'); 
+        isEditing = !isEditing; 
+        box.readOnly = !isEditing; 
+        
+        if(isEditing) { 
+            box.style.borderColor = '#f97316'; 
+            btn.innerText = '💾 บันทึก'; 
+            btn.style.background = '#16a34a'; 
+            
+            // ✅ เพิ่มตรงนี้: พอพิมพ์แก้อะไรปุ๊บ ให้จำปั๊บ (กันไฟดับ/คอมค้าง)
+            box.addEventListener('input', saveCurrentData);
+            
+        } else { 
+            box.style.borderColor = '#cbd5e1'; 
+            btn.innerText = '✏️ แก้ไข'; 
+            btn.style.background = '#f59e0b'; 
+            
+            // ยกเลิกการดักจับเมื่อหยุดแก้ไข
+            box.removeEventListener('input', saveCurrentData);
+            
+            saveCurrentData(); // บันทึกปิดท้ายอีกที
+            if(box.value.trim()) { updateDbCount(); runProgram(); } 
+        } 
+    }
     function toggleOrder() { inputOrder = inputOrder==='normal'?'reverse':'normal'; document.getElementById('btnOrder').innerText = inputOrder==='normal'?'⬇ ปกติ':'⬆ สลับ'; }
     function toggleSection(contentId, iconId) { const content = document.getElementById(contentId); const icon = document.getElementById(iconId); if(content.style.display === 'none') { content.style.display = 'block'; icon.innerText = '▼'; } else { content.style.display = 'none'; icon.innerText = '▲'; } }
     function toggleDashboard() { toggleSection('dashboardContent', 'dashIcon'); }
@@ -1204,29 +1229,28 @@ function copyHistoryColumn() {
                 const main = document.getElementById('inputData');
                 let textToAdd = parsed.textFormat;
                 
-                // จัดการลำดับกรณีเลือกแบบย้อนกลับ
+                // จัดการลำดับ (ปกติ/ย้อนกลับ)
                 if (inputOrder === 'reverse') {
                     let lines = parsed.rounds.map(r => `${r.up} ${r.down}`);
                     textToAdd = lines.reverse().join('\n');
                 }
                 
-                // เพิ่มข้อมูลลงในกล่องหลัก
+                // เพิ่มข้อมูล
                 main.value = (main.value.trim() ? main.value + "\n" : "") + textToAdd;
                 document.getElementById('newData').value = ""; // ล้างช่องเติม
                 main.scrollTop = main.scrollHeight; // เลื่อนลงล่างสุด
                 
-                // อัปเดตจำนวนงวดทั้งหมด
+                // อัปเดตจำนวนงวด
                 updateDbCount(); 
                 
-                // --- ปรับเลข "ถึงงวดที่" ให้เป็นงวดล่าสุดอัตโนมัติ ---
-                const totalRounds = document.getElementById('rangeEnd').max; // ค่า max ที่เพิ่งอัปเดตจาก updateDbCount
-                document.getElementById('rangeEnd').value = totalRounds;
-                
-                // คำนวณหาจำนวนงวด (Range Count) ใหม่ เพื่อให้ช่อง "ล่าสุด" สัมพันธ์กัน
-                updateRangeFromCount(); 
-                // ----------------------------------------------------------
+                // ✅✅✅ หัวใจสำคัญ: สั่งบันทึกลงความจำเครื่องทันที! ✅✅✅
+                saveCurrentData(); 
+                // ----------------------------------------------------
 
-                // runProgram(); // updateRangeFromCount calls runProgram already
+                const totalRounds = document.getElementById('rangeEnd').max;
+                document.getElementById('rangeEnd').value = totalRounds;
+                updateRangeFromCount(); 
+                
             } else alert("ข้อมูลไม่ถูกต้อง");
         } else alert("กรุณาใส่ข้อมูล");
     }
