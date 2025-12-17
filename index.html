@@ -327,45 +327,51 @@
                 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
                     <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #dcfce7;">
                         <span style="font-weight:bold; color:#15803d;">เงื่อนไข:</span>
-                        <span style="font-size:14px;">ถ้าเลข</span>
+                        <span style="font-size:14px;">ถ้า</span>
                         <select id="followNum" class="btn" style="padding:2px 5px;">
                             <option value="0">0</option><option value="1">1</option><option value="2">2</option>
                             <option value="3">3</option><option value="4">4</option><option value="5">5</option>
                             <option value="6">6</option><option value="7">7</option><option value="8">8</option>
                             <option value="9">9</option>
                         </select>
-                        <span style="font-size:14px;">มาที่</span>
+                        <span style="font-size:14px;">มา</span>
                         <select id="sourcePos" class="btn" style="padding:2px 5px;">
                             <option value="0">หลักร้อย</option>
                             <option value="1" selected>สิบบน</option>
                             <option value="2">หน่วยบน</option>
                             <option value="3">สิบล่าง</option>
                             <option value="4">หน่วยล่าง</option>
-                            <option value="5">แต้มบน (รวม)</option>
-                            <option value="6">แต้มล่าง (รวม)</option>
+                            <option value="5">แต้มบน</option>
+                            <option value="6">แต้มล่าง</option>
                         </select>
                     </div>
                     
-                    <div style="font-size:20px; color:#16a34a;">👉</div>
+                    <span style="font-size:20px; color:#16a34a;">👉</span>
 
                     <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #fef9c3;">
                         <span style="font-weight:bold; color:#b45309;">ผลลัพธ์:</span>
-                        <span style="font-size:14px;">ดูที่</span>
+                        <span style="font-size:14px;">ดู</span>
                         <select id="targetPos" class="btn" style="padding:2px 5px; border-color:#b45309; color:#b45309;">
                             <option value="0">หลักร้อย</option>
                             <option value="1">สิบบน</option>
                             <option value="2">หน่วยบน</option>
                             <option value="3">สิบล่าง</option>
                             <option value="4">หน่วยล่าง</option>
-                            <option value="5">แต้มบน (รวม)</option>
-                            <option value="6">แต้มล่าง (รวม)</option>
+                            <option value="5">แต้มบน</option>
+                            <option value="6">แต้มล่าง</option>
                         </select>
                     </div>
 
-                    <div style="display:flex; gap:5px; justify-content:center; align-items:center; margin-top:10px;">
-    <button class="sf-btn" style="background:#16a34a;" onclick="calcFollowing()">🚀 วิเคราะห์</button>
-    <button class="sf-btn" style="background:#ffffff; color:#16a34a; border:1px solid #16a34a; box-shadow:none;" onclick="copyFollowResult()">📋 Copy</button>
-</div>
+                    <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #3b82f6; display:flex; align-items:center; gap:5px;">
+                        <span style="font-weight:bold; color:#2563eb; font-size:13px;">ระยะ:</span>
+                        <input type="number" id="followLookForward" value="3" min="1" max="10" class="btn" style="width:40px; padding:2px; color:#2563eb; border-color:#2563eb; text-align:center;">
+                        <span style="font-size:12px;">งวด</span>
+                    </div>
+
+                    <div style="display:flex; gap:5px;">
+                        <button class="sf-btn" style="background:#16a34a;" onclick="calcFollowing()">🚀 วิเคราะห์</button>
+                        <button class="sf-btn" style="background:#ffffff; color:#16a34a; border:1px solid #16a34a; box-shadow:none;" onclick="copyFollowResult()">📋 Copy</button>
+                    </div>
                 </div>
             </div>
             
@@ -373,7 +379,6 @@
             <div id="followOutput" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap:10px; margin-top:15px;"></div>
         </div>
     </div>
-</div>
 
 <div class="collapsible-container" style="margin-top: 20px;">
     <div class="collapsible-header" onclick="toggleSection('pairFollowContent', 'dashIcon4')">
@@ -385,22 +390,28 @@
                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center;">
                     
                     <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #a7f3d0; display:flex; align-items:center; gap:5px;">
-                        <span style="font-weight:bold; color:#059669; font-size:13px;">ถ้า 2 ตัว</span>
+                        <span style="font-weight:bold; color:#059669; font-size:13px;">ถ้าคู่</span>
                         <select id="pairSourcePos" class="btn" style="padding:2px;">
                             <option value="up">บน</option>
                             <option value="down">ล่าง</option>
                         </select>
-                        <input type="number" id="pairInput" class="btn" style="width:50px; padding:2px;" placeholder="เช่น 85">
+                        <input type="number" id="pairInput" class="btn" style="width:50px; padding:2px;" placeholder="85">
                     </div>
                     
                     <span style="font-size:16px; color:#059669;">👉</span>
                     
                     <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #fef9c3; display:flex; align-items:center; gap:5px;">
-                        <span style="font-size:13px;">ดู 2 ตัว</span>
+                        <span style="font-size:13px;">ดูคู่</span>
                         <select id="pairTargetPos" class="btn" style="padding:2px;">
                             <option value="up">บน</option>
                             <option value="down">ล่าง</option>
                         </select>
+                    </div>
+
+                    <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #f59e0b; display:flex; align-items:center; gap:5px;">
+                        <span style="font-weight:bold; color:#d97706; font-size:13px;">ระยะ:</span>
+                        <input type="number" id="pairLookForward" value="3" min="1" max="10" class="btn" style="width:40px; padding:2px; color:#d97706; border-color:#d97706; text-align:center;">
+                        <span style="font-size:12px;">งวด</span>
                     </div>
 
                     <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #3b82f6; display:flex; align-items:center; gap:5px;">
@@ -1131,10 +1142,257 @@
     function copySingleSmartFlow(btn) { copyText(btn.getAttribute('data-text')); }
     function copySmartFlow() { let cards = document.querySelectorAll('.btn-copy-sf'); let allText = ""; cards.forEach(btn => { allText += btn.getAttribute('data-text') + "\n\n====================\n\n"; }); if(allText) copyText(allText); }
 
-    function calcFollowing() { if (!currentData || currentData.length < 2) return alert("ข้อมูลไม่เพียงพอ"); const targetNum = parseInt(document.getElementById('followNum').value); const sPos = parseInt(document.getElementById('sourcePos').value); const tPos = parseInt(document.getElementById('targetPos').value); const getValue = (row, pos) => { if (pos <= 4) return row[pos]; if (pos === 5 && !isNaN(row[1]) && !isNaN(row[2])) return (row[1] + row[2]) % 10; if (pos === 6 && !isNaN(row[3]) && !isNaN(row[4])) return (row[3] + row[4]) % 10; return NaN; }; const intData = currentData.map(r => [ parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), parseInt(r.down[0]), parseInt(r.down[1]) ]); let counts = Array(10).fill(0); let foundCount = 0; let highCount = 0; let lowCount = 0; for (let i = 1; i < intData.length; i++) { let currentDraw = intData[i]; let nextDraw = intData[i-1]; let sVal = getValue(currentDraw, sPos); if (!isNaN(sVal) && sVal === targetNum) { let tVal = getValue(nextDraw, tPos); if (!isNaN(tVal)) { counts[tVal]++; foundCount++; if (tVal >= 5) highCount++; else lowCount++; } } } const outputDiv = document.getElementById('followOutput'); const hlDiv = document.getElementById('hlPrediction'); if (foundCount === 0) { outputDiv.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red;">ไม่พบประวัติ</div>`; hlDiv.style.display = 'none'; return; } let highP = Math.round((highCount / foundCount) * 100); let lowP = 100 - highP; hlDiv.style.display = 'block'; hlDiv.innerHTML = ` <div style="font-weight:bold; margin-bottom:5px; color:#334155;">🔮 ทำนายสูง-ต่ำ (จากสถิติ)</div> <div style="display:flex; height:20px; border-radius:10px; overflow:hidden;"> <div style="width:${lowP}%; background:#f59e0b; color:white; font-size:12px; display:flex; align-items:center; justify-content:center;">ต่ำ ${lowP}%</div> <div style="width:${highP}%; background:#10b981; color:white; font-size:12px; display:flex; align-items:center; justify-content:center;">สูง ${highP}%</div> </div> <div style="font-size:12px; color:#64748b; margin-top:3px;">(ต่ำ 0-4 | สูง 5-9)</div> `; let sorted = counts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c); currentFollowStr = sorted.map(item => item.n).join(''); let html = ""; sorted.forEach(item => { let percent = Math.round((item.c / foundCount) * 100); let barColor = '#10b981'; if(percent >= 20) barColor = '#ef4444'; else if(percent >= 12) barColor = '#f59e0b'; html += ` <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:5px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;"> <div style="font-size:12px; font-weight:bold; color:#64748b;">${percent}%</div> <div style="width:100%; height:50px; background:#f1f5f9; border-radius:5px; position:relative; display:flex; align-items:flex-end; justify-content:center;"> <div style="width:60%; height:${Math.max(5, percent * 1.5)}%; background:${barColor}; border-radius:3px 3px 0 0;"></div> </div> <div style="font-size:18px; font-weight:800; color:#1e293b;">${item.n}</div> <div style="font-size:10px; color:#94a3b8;">(${item.c})</div> </div> `; }); outputDiv.innerHTML = html + `<div style="grid-column:1/-1; text-align:center; font-size:12px; margin-top:10px; color:#64748b;">จากสถิติย้อนหลัง ${foundCount} ครั้ง</div>`; }
-    function copyFollowResult() { if (!currentFollowStr) { alert("กรุณากดปุ่ม 'วิเคราะห์' ก่อนคัดลอก"); return; } copyText(currentFollowStr); }
+    // --- ฟังก์ชัน 1: วิเคราะห์เลขตาม (แบบเลือกจำนวนงวดล่วงหน้าได้) ---
+function calcFollowing() {
+    if (!currentData || currentData.length < 5) return alert("ข้อมูลไม่เพียงพอ");
 
-    function calcPairFollow() { currentPairWinStr = ""; if (!currentData || currentData.length < 2) return alert("ข้อมูลไม่เพียงพอ"); let inputVal = document.getElementById('pairInput').value; if(inputVal === '' || inputVal.length < 2) return alert("กรุณาใส่เลขคู่ (เช่น 85)"); let targetPair = parseInt(inputVal); let sPos = document.getElementById('pairSourcePos').value; let tPos = document.getElementById('pairTargetPos').value; let wantLen = parseInt(document.getElementById('winLength').value) || 7; const getPair = (row, type) => { if(type === 'up') { if(!isNaN(row[1]) && !isNaN(row[2])) return row[1]*10 + row[2]; } else { if(!isNaN(row[3]) && !isNaN(row[4])) return row[3]*10 + row[4]; } return NaN; }; const intData = currentData.map(r => [ parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), parseInt(r.down[0]), parseInt(r.down[1]) ]); let counts = Array(100).fill(0); let digitCounts = Array(10).fill(0); let foundCount = 0; let lowCount = 0, highCount = 0; let resultsList = []; for(let i=1; i<intData.length; i++) { let cur = getPair(intData[i], sPos); if(cur === targetPair) { let next = getPair(intData[i-1], tPos); if(!isNaN(next)) { counts[next]++; foundCount++; resultsList.push(next); let d1 = Math.floor(next / 10); let d2 = next % 10; digitCounts[d1]++; digitCounts[d2]++; if(next >= 50) highCount++; else lowCount++; } } } const outputDiv = document.getElementById('pairOutput'); const hlDiv = document.getElementById('pairHlPrediction'); const winDiv = document.getElementById('pairWinPrediction'); if (foundCount === 0) { outputDiv.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red;">ไม่พบประวัติคู่ ${targetPair}</div>`; hlDiv.style.display = 'none'; winDiv.style.display = 'none'; return; } let sortedDigits = digitCounts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c); let mainSet = sortedDigits.slice(0, wantLen).map(x => x.n); currentPairWinStr = mainSet.join(''); let reserveDigit = sortedDigits[wantLen] ? sortedDigits[wantLen].n : null; let reserveSet = [...mainSet]; if (reserveDigit !== null) reserveSet.push(reserveDigit); let mainWinCount = 0; resultsList.forEach(res => { let d1 = Math.floor(res / 10), d2 = res % 10; if(mainSet.includes(d1) && mainSet.includes(d2)) mainWinCount++; }); let mainAcc = Math.round((mainWinCount/foundCount)*100); let reserveText = reserveDigit !== null ? `(กัน +${reserveDigit})` : ``; winDiv.style.display = 'grid'; winDiv.innerHTML = ` <div style="background:white; padding:10px; border-radius:10px; border:1px solid #10b981; box-shadow:0 2px 5px rgba(0,0,0,0.05);"> <div style="font-weight:bold; color:#059669; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;"> <span>🎯 วินไหล (${wantLen} ตัว)</span> <span style="font-size:12px; background:#dcfce7; padding:2px 8px; border-radius:10px; color:#15803d;">เข้า ${mainWinCount}/${foundCount} (${mainAcc}%)</span> </div> <div style="font-size:20px; font-weight:800; color:#1e293b; letter-spacing:4px; text-align:center; margin:8px 0;"> ${mainSet.join('')} </div> <div style="font-size:12px; color:#64748b; text-align:center;"> ${reserveText} </div> </div> `; let highP = Math.round((highCount / foundCount) * 100); let lowP = 100 - highP; hlDiv.style.display = 'block'; hlDiv.innerHTML = ` <div style="font-weight:bold; margin-bottom:5px; color:#059669;">📊 ทำนายคู่ สูง-ต่ำ</div> <div style="display:flex; height:20px; border-radius:10px; overflow:hidden;"> <div style="width:${lowP}%; background:#f59e0b; color:white; font-size:12px; display:flex; align-items:center; justify-content:center;">ต่ำ ${lowP}%</div> <div style="width:${highP}%; background:#10b981; color:white; font-size:12px; display:flex; align-items:center; justify-content:center;">สูง ${highP}%</div> </div> `; let sorted = counts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c).slice(0, 10); let html = ""; sorted.forEach(item => { if(item.c === 0) return; let pairStr = item.n.toString().padStart(2, '0'); let percent = Math.round((item.c / foundCount) * 100); html += ` <div style="text-align:center; padding:5px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;"> <div style="font-size:18px; font-weight:bold; color:#059669;">${pairStr}</div> <div style="font-size:11px; color:#64748b;">${percent}% (${item.c})</div> </div> `; }); outputDiv.innerHTML = html; }
+    const targetNum = parseInt(document.getElementById('followNum').value);
+    const sPos = parseInt(document.getElementById('sourcePos').value);
+    const tPos = parseInt(document.getElementById('targetPos').value);
+    
+    // ✅ ดึงค่าระยะจากช่อง input (ถ้าไม่ใส่ ให้เป็น 3)
+    const lookForward = parseInt(document.getElementById('followLookForward').value) || 3;
+
+    const getValue = (row, pos) => {
+        if (pos <= 4) return parseInt(row[pos]);
+        if (pos === 5 && !isNaN(row[1]) && !isNaN(row[2])) return (parseInt(row[1]) + parseInt(row[2])) % 10;
+        if (pos === 6 && !isNaN(row[3]) && !isNaN(row[4])) return (parseInt(row[3]) + parseInt(row[4])) % 10;
+        return NaN;
+    };
+
+    const intData = currentData.map(r => [
+        parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
+        parseInt(r.down[0]), parseInt(r.down[1])
+    ]);
+
+    let counts = Array(10).fill(0);
+    let foundCount = 0; 
+    let totalSamples = 0; 
+    let highCount = 0, lowCount = 0; 
+    let evenCount = 0, oddCount = 0;  
+    
+    // เริ่มต้นที่ lookForward เพื่อให้มีพื้นที่ถอยหลังไปดูงวดก่อนหน้าได้
+    for (let i = lookForward; i < intData.length; i++) {
+        let currentDraw = intData[i];   
+        let sVal = getValue(currentDraw, sPos);
+        
+        // ถ้าเจอเลขเงื่อนไข
+        if (!isNaN(sVal) && sVal === targetNum) {
+            foundCount++;
+            
+            // ✅ Loop เก็บข้อมูลล่วงหน้า X งวด (ตามค่า lookForward)
+            for (let k = 1; k <= lookForward; k++) {
+                let nextDraw = intData[i-k];
+                if (!nextDraw) continue;
+
+                let tVal = getValue(nextDraw, tPos);
+                if (!isNaN(tVal)) {
+                    counts[tVal]++;
+                    totalSamples++;
+                    
+                    if (tVal >= 5) highCount++; else lowCount++;
+                    if (tVal % 2 === 0) evenCount++; else oddCount++;
+                }
+            }
+        }
+    }
+
+    const outputDiv = document.getElementById('followOutput');
+    const hlDiv = document.getElementById('hlPrediction');
+
+    if (foundCount === 0) {
+        outputDiv.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red;">ไม่พบประวัติ</div>`;
+        hlDiv.style.display = 'none';
+        return;
+    }
+
+    // คำนวณเปอร์เซ็นต์
+    let highP = Math.round((highCount / totalSamples) * 100);
+    let lowP = 100 - highP;
+    let evenP = Math.round((evenCount / totalSamples) * 100);
+    let oddP = 100 - evenP;
+
+    hlDiv.style.display = 'block';
+    hlDiv.innerHTML = `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div style="background:white; padding:10px; border-radius:10px; border:1px solid #e2e8f0; text-align:center;">
+                <div style="font-weight:bold; color:#334155; margin-bottom:5px;">↕️ สูง-ต่ำ (ระยะ ${lookForward} งวด)</div>
+                <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-bottom:5px;">
+                    <div style="width:${lowP}%; background:#f59e0b;"></div>
+                    <div style="width:${highP}%; background:#10b981;"></div>
+                </div>
+                <div style="font-size:12px;">ต่ำ ${lowP}% | สูง ${highP}%</div>
+            </div>
+            <div style="background:white; padding:10px; border-radius:10px; border:1px solid #e2e8f0; text-align:center;">
+                <div style="font-weight:bold; color:#334155; margin-bottom:5px;">🔢 คู่-คี่ (ระยะ ${lookForward} งวด)</div>
+                <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-bottom:5px;">
+                    <div style="width:${evenP}%; background:#3b82f6;"></div>
+                    <div style="width:${oddP}%; background:#ec4899;"></div>
+                </div>
+                <div style="font-size:12px;">คู่ ${evenP}% | คี่ ${oddP}%</div>
+            </div>
+        </div>
+        <div style="font-size:12px; color:#64748b; margin-top:5px; text-align:center;">(ฐานข้อมูล: ${foundCount} รอบ x ${lookForward} งวด = ${totalSamples} ตัวเลข)</div>
+    `;
+
+    let sorted = counts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c);
+    currentFollowStr = sorted.map(item => item.n).join('');
+    
+    let html = "";
+    sorted.forEach(item => {
+        let percent = Math.round((item.c / totalSamples) * 100); 
+        let barColor = '#10b981'; 
+        if(percent >= 15) barColor = '#ef4444'; 
+        else if(percent >= 10) barColor = '#f59e0b';
+
+        html += `
+            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:5px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">
+                <div style="font-size:12px; font-weight:bold; color:#64748b;">${percent}%</div>
+                <div style="width:100%; height:50px; background:#f1f5f9; border-radius:5px; position:relative; display:flex; align-items:flex-end; justify-content:center;">
+                    <div style="width:60%; height:${Math.max(5, percent * 3)}%; background:${barColor}; border-radius:3px 3px 0 0;"></div>
+                </div>
+                <div style="font-size:18px; font-weight:800; color:#1e293b;">${item.n}</div>
+                <div style="font-size:10px; color:#94a3b8;">(${item.c})</div>
+            </div>
+        `;
+    });
+    outputDiv.innerHTML = html;
+}
+
+// --- ฟังก์ชัน 2: วิเคราะห์เลขตามคู่ (แบบเลือกจำนวนงวดล่วงหน้าได้) ---
+function calcPairFollow() {
+    currentPairWinStr = ""; 
+    if (!currentData || currentData.length < 5) return alert("ข้อมูลไม่เพียงพอ");
+    
+    let inputVal = document.getElementById('pairInput').value;
+    if(inputVal === '' || inputVal.length < 2) return alert("กรุณาใส่เลขคู่ (เช่น 85)");
+    let targetPair = parseInt(inputVal);
+    let sPos = document.getElementById('pairSourcePos').value;
+    let tPos = document.getElementById('pairTargetPos').value;
+    let wantLen = parseInt(document.getElementById('winLength').value) || 7;
+    
+    // ✅ ดึงค่าระยะจากช่อง input
+    const lookForward = parseInt(document.getElementById('pairLookForward').value) || 3;
+
+    const getPair = (row, type) => {
+        if(type === 'up') {
+            if(!isNaN(row[1]) && !isNaN(row[2])) return row[1]*10 + row[2];
+        } else {
+            if(!isNaN(row[3]) && !isNaN(row[4])) return row[3]*10 + row[4];
+        }
+        return NaN;
+    }
+    
+    const intData = currentData.map(r => [
+        parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
+        parseInt(r.down[0]), parseInt(r.down[1])
+    ]);
+
+    let counts = Array(100).fill(0);
+    let digitCounts = Array(10).fill(0);
+    let foundCount = 0;
+    let totalSamples = 0;
+    
+    let highCount = 0, lowCount = 0; 
+    let evenCount = 0, oddCount = 0;
+
+    for(let i = lookForward; i < intData.length; i++) {
+        let cur = getPair(intData[i], sPos);
+        
+        if(cur === targetPair) {
+            foundCount++;
+            
+            // ✅ Loop เก็บข้อมูลล่วงหน้า
+            for(let k=1; k<=lookForward; k++) {
+                let next = getPair(intData[i-k], tPos);
+                if(!isNaN(next)) {
+                    counts[next]++;
+                    totalSamples++;
+                    
+                    let d1 = Math.floor(next / 10);
+                    let d2 = next % 10;
+                    digitCounts[d1]++;
+                    digitCounts[d2]++;
+
+                    if(next >= 50) highCount++; else lowCount++;
+                    if(next % 2 === 0) evenCount++; else oddCount++;
+                }
+            }
+        }
+    }
+    
+    const outputDiv = document.getElementById('pairOutput');
+    const hlDiv = document.getElementById('pairHlPrediction');
+    const winDiv = document.getElementById('pairWinPrediction');
+
+    if (foundCount === 0) {
+        outputDiv.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red;">ไม่พบประวัติคู่ ${targetPair}</div>`;
+        hlDiv.style.display = 'none';
+        winDiv.style.display = 'none';
+        return;
+    }
+
+    let sortedDigits = digitCounts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c);
+    let mainSet = sortedDigits.slice(0, wantLen).map(x => x.n);
+    currentPairWinStr = mainSet.join('');
+    
+    winDiv.style.display = 'grid';
+    winDiv.innerHTML = `
+        <div style="background:white; padding:10px; border-radius:10px; border:1px solid #10b981; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+            <div style="font-weight:bold; color:#059669; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+                <span>🎯 วินไหล (${wantLen} ตัว) - ระยะ ${lookForward} งวด</span>
+            </div>
+            <div style="font-size:20px; font-weight:800; color:#1e293b; letter-spacing:4px; text-align:center; margin:8px 0;">
+                ${mainSet.join('')}
+            </div>
+            <div style="font-size:12px; color:#64748b; text-align:center;">
+                (จากความถี่สะสม ${totalSamples} ชุดตัวเลข)
+            </div>
+        </div>
+    `;
+
+    let highP = Math.round((highCount / totalSamples) * 100);
+    let lowP = 100 - highP;
+    let evenP = Math.round((evenCount / totalSamples) * 100);
+    let oddP = 100 - evenP;
+
+    hlDiv.style.display = 'block';
+    hlDiv.innerHTML = `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div style="background:white; padding:10px; border-radius:10px; border:1px solid #e2e8f0; text-align:center;">
+                <div style="font-weight:bold; color:#334155; margin-bottom:5px;">↕️ สูง-ต่ำ (รวม)</div>
+                <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-bottom:5px;">
+                    <div style="width:${lowP}%; background:#f59e0b;"></div>
+                    <div style="width:${highP}%; background:#10b981;"></div>
+                </div>
+                <div style="font-size:12px;">ต่ำ ${lowP}% | สูง ${highP}%</div>
+            </div>
+            <div style="background:white; padding:10px; border-radius:10px; border:1px solid #e2e8f0; text-align:center;">
+                <div style="font-weight:bold; color:#334155; margin-bottom:5px;">🔢 คู่-คี่ (รวม)</div>
+                <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-bottom:5px;">
+                    <div style="width:${evenP}%; background:#3b82f6;"></div>
+                    <div style="width:${oddP}%; background:#ec4899;"></div>
+                </div>
+                <div style="font-size:12px;">คู่ ${evenP}% | คี่ ${oddP}%</div>
+            </div>
+        </div>
+    `;
+
+    let sorted = counts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c).slice(0, 10);
+    let html = "";
+    sorted.forEach(item => {
+        if(item.c === 0) return;
+        let pairStr = item.n.toString().padStart(2, '0');
+        let percent = Math.round((item.c / totalSamples) * 100);
+        html += `
+            <div style="text-align:center; padding:5px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">
+                <div style="font-size:18px; font-weight:bold; color:#059669;">${pairStr}</div>
+                <div style="font-size:11px; color:#64748b;">${percent}% (${item.c})</div>
+            </div>
+        `;
+    });
+    outputDiv.innerHTML = html;
+}
     function copyPairWinResult() { if (!currentPairWinStr) { alert("กรุณากดปุ่ม 'วิเคราะห์' เพื่อคำนวณก่อนคัดลอก"); return; } copyText(currentPairWinStr); }
     
     function getLatestRound() { if (!currentData || currentData.length === 0) return null; return currentData[currentData.length - 1]; }
