@@ -1128,7 +1128,54 @@
     function updateCountFromRange() { let total = updateDbCount(); let startInput = document.getElementById('rangeStart'); let endInput = document.getElementById('rangeEnd'); let countInput = document.getElementById('rangeCount'); let start = parseInt(startInput.value); let end = parseInt(endInput.value); if (!isNaN(end) && end > total) { end = total; endInput.value = total; } if (!isNaN(start) && start > total) { start = total; startInput.value = total; } if (!isNaN(start) && !isNaN(end) && start > end) { start = end; startInput.value = end; } if (!isNaN(start) && !isNaN(end)) { let count = end - start + 1; if (count < 1) count = 1; countInput.value = count; runProgram(); } }
     function togglePin(name) { if(pinnedList.includes(name)) pinnedList = pinnedList.filter(n => n !== name); else { if(pinnedList.length >= 5) { alert("เต็ม 5 สูตร"); return; } pinnedList.push(name); } if(lastCalculatedResults.length > 0) renderTable(currentData, lastCalculatedResults); }
     function copyText(t) { navigator.clipboard.writeText(t).then(()=>{ const el=document.getElementById('toast'); el.style.display='block'; setTimeout(()=>el.style.display='none', 1000); }); }
-    function appendAndRun() { const rawNew = document.getElementById('newData').value.trim(); if(rawNew) { const parsed = parseInputText(rawNew); if(parsed.textFormat) { const main = document.getElementById('inputData'); let textToAdd = parsed.textFormat; if (inputOrder === 'reverse') { let lines = parsed.rounds.map(r => `${r.up} ${r.down}`); textToAdd = lines.reverse().join('\n'); } main.value = (main.value.trim() ? main.value + "\n" : "") + textToAdd; document.getElementById('newData').value = ""; main.scrollTop = main.scrollHeight; updateDbCount(); saveCurrentData(); const totalRounds = document.getElementById('rangeEnd').max; document.getElementById('rangeEnd').value = totalRounds; updateRangeFromCount(); } else alert("ข้อมูลไม่ถูกต้อง"); } else alert("กรุณาใส่ข้อมูล"); }
+    function appendAndRun() {
+        const rawNew = document.getElementById('newData').value.trim();
+        if(rawNew) {
+            const parsed = parseInputText(rawNew);
+            if(parsed.textFormat) {
+                const main = document.getElementById('inputData');
+                let textToAdd = parsed.textFormat; // ข้อความที่จะเพิ่ม
+                
+                // ตรวจสอบโหมดการเรียงลำดับปัจจุบัน (ปกติ หรือ สลับ)
+                if (inputOrder === 'reverse') {
+                    // --- โหมดสลับ (ล่าสุดอยู่บน) ---
+                    // 1. กลับด้านข้อมูลใหม่ให้เรียงจาก ใหม่->เก่า ด้วย
+                    let lines = parsed.rounds.map(r => `${r.up} ${r.down}`);
+                    textToAdd = lines.reverse().join('\n');
+                    
+                    // 2. ✅ แก้ไข: แทรกไว้ "บนสุด" ของกล่องข้อความ
+                    main.value = textToAdd + (main.value.trim() ? "\n" + main.value : "");
+                    
+                    // เลื่อน Scrollbar ไปบนสุด เพื่อให้เห็นข้อมูลที่เพิ่งเติม
+                    main.scrollTop = 0; 
+                } else {
+                    // --- โหมดปกติ (เก่า->ใหม่ / ล่าสุดอยู่ล่าง) ---
+                    // 1. ✅ แก้ไข: ต่อท้าย "ล่างสุด" ตามปกติ
+                    main.value = (main.value.trim() ? main.value + "\n" : "") + textToAdd;
+                    
+                    // เลื่อน Scrollbar ลงล่างสุด
+                    main.scrollTop = main.scrollHeight; 
+                }
+                
+                // ล้างช่องเติมข้อมูล
+                document.getElementById('newData').value = ""; 
+                
+                // อัปเดตฐานข้อมูลและบันทึก
+                updateDbCount(); 
+                saveCurrentData(); 
+
+                // อัปเดตการเลือกช่วงข้อมูล (ให้ครอบคลุมงวดล่าสุดเสมอ)
+                const totalRounds = document.getElementById('rangeEnd').max;
+                document.getElementById('rangeEnd').value = totalRounds;
+                updateRangeFromCount(); 
+                
+            } else {
+                alert("รูปแบบข้อมูลไม่ถูกต้อง กรุณาตรวจสอบตัวเลข");
+            }
+        } else {
+            alert("กรุณาใส่ข้อมูลผลรางวัลก่อนกดเพิ่ม");
+        }
+    }
     function clearAll() { if(confirm("ล้าง?")) { document.getElementById('inputData').value=""; saveCurrentData(); document.getElementById('resultContainer').innerHTML=""; ['flowPanel','consensusSection','copyArea','tableWrapper','structurePanel','vinFlowSection'].forEach(id => document.getElementById(id).style.display='none'); updateDbCount(); } }
     function parseInputText(text) { let nums = text.match(/\d+/g); if(!nums) return {rounds:[], textFormat:""}; let rounds=[], tempUp=null, idx=1; nums.forEach(n => { if(n.length===5) rounds.push({i:idx++, up:n.substring(0,3), down:n.substring(3,5)}); else if(n.length===3) tempUp=n; else if(n.length===2 && tempUp) { rounds.push({i:idx++, up:tempUp, down:n}); tempUp=null; } }); if(rounds.length) return {rounds:rounds, textFormat:rounds.map(r=>`${r.up} ${r.down}`).join('\n')}; return {rounds:[], textFormat:""}; }
 
@@ -1142,7 +1189,7 @@
     function copySingleSmartFlow(btn) { copyText(btn.getAttribute('data-text')); }
     function copySmartFlow() { let cards = document.querySelectorAll('.btn-copy-sf'); let allText = ""; cards.forEach(btn => { allText += btn.getAttribute('data-text') + "\n\n====================\n\n"; }); if(allText) copyText(allText); }
 
-    // --- ฟังก์ชัน 1: วิเคราะห์เลขตาม (แบบเลือกจำนวนงวดล่วงหน้าได้) ---
+    // --- ฟังก์ชัน 1: วิเคราะห์เลขตาม (Cross-Position) ---
 function calcFollowing() {
     if (!currentData || currentData.length < 5) return alert("ข้อมูลไม่เพียงพอ");
 
@@ -1150,8 +1197,9 @@ function calcFollowing() {
     const sPos = parseInt(document.getElementById('sourcePos').value);
     const tPos = parseInt(document.getElementById('targetPos').value);
     
-    // ✅ ดึงค่าระยะจากช่อง input (ถ้าไม่ใส่ ให้เป็น 3)
-    const lookForward = parseInt(document.getElementById('followLookForward').value) || 3;
+    // รับค่าระยะ (ถ้าไม่มีให้เป็น 3)
+    const lookForwardInput = document.getElementById('followLookForward');
+    const lookForward = lookForwardInput ? (parseInt(lookForwardInput.value) || 3) : 3;
 
     const getValue = (row, pos) => {
         if (pos <= 4) return parseInt(row[pos]);
@@ -1171,25 +1219,19 @@ function calcFollowing() {
     let highCount = 0, lowCount = 0; 
     let evenCount = 0, oddCount = 0;  
     
-    // เริ่มต้นที่ lookForward เพื่อให้มีพื้นที่ถอยหลังไปดูงวดก่อนหน้าได้
     for (let i = lookForward; i < intData.length; i++) {
         let currentDraw = intData[i];   
         let sVal = getValue(currentDraw, sPos);
         
-        // ถ้าเจอเลขเงื่อนไข
         if (!isNaN(sVal) && sVal === targetNum) {
             foundCount++;
-            
-            // ✅ Loop เก็บข้อมูลล่วงหน้า X งวด (ตามค่า lookForward)
             for (let k = 1; k <= lookForward; k++) {
                 let nextDraw = intData[i-k];
                 if (!nextDraw) continue;
-
                 let tVal = getValue(nextDraw, tPos);
                 if (!isNaN(tVal)) {
                     counts[tVal]++;
                     totalSamples++;
-                    
                     if (tVal >= 5) highCount++; else lowCount++;
                     if (tVal % 2 === 0) evenCount++; else oddCount++;
                 }
@@ -1203,10 +1245,10 @@ function calcFollowing() {
     if (foundCount === 0) {
         outputDiv.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red;">ไม่พบประวัติ</div>`;
         hlDiv.style.display = 'none';
+        currentFollowStr = ""; // ล้างค่าถ้าไม่เจอ
         return;
     }
 
-    // คำนวณเปอร์เซ็นต์
     let highP = Math.round((highCount / totalSamples) * 100);
     let lowP = 100 - highP;
     let evenP = Math.round((evenCount / totalSamples) * 100);
@@ -1236,6 +1278,8 @@ function calcFollowing() {
     `;
 
     let sorted = counts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c);
+    
+    // ✅ หัวใจสำคัญ: บันทึกค่าลงตัวแปร global เพื่อให้ปุ่ม Copy มองเห็น
     currentFollowStr = sorted.map(item => item.n).join('');
     
     let html = "";
@@ -1393,7 +1437,25 @@ function calcPairFollow() {
     });
     outputDiv.innerHTML = html;
 }
-    function copyPairWinResult() { if (!currentPairWinStr) { alert("กรุณากดปุ่ม 'วิเคราะห์' เพื่อคำนวณก่อนคัดลอก"); return; } copyText(currentPairWinStr); }
+        function copyFollowResult() {
+    // เช็คว่าตัวแปร currentFollowStr มีค่าหรือไม่
+    if (!currentFollowStr) {
+        alert("กรุณากดปุ่ม 'วิเคราะห์' ก่อนคัดลอก");
+        return;
+    }
+    // ส่งค่าไปที่ฟังก์ชันกลาง copyText
+    copyText(currentFollowStr);
+}
+
+    function copyPairWinResult() {
+    // เช็คว่าตัวแปร currentPairWinStr มีค่าหรือไม่
+    if (!currentPairWinStr) {
+        alert("กรุณากดปุ่ม 'วิเคราะห์' เพื่อคำนวณก่อนคัดลอก");
+        return;
+    }
+    // ส่งค่าไปที่ฟังก์ชันกลาง copyText
+    copyText(currentPairWinStr);
+}
     
     function getLatestRound() { if (!currentData || currentData.length === 0) return null; return currentData[currentData.length - 1]; }
     function setFollowFromLatest() { const latest = getLatestRound(); if (!latest) return; const sPos = parseInt(document.getElementById('sourcePos').value); let val = NaN; if (sPos === 0) val = parseInt(latest.up[0]); else if (sPos === 1) val = parseInt(latest.up[1]); else if (sPos === 2) val = parseInt(latest.up[2]); else if (sPos === 3) val = parseInt(latest.down[0]); else if (sPos === 4) val = parseInt(latest.down[1]); else if (sPos === 5) val = (parseInt(latest.up[1]) + parseInt(latest.up[2])) % 10; else if (sPos === 6) val = (parseInt(latest.down[0]) + parseInt(latest.down[1])) % 10; if (!isNaN(val)) { document.getElementById('followNum').value = val; } }
