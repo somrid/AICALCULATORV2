@@ -755,6 +755,10 @@
     }
 
     function findFormulasLite(intData, targetType, len, displayMode, startIdx, endIdx, targetCount, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize, forwardTest) {
+// ✅ แทรกตรงนี้: จำกัดจำนวนเลขคี่/คู่ ไม่ให้เกิน 5 ตัว
+        if ((stepMode === 'odd' || stepMode === 'even') && len > 5) {
+            len = 5;
+        }
         // คำนวณขอบเขตข้อมูล (ใช้ i-1 ทำนาย i)
         // ข้อมูลต้องมีอย่างน้อย 2 งวด (งวดตั้งต้น + งวดทำนาย)
         let activeEndIdx = Math.min(endIdx - (forwardTest || 0), intData.length - 1);
