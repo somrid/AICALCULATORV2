@@ -653,7 +653,20 @@
     <div id="toast" class="toast">✅ คัดลอกเรียบร้อย!</div>
     <input type="hidden" id="manualLimitInput" value="100">
 </div>
-
+	<div class="collapsible-container" style="margin-top: 20px;">
+        <div class="collapsible-header" onclick="toggleSection('specialContent', 'specialIcon')">
+            <span>🧩 วิเคราะห์เลขดับ & แพทเทิร์นพิเศษ (Special Analysis)</span><span id="specialIcon">▼</span>
+        </div>
+        <div id="specialContent" class="collapsible-content">
+             <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                <button class="sf-btn" style="background:#ef4444; box-shadow:0 4px 10px rgba(239, 68, 68, 0.3);" onclick="calcKillerDigits()">💀 วิเคราะห์เลขดับ (Killer)</button>
+                <button class="sf-btn" style="background:#8b5cf6; box-shadow:0 4px 10px rgba(139, 92, 246, 0.3);" onclick="checkSpecialPatterns()">🔄 เช็คเบิ้ล/พี่น้อง/หาม</button>
+             </div>
+             
+             <div id="killerOutput" style="display:none; margin-bottom:20px; animation: fadeIn 0.5s;"></div>
+             <div id="patternOutput" style="display:none; animation: fadeIn 0.5s;"></div>
+        </div>
+    </div>
 <script>
     // --- ตัวแปรหลักของระบบ ---
     let currentFollowStr = ""; 
@@ -1471,6 +1484,167 @@ function calcPairFollow() {
     }
     function copyFreqStats(elementId, title) { let el = document.getElementById(elementId); if (!el || el.innerText.includes('รอผล')) return alert('ไม่มีข้อมูล'); let rows = el.querySelectorAll('.freq-row'); let txt = `📈 สถิติออกบ่อย: ${title}\n------------------\n`; rows.forEach(r => { let count = r.querySelector('.freq-count').innerText; let badges = r.querySelectorAll('.freq-badge'); let nums = Array.from(badges).map(b => b.innerText).join(', '); txt += `ออก ${count} ครั้ง: ${nums}\n`; }); txt += `\nBy โปรแกรมคำนวณตัวเลข`; copyText(txt); }
     function copyStructStats(tableId, title) { let el = document.getElementById(tableId); if (!el || !el.querySelector('tbody')) return alert('ไม่มีข้อมูล'); let rows = el.querySelectorAll('tbody tr'); let txt = `🏗️ โครงสร้าง: ${title}\n------------------\n`; rows.forEach(r => { if(r.cells.length < 2) return; let nameEl = r.querySelector('.struct-name'); let countEl = r.querySelector('.struct-count'); let numsEl = r.querySelector('.nums-col'); if(nameEl && countEl && numsEl) { let name = nameEl.innerText.replace('🏆', '').trim(); let count = countEl.innerText; let nums = numsEl.innerText.replace(/\n/g, ' ').trim(); txt += `${name} (${count}): ${nums}\n`; } }); txt += `\nBy โปรแกรมคำนวณตัวเลข`; copyText(txt); }
+// 🔥🔥 ฟังก์ชันวิเคราะห์เลขดับ (Killer Digits) - ครบ 10 หลัก 🔥🔥
+    function calcKillerDigits() {
+        if (!currentData || currentData.length === 0) return alert("ไม่มีข้อมูล");
+        
+        // แปลงข้อมูลเป็นตัวเลขเตรียมไว้
+        const intData = currentData.map(r => [
+            parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
+            parseInt(r.down[0]), parseInt(r.down[1])
+        ]);
+
+        // นิยาม 10 หลัก (เหมือน Flow Dashboard)
+        const flowDefs = [
+            {name:"1.หลักร้อย", idx:[0], color:"#ef4444"},      // แดง
+            {name:"2.สิบบน", idx:[1], color:"#f97316"},       // ส้ม
+            {name:"3.หน่วยบน", idx:[2], color:"#eab308"},     // เหลือง
+            {name:"4.บน (รวม)", idx:[1,2], color:"#84cc16"},  // เขียวอ่อน
+            {name:"5.สิบล่าง", idx:[3], color:"#06b6d4"},     // ฟ้า
+            {name:"6.หน่วยล่าง", idx:[4], color:"#3b82f6"},   // น้ำเงิน
+            {name:"7.ล่าง (รวม)", idx:[3,4], color:"#6366f1"},// คราม
+            {name:"8.บน+ล่าง", idx:[1,2,3,4], color:"#a855f7"},// ม่วง
+            {name:"9.แต้มบน", idx:[1,2], type:'sum', color:"#be185d"}, // ชมพูเข้ม
+            {name:"10.แต้มล่าง", idx:[3,4], type:'sum', color:"#0369a1"} // ฟ้าเข้ม
+        ];
+
+        let html = `<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px;">`;
+        
+        // วนลูปสร้างการ์ดทั้ง 10 หลัก
+        flowDefs.forEach(def => {
+            let gaps = [];
+            
+            // วนลูปหา Gap ของเลข 0-9
+            for(let d=0; d<=9; d++) {
+                let currentGap = 0;
+                let found = false;
+
+                // ไล่ย้อนหลังหาว่างวดล่าสุดที่เลข d โผล่มาคือเมื่อไหร่
+                for(let i=intData.length-1; i>=0; i--) {
+                    let row = intData[i];
+                    let match = false;
+
+                    if(def.type === 'sum') {
+                        // กรณีแต้มรวม (Sum)
+                        let v1 = row[def.idx[0]];
+                        let v2 = row[def.idx[1]];
+                        if(!isNaN(v1) && !isNaN(v2)) {
+                            if ((v1+v2)%10 === d) match = true;
+                        }
+                    } else {
+                        // กรณีเลขตำแหน่งปกติ
+                        for(let id of def.idx) {
+                            if(row[id] === d) { match = true; break; }
+                        }
+                    }
+
+                    if(match) {
+                        found = true;
+                        break; // เจอแล้ว หยุดนับ
+                    } else {
+                        currentGap++; // ไม่เจอ บวกระยะห่างเพิ่ม
+                    }
+                }
+                gaps.push({ n: d, gap: currentGap, found: found });
+            }
+
+            // เรียงลำดับจาก หายไปนานสุด -> น้อยสุด
+            gaps.sort((a,b) => b.gap - a.gap);
+            let top3 = gaps.slice(0, 3); // เอา 3 อันดับแรกที่เป็นเลขดับ
+
+            // สร้างไส้ในการ์ด
+            let itemsHtml = top3.map(x => `
+                <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding:4px 0;">
+                    <span style="font-weight:bold; color:${def.color}; font-size:14px;">เลข ${x.n}</span>
+                    <span style="font-size:11px; color:#64748b;">${x.found ? 'ไม่มา '+x.gap+' งวด' : 'ยังไม่เคยออก'}</span>
+                </div>
+            `).join('');
+
+            html += `
+                <div style="border:1px solid #e2e8f0; border-radius:8px; padding:10px; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                    <div style="font-weight:800; color:#1e293b; margin-bottom:8px; border-bottom:2px solid ${def.color}; padding-bottom:5px; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        ${def.name} (ดับ)
+                    </div>
+                    ${itemsHtml}
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+        
+        const out = document.getElementById('killerOutput');
+        out.innerHTML = html;
+        out.style.display = 'block';
+    }
+
+    // 🔥🔥 ฟังก์ชันเช็คแพทเทิร์นพิเศษ (Special Patterns) 🔥🔥
+    function checkSpecialPatterns() {
+        if (!currentData || currentData.length === 0) return alert("ไม่มีข้อมูล");
+        
+        let limit = 20;
+        let start = Math.max(0, currentData.length - limit);
+        let subset = currentData.slice(start);
+        
+        // นับจำนวน
+        let doubleCount = 0; // เบิ้ล (11)
+        let siblingCount = 0; // พี่น้อง (01, 12, 89)
+        let sandwichCount = 0; // หาม (121)
+        
+        // Gap (ระยะห่างล่าสุด)
+        let lastDouble = -1, lastSibling = -1, lastSandwich = -1;
+
+        subset.forEach((r, idx) => {
+            let u2 = r.up.substring(1,3); // 2 ตัวบน
+            let d2 = r.down; // 2 ตัวล่าง
+            let u3 = r.up; // 3 ตัวบน
+            
+            // เช็คเบิ้ล (บนหรือล่างก็ได้)
+            if (u2[0]===u2[1] || d2[0]===d2[1]) { doubleCount++; lastDouble = idx; }
+            
+            // เช็คพี่น้อง (บนหรือล่าง)
+            const isSib = (s) => {
+                let a = parseInt(s[0]), b = parseInt(s[1]);
+                return Math.abs(a-b)===1 || (a===0&&b===9) || (a===9&&b===0);
+            };
+            if (isSib(u2) || isSib(d2)) { siblingCount++; lastSibling = idx; }
+            
+            // เช็คหาม (เฉพาะ 3 ตัวบน)
+            if (u3[0] === u3[2]) { sandwichCount++; lastSandwich = idx; }
+        });
+        
+        let gapDouble = (lastDouble === -1) ? limit : (limit - 1 - lastDouble);
+        let gapSibling = (lastSibling === -1) ? limit : (limit - 1 - lastSibling);
+        let gapSandwich = (lastSandwich === -1) ? limit : (limit - 1 - lastSandwich);
+
+        let html = `<div style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">`;
+        
+        const createBadge = (title, count, gap, color) => {
+            let status = "ปกติ";
+            let statusColor = "#64748b";
+            
+            if (gap > 5) { status = "รอมานาน (น่าตาม)"; statusColor = "#ef4444"; }
+            else if (count >= 5) { status = "กำลังไหล (ระวัง)"; statusColor = "#10b981"; }
+            
+            return `
+                <div style="background:white; border:1px solid ${color}; border-radius:10px; padding:10px; width:140px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                    <div style="font-weight:bold; color:${color}; font-size:16px;">${title}</div>
+                    <div style="font-size:24px; font-weight:800; color:#1e293b; margin:5px 0;">${gap} <span style="font-size:12px; font-weight:normal; color:#94a3b8;">งวดติด</span></div>
+                    <div style="font-size:12px; background:${statusColor}; color:white; padding:2px 8px; border-radius:10px;">${status}</div>
+                    <div style="font-size:11px; margin-top:5px; color:#64748b;">(มา ${count}/${limit} ครั้ง)</div>
+                </div>
+            `;
+        };
+        
+        html += createBadge("เลขเบิ้ล (11)", doubleCount, gapDouble, "#ec4899");
+        html += createBadge("เลขพี่น้อง (01)", siblingCount, gapSibling, "#8b5cf6");
+        html += createBadge("เลขหาม (121)", sandwichCount, gapSandwich, "#f59e0b");
+        
+        html += `</div>`;
+        
+        const out = document.getElementById('patternOutput');
+        out.innerHTML = html;
+        out.style.display = 'block';
+    }
 </script>
 </body>
 </html>
