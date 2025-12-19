@@ -235,7 +235,7 @@
         font-size: 14px !important;    /* เดิม 16px -> ลดเหลือ 14px ให้ดูพอดี */
         line-height: 1.5 !important;   /* เดิม 1.8  -> ลดช่องว่างระหว่างบรรทัดลง */
     }
-/* === CSS ตารางร้อยมาลัย (ธีม: ดำ-ชมพู-เขียว) === */
+/* === CSS ตารางร้อยมาลัย (Garland Matrix) === */
         .garland-wrapper {
             overflow-x: auto;
             overflow-y: hidden;
@@ -257,18 +257,18 @@
             text-align: center;
             border-bottom: 1px solid #e2e8f0;
             border-right: 1px solid #e2e8f0;
-            font-size: 16px; /* ตัวเลขใหญ่ชัดเจน */
+            font-size: 16px;
             font-family: 'Sarabun', sans-serif;
-            color: #000000; /* ✅ ตัวหนังสือปกติสีดำ */
+            color: #000000;
         }
         
-        /* หัวตาราง */
+        /* หัวตารางทั่วไป */
         .garland-table thead th {
             position: sticky;
             top: 0;
             z-index: 20;
             background: #334155;
-            color: white;
+            color: white; /* สีขาว */
             font-weight: 600;
             box-shadow: 0 2px 3px rgba(0,0,0,0.1);
         }
@@ -281,9 +281,14 @@
             background: #f8fafc;
             border-right: 2px solid #cbd5e1;
             font-weight: bold;
-            color: #64748b;
+            color: #64748b; /* สีของเนื้อหาในตาราง */
         }
-        .garland-table thead th:nth-child(1) { z-index: 30; background: #1e293b; }
+        /* ✅ แก้ไขเฉพาะหัวตารางงวดให้เป็นสีขาว */
+        .garland-table thead th:nth-child(1) { 
+            z-index: 30; 
+            background: #1e293b; 
+            color: white !important; /* บังคับสีขาว */
+        }
 
         /* ตรึงคอลัมน์ 2 (ผล) */
         .garland-table td:nth-child(2), .garland-table th:nth-child(2) {
@@ -292,11 +297,15 @@
             z-index: 10;
             background: #ffffff;
             border-right: 2px solid #cbd5e1;
-            color: #000000;
+            color: #000000; /* สีของเนื้อหาในตาราง */
             font-weight: 800;
         }
-        .garland-table thead th:nth-child(2) { z-index: 30; background: #1e293b; }
-
+        /* ✅ แก้ไขเฉพาะหัวตารางผลให้เป็นสีขาว */
+        .garland-table thead th:nth-child(2) { 
+            z-index: 30; 
+            background: #1e293b; 
+            color: white !important; /* บังคับสีขาว */
+        }
         /* ✅ สีตัวเลขที่เข้าเป้า (สีชมพู) */
         .g-num-hit { 
             color: #db2777; 
