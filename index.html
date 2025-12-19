@@ -235,7 +235,102 @@
         font-size: 14px !important;    /* เดิม 16px -> ลดเหลือ 14px ให้ดูพอดี */
         line-height: 1.5 !important;   /* เดิม 1.8  -> ลดช่องว่างระหว่างบรรทัดลง */
     }
-    </style>
+/* === CSS ตารางร้อยมาลัย (ธีม: ดำ-ชมพู-เขียว) === */
+        .garland-wrapper {
+            overflow-x: auto;
+            overflow-y: hidden;
+            position: relative;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .garland-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            white-space: nowrap;
+        }
+        .garland-table th, .garland-table td {
+            padding: 6px 4px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            font-size: 16px; /* ตัวเลขใหญ่ชัดเจน */
+            font-family: 'Sarabun', sans-serif;
+            color: #000000; /* ✅ ตัวหนังสือปกติสีดำ */
+        }
+        
+        /* หัวตาราง */
+        .garland-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: #334155;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+
+        /* ตรึงคอลัมน์ 1 (งวด) */
+        .garland-table td:nth-child(1), .garland-table th:nth-child(1) {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: #f8fafc;
+            border-right: 2px solid #cbd5e1;
+            font-weight: bold;
+            color: #64748b;
+        }
+        .garland-table thead th:nth-child(1) { z-index: 30; background: #1e293b; }
+
+        /* ตรึงคอลัมน์ 2 (ผล) */
+        .garland-table td:nth-child(2), .garland-table th:nth-child(2) {
+            position: sticky;
+            left: 50px;
+            z-index: 10;
+            background: #ffffff;
+            border-right: 2px solid #cbd5e1;
+            color: #000000;
+            font-weight: 800;
+        }
+        .garland-table thead th:nth-child(2) { z-index: 30; background: #1e293b; }
+
+        /* ✅ สีตัวเลขที่เข้าเป้า (สีชมพู) */
+        .g-num-hit { 
+            color: #db2777; 
+            font-weight: 900; 
+            /* text-decoration: underline; เอาขีดเส้นใต้ออกเพื่อให้ดูสะอาดตา (หรือใส่กลับได้) */
+        } 
+        
+        /* ✅ พื้นหลังช่องที่ถูก (สีเขียวอ่อน) */
+        .g-cell-win { 
+            background-color: #dcfce7; 
+        }   
+/* === CSS สำหรับส่วนวิเคราะห์เลขดับและแพทเทิร์น (Special Analysis) แบบเต็มจอ === */
+        .special-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* ปรับขนาดขั้นต่ำ 200px ยืดหยุ่นเต็มจอ */
+            gap: 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .special-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
+            transition: transform 0.2s;
+        }
+        .special-card:hover { transform: translateY(-2px); }
+</style>
 </head>
 <body>
 
@@ -658,16 +753,60 @@
             <span>🧩 วิเคราะห์เลขดับ & แพทเทิร์นพิเศษ (Special Analysis)</span><span id="specialIcon">▼</span>
         </div>
         <div id="specialContent" class="collapsible-content">
-             <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+            <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
                 <button class="sf-btn" style="background:#ef4444; box-shadow:0 4px 10px rgba(239, 68, 68, 0.3);" onclick="calcKillerDigits()">💀 วิเคราะห์เลขดับ (Killer)</button>
                 <button class="sf-btn" style="background:#8b5cf6; box-shadow:0 4px 10px rgba(139, 92, 246, 0.3);" onclick="checkSpecialPatterns()">🔄 เช็คเบิ้ล/พี่น้อง/หาม</button>
-             </div>
-             
-             <div id="killerOutput" style="display:none; margin-bottom:20px; animation: fadeIn 0.5s;"></div>
-             <div id="patternOutput" style="display:none; animation: fadeIn 0.5s;"></div>
+            </div>
+            
+            <div id="killerOutput" style="display:none; margin-bottom:20px; animation: fadeIn 0.5s;"></div>
+            <div id="patternOutput" style="display:none; animation: fadeIn 0.5s;"></div>
+            <div id="fixedRangeOutput" style="display:none; margin-top:20px; animation: fadeIn 0.5s;"></div>
         </div>
-    </div>
-<script>
+    </div> 
+<div class="collapsible-container" style="margin-top: 20px;">
+        <div class="collapsible-header" onclick="toggleSection('garlandContent', 'garlandIcon')">
+            <span>🌸 ร้อยมาลัยเดินสูตร (Garland Matrix 10 ทิศ)</span><span id="garlandIcon">▼</span>
+        </div>
+        <div id="garlandContent" class="collapsible-content">
+            <div style="display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                
+                <div style="display:flex; align-items:center; gap:5px; background:#f1f5f9; padding:5px 10px; border-radius:10px; border:1px solid #cbd5e1;">
+                    <span style="font-weight:bold; color:#475569; font-size:13px;">เดิน:</span>
+                    <select id="glLen" class="btn" style="padding:2px 5px; border:1px solid #cbd5e1;">
+                        <option value="1">1 ตัว</option>
+                        <option value="2">2 ตัว</option>
+                        <option value="3">3 ตัว</option>
+                        <option value="4">4 ตัว</option>
+                        <option value="5">5 ตัว</option>
+                        <option value="6">6 ตัว</option>
+                        <option value="7" selected>7 ตัว</option>
+                        <option value="8">8 ตัว</option>
+                        <option value="9">9 ตัว</option>
+                    </select>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:5px; background:#f1f5f9; padding:5px 10px; border-radius:10px; border:1px solid #cbd5e1;">
+                    <span style="font-weight:bold; color:#475569; font-size:13px;">เป้าหมาย:</span>
+                    <select id="glTarget" class="btn" style="padding:2px 5px; border:1px solid #cbd5e1;">
+                        <option value="0">1. หลักร้อย</option>
+                        <option value="1">2. หลักสิบบน</option>
+                        <option value="2">3. หลักหน่วยบน</option>
+                        <option value="3">4. หลักสิบล่าง</option>
+                        <option value="4">5. หลักหน่วยล่าง</option>
+                        <option value="5" style="color:#059669; font-weight:bold;">6. พิกัดบน (รูด)</option>
+                        <option value="6" style="color:#059669; font-weight:bold;">7. พิกัดล่าง (รูด)</option>
+                        <option value="7" style="color:#db2777; font-weight:bold;">8. วินบน (ครบ2ตัว)</option>
+                        <option value="8" style="color:#2563eb; font-weight:bold;">9. วินล่าง (ครบ2ตัว)</option>
+                        <option value="9" style="color:#7c3aed; font-weight:bold;">10. บน/ล่าง (รวม)</option>
+                    </select>
+                </div>
+
+                <button class="sf-btn" style="background:#db2777; box-shadow:0 4px 10px rgba(219, 39, 119, 0.3);" onclick="calcGarlandMatrix()">🌸 รันสูตร</button>
+            </div>
+            
+            <div id="garlandOutput" style="overflow-x:auto;"></div>
+        </div>
+    </div><script>
     // --- ตัวแปรหลักของระบบ ---
     let currentFollowStr = ""; 
     let currentPairWinStr = "";
@@ -1488,131 +1627,93 @@ function calcPairFollow() {
     }
     function copyFreqStats(elementId, title) { let el = document.getElementById(elementId); if (!el || el.innerText.includes('รอผล')) return alert('ไม่มีข้อมูล'); let rows = el.querySelectorAll('.freq-row'); let txt = `📈 สถิติออกบ่อย: ${title}\n------------------\n`; rows.forEach(r => { let count = r.querySelector('.freq-count').innerText; let badges = r.querySelectorAll('.freq-badge'); let nums = Array.from(badges).map(b => b.innerText).join(', '); txt += `ออก ${count} ครั้ง: ${nums}\n`; }); txt += `\nBy โปรแกรมคำนวณตัวเลข`; copyText(txt); }
     function copyStructStats(tableId, title) { let el = document.getElementById(tableId); if (!el || !el.querySelector('tbody')) return alert('ไม่มีข้อมูล'); let rows = el.querySelectorAll('tbody tr'); let txt = `🏗️ โครงสร้าง: ${title}\n------------------\n`; rows.forEach(r => { if(r.cells.length < 2) return; let nameEl = r.querySelector('.struct-name'); let countEl = r.querySelector('.struct-count'); let numsEl = r.querySelector('.nums-col'); if(nameEl && countEl && numsEl) { let name = nameEl.innerText.replace('🏆', '').trim(); let count = countEl.innerText; let nums = numsEl.innerText.replace(/\n/g, ' ').trim(); txt += `${name} (${count}): ${nums}\n`; } }); txt += `\nBy โปรแกรมคำนวณตัวเลข`; copyText(txt); }
-// 🔥🔥 ฟังก์ชันวิเคราะห์เลขดับ (Killer Digits) - ครบ 10 หลัก 🔥🔥
+
+// 🔥🔥 ฟังก์ชันวิเคราะห์เลขดับ (Killer Digits) - แบบเต็มจอ Responsive 100% 🔥🔥
     function calcKillerDigits() {
-        if (!currentData || currentData.length === 0) return alert("ไม่มีข้อมูล");
+        if (!currentData || currentData.length === 0) return alert("กรุณากด 'คำนวณใหม่' เพื่อโหลดข้อมูลก่อน");
         
-        // แปลงข้อมูลเป็นตัวเลขเตรียมไว้
         const intData = currentData.map(r => [
             parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
             parseInt(r.down[0]), parseInt(r.down[1])
         ]);
 
-        // นิยาม 10 หลัก (เหมือน Flow Dashboard)
         const flowDefs = [
-            {name:"1.หลักร้อย", idx:[0], color:"#ef4444"},      // แดง
-            {name:"2.สิบบน", idx:[1], color:"#f97316"},       // ส้ม
-            {name:"3.หน่วยบน", idx:[2], color:"#eab308"},     // เหลือง
-            {name:"4.บน (รวม)", idx:[1,2], color:"#84cc16"},  // เขียวอ่อน
-            {name:"5.สิบล่าง", idx:[3], color:"#06b6d4"},     // ฟ้า
-            {name:"6.หน่วยล่าง", idx:[4], color:"#3b82f6"},   // น้ำเงิน
-            {name:"7.ล่าง (รวม)", idx:[3,4], color:"#6366f1"},// คราม
-            {name:"8.บน+ล่าง", idx:[1,2,3,4], color:"#a855f7"},// ม่วง
-            {name:"9.แต้มบน", idx:[1,2], type:'sum', color:"#be185d"}, // ชมพูเข้ม
-            {name:"10.แต้มล่าง", idx:[3,4], type:'sum', color:"#0369a1"} // ฟ้าเข้ม
+            {name:"1.หลักร้อย", idx:[0], color:"#ef4444"},
+            {name:"2.สิบบน", idx:[1], color:"#f97316"},
+            {name:"3.หน่วยบน", idx:[2], color:"#eab308"},
+            {name:"4.บน (รวม)", idx:[1,2], color:"#84cc16"},
+            {name:"5.สิบล่าง", idx:[3], color:"#06b6d4"},
+            {name:"6.หน่วยล่าง", idx:[4], color:"#3b82f6"},
+            {name:"7.ล่าง (รวม)", idx:[3,4], color:"#6366f1"},
+            {name:"8.บน+ล่าง", idx:[1,2,3,4], color:"#a855f7"},
+            {name:"9.แต้มบน", idx:[1,2], type:'sum', color:"#be185d"},
+            {name:"10.แต้มล่าง", idx:[3,4], type:'sum', color:"#0369a1"}
         ];
 
-        let html = `<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px;">`;
+        // ✅ ใช้ Class 'special-grid' เพื่อบังคับขยายเต็ม 100%
+        let html = `<div class="special-grid">`;
         
-        // วนลูปสร้างการ์ดทั้ง 10 หลัก
         flowDefs.forEach(def => {
             let gaps = [];
-            
-            // วนลูปหา Gap ของเลข 0-9
             for(let d=0; d<=9; d++) {
                 let currentGap = 0;
                 let found = false;
-
-                // ไล่ย้อนหลังหาว่างวดล่าสุดที่เลข d โผล่มาคือเมื่อไหร่
                 for(let i=intData.length-1; i>=0; i--) {
                     let row = intData[i];
                     let match = false;
-
                     if(def.type === 'sum') {
-                        // กรณีแต้มรวม (Sum)
                         let v1 = row[def.idx[0]];
                         let v2 = row[def.idx[1]];
                         if(!isNaN(v1) && !isNaN(v2)) {
                             if ((v1+v2)%10 === d) match = true;
                         }
                     } else {
-                        // กรณีเลขตำแหน่งปกติ
                         for(let id of def.idx) {
                             if(row[id] === d) { match = true; break; }
                         }
                     }
-
-                    if(match) {
-                        found = true;
-                        break; // เจอแล้ว หยุดนับ
-                    } else {
-                        currentGap++; // ไม่เจอ บวกระยะห่างเพิ่ม
-                    }
+                    if(match) { found = true; break; } else { currentGap++; }
                 }
                 gaps.push({ n: d, gap: currentGap, found: found });
             }
-
-            // เรียงลำดับจาก หายไปนานสุด -> น้อยสุด
             gaps.sort((a,b) => b.gap - a.gap);
-            let top3 = gaps.slice(0, 3); // เอา 3 อันดับแรกที่เป็นเลขดับ
-
-            // สร้างไส้ในการ์ด
+            let top3 = gaps.slice(0, 3);
             let itemsHtml = top3.map(x => `
                 <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding:4px 0;">
                     <span style="font-weight:bold; color:${def.color}; font-size:14px;">เลข ${x.n}</span>
-                    <span style="font-size:11px; color:#64748b;">${x.found ? 'ไม่มา '+x.gap+' งวด' : 'ยังไม่เคยออก'}</span>
+                    <span style="font-size:12px; color:#64748b;">${x.found ? 'เว้น '+x.gap : 'ยังไม่ออก'}</span>
                 </div>
             `).join('');
-
-            html += `
-                <div style="border:1px solid #e2e8f0; border-radius:8px; padding:10px; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-                    <div style="font-weight:800; color:#1e293b; margin-bottom:8px; border-bottom:2px solid ${def.color}; padding-bottom:5px; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                        ${def.name} (ดับ)
-                    </div>
-                    ${itemsHtml}
+            
+            html += `<div class="special-card" style="border-top:3px solid ${def.color};">
+                <div style="font-weight:800; color:#1e293b; margin-bottom:8px; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    ${def.name}
                 </div>
-            `;
+                ${itemsHtml}
+            </div>`;
         });
-        
         html += `</div>`;
-        
         const out = document.getElementById('killerOutput');
         out.innerHTML = html;
         out.style.display = 'block';
     }
 
-    // 🔥🔥 ฟังก์ชันเช็คแพทเทิร์นพิเศษ (Special Patterns) 🔥🔥
+    // 🔥🔥 ฟังก์ชันเช็คแพทเทิร์นพิเศษ (Special Patterns) - แบบเต็มจอ Responsive 100% 🔥🔥
     function checkSpecialPatterns() {
-        if (!currentData || currentData.length === 0) return alert("ไม่มีข้อมูล");
-        
+        if (!currentData || currentData.length === 0) return alert("กรุณากด 'คำนวณใหม่' เพื่อโหลดข้อมูลก่อน");
         let limit = 20;
         let start = Math.max(0, currentData.length - limit);
         let subset = currentData.slice(start);
-        
-        // นับจำนวน
-        let doubleCount = 0; // เบิ้ล (11)
-        let siblingCount = 0; // พี่น้อง (01, 12, 89)
-        let sandwichCount = 0; // หาม (121)
-        
-        // Gap (ระยะห่างล่าสุด)
+        let doubleCount = 0, siblingCount = 0, sandwichCount = 0;
         let lastDouble = -1, lastSibling = -1, lastSandwich = -1;
 
         subset.forEach((r, idx) => {
-            let u2 = r.up.substring(1,3); // 2 ตัวบน
-            let d2 = r.down; // 2 ตัวล่าง
-            let u3 = r.up; // 3 ตัวบน
-            
-            // เช็คเบิ้ล (บนหรือล่างก็ได้)
+            let u2 = r.up.substring(1,3);
+            let d2 = r.down;
+            let u3 = r.up;
             if (u2[0]===u2[1] || d2[0]===d2[1]) { doubleCount++; lastDouble = idx; }
-            
-            // เช็คพี่น้อง (บนหรือล่าง)
-            const isSib = (s) => {
-                let a = parseInt(s[0]), b = parseInt(s[1]);
-                return Math.abs(a-b)===1 || (a===0&&b===9) || (a===9&&b===0);
-            };
+            const isSib = (s) => { let a = parseInt(s[0]), b = parseInt(s[1]); return Math.abs(a-b)===1 || (a===0&&b===9) || (a===9&&b===0); };
             if (isSib(u2) || isSib(d2)) { siblingCount++; lastSibling = idx; }
-            
-            // เช็คหาม (เฉพาะ 3 ตัวบน)
             if (u3[0] === u3[2]) { sandwichCount++; lastSandwich = idx; }
         });
         
@@ -1620,35 +1721,207 @@ function calcPairFollow() {
         let gapSibling = (lastSibling === -1) ? limit : (limit - 1 - lastSibling);
         let gapSandwich = (lastSandwich === -1) ? limit : (limit - 1 - lastSandwich);
 
-        let html = `<div style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">`;
+        // ✅ ใช้ Class 'special-grid' เหมือนกันเพื่อให้ขนาดเท่ากัน
+        let html = `<div class="special-grid">`;
         
         const createBadge = (title, count, gap, color) => {
-            let status = "ปกติ";
-            let statusColor = "#64748b";
-            
+            let status = "ปกติ", statusColor = "#64748b";
             if (gap > 5) { status = "รอมานาน (น่าตาม)"; statusColor = "#ef4444"; }
             else if (count >= 5) { status = "กำลังไหล (ระวัง)"; statusColor = "#10b981"; }
             
-            return `
-                <div style="background:white; border:1px solid ${color}; border-radius:10px; padding:10px; width:140px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-                    <div style="font-weight:bold; color:${color}; font-size:16px;">${title}</div>
-                    <div style="font-size:24px; font-weight:800; color:#1e293b; margin:5px 0;">${gap} <span style="font-size:12px; font-weight:normal; color:#94a3b8;">งวดติด</span></div>
-                    <div style="font-size:12px; background:${statusColor}; color:white; padding:2px 8px; border-radius:10px;">${status}</div>
+            return `<div class="special-card" style="border:1px solid ${color}; background:#fff;">
+                <div style="font-weight:bold; color:${color}; font-size:16px; margin-bottom:5px;">${title}</div>
+                <div style="font-size:32px; font-weight:800; color:#1e293b; margin:5px 0;">${gap} <span style="font-size:12px; font-weight:normal; color:#94a3b8;">งวดติด</span></div>
+                <div style="margin-top:auto;">
+                    <span style="font-size:12px; background:${statusColor}; color:white; padding:3px 10px; border-radius:20px;">${status}</span>
                     <div style="font-size:11px; margin-top:5px; color:#64748b;">(มา ${count}/${limit} ครั้ง)</div>
                 </div>
-            `;
+            </div>`;
         };
-        
         html += createBadge("เลขเบิ้ล (11)", doubleCount, gapDouble, "#ec4899");
         html += createBadge("เลขพี่น้อง (01)", siblingCount, gapSibling, "#8b5cf6");
         html += createBadge("เลขหาม (121)", sandwichCount, gapSandwich, "#f59e0b");
-        
         html += `</div>`;
         
         const out = document.getElementById('patternOutput');
         out.innerHTML = html;
         out.style.display = 'block';
     }
-</script>
+// 🔥 ฟังก์ชันร้อยมาลัยเดินสูตร (เวอร์ชั่น 6: ดำ-ชมพู-พื้นเขียว) 🔥
+function calcGarlandMatrix() {
+    if (!currentData || currentData.length < 10) return alert("ข้อมูลไม่เพียงพอ (ต้องมีอย่างน้อย 10 งวด)");
+
+    const len = parseInt(document.getElementById('glLen').value);
+    const targetMode = parseInt(document.getElementById('glTarget').value); 
+    const lookBack = 20;
+
+    const history = currentData.slice(0, lookBack + 1);
+
+    // 1. สร้างตาราง
+    let html = `<div class="garland-wrapper"><table class="garland-table">`;
+    html += `<thead><tr>
+        <th>งวด</th>
+        <th>ผล</th>
+        <th>ฐาน</th>`;
+    for(let i=0; i<=9; i++) {
+        html += `<th>สูตร +${i}</th>`;
+    }
+    html += `</tr></thead><tbody>`;
+
+    let columnScores = Array(10).fill(0);
+
+    const getPyramidSeed = (round) => {
+        let row1 = [parseInt(round.up[0]), parseInt(round.up[1]), parseInt(round.up[2]), parseInt(round.down[0]), parseInt(round.down[1])];
+        if (row1.some(isNaN)) return null;
+        let row2 = []; for(let i=0; i<4; i++) row2.push((row1[i] + row1[i+1]) % 10);
+        let row3 = []; for(let i=0; i<3; i++) row3.push((row2[i] + row2[i+1]) % 10);
+        let row4 = []; for(let i=0; i<2; i++) row4.push((row3[i] + row3[i+1]) % 10);
+        return (row4[0] + row4[1]) % 10;
+    };
+
+    for (let i = 0; i < Math.min(history.length - 1, lookBack); i++) {
+        let currentRound = history[i];     
+        let prevRound = history[i + 1];    
+
+        let seed = getPyramidSeed(prevRound);
+        if (seed === null) continue;
+
+        let h = parseInt(currentRound.up[0]);
+        let t = parseInt(currentRound.up[1]);
+        let u = parseInt(currentRound.up[2]);
+        let dt = parseInt(currentRound.down[0]);
+        let du = parseInt(currentRound.down[1]);
+
+        let targets = []; 
+        let displayResult = "";
+        let isVinMode = false;
+
+        switch (targetMode) {
+            case 0: targets = [h]; displayResult = `${h}`; break;
+            case 1: targets = [t]; displayResult = `${t}`; break;
+            case 2: targets = [u]; displayResult = `${u}`; break;
+            case 3: targets = [dt]; displayResult = `${dt}`; break;
+            case 4: targets = [du]; displayResult = `${du}`; break;
+            case 5: targets = [t, u]; displayResult = `${t}${u}`; break;
+            case 6: targets = [dt, du]; displayResult = `${dt}${du}`; break;
+            case 7: targets = [t, u]; displayResult = `${t}${u}`; isVinMode = true; break;
+            case 8: targets = [dt, du]; displayResult = `${dt}${du}`; isVinMode = true; break;
+            case 9: targets = [t, u, dt, du]; displayResult = `${t}${u}/${dt}${du}`; break;
+        }
+
+        html += `<tr>`;
+        html += `<td>${i+1}</td>`; 
+        html += `<td>${displayResult}</td>`;
+        html += `<td style="color:#db2777; font-weight:bold; background:#fff1f2;">${seed}</td>`;
+
+        for (let offset = 0; offset <= 9; offset++) {
+            let startDigit = (seed + offset) % 10;
+            let numSet = [];
+            for (let k = 0; k < len; k++) numSet.push((startDigit + k) % 10);
+
+            // ตรวจสอบผล
+            let isWin = false;
+            if (isVinMode) {
+                let uniqueTargets = [...new Set(targets)];
+                let uniqueMatches = numSet.filter(n => uniqueTargets.includes(n));
+                isWin = (uniqueMatches.length === uniqueTargets.length);
+            } else {
+                isWin = numSet.some(n => targets.includes(n));
+            }
+
+            if (isWin) columnScores[offset]++;
+
+            // ✅ กำหนด Class สีพื้นหลัง
+            let cellClass = isWin ? "g-cell-win" : "";
+            
+            // ✅ สร้าง HTML ตัวเลข (ถ้าเข้าเป้าให้เป็นสีชมพู)
+            let displayStr = "";
+            numSet.forEach(n => {
+                if (targets.includes(n)) {
+                    // ถ้าถูกวิน หรือ ถูกตัววิ่ง -> เป็นสีชมพูเข้ม
+                    if (isVinMode && !isWin) {
+                         // กรณีวินมาไม่ครบ (แต่มีตัวเลขติด) ให้แสดงสีดำปกติ หรือจะไฮไลท์อ่อนๆ ก็ได้
+                         // ในที่นี้ขอแสดงสีดำเพื่อให้แยกชัดเจนว่า "ยังไม่ถูกวิน"
+                         displayStr += n;
+                    } else {
+                         displayStr += `<span class="g-num-hit">${n}</span>`; 
+                    }
+                } else {
+                    displayStr += n; // สีดำปกติ
+                }
+            });
+
+            html += `<td class="${cellClass}">${displayStr}</td>`;
+        }
+        html += `</tr>`;
+    }
+
+    // เพิ่มบรรทัดทำนาย (Next Round)
+    let lastRound = currentData[0];
+    let nextSeed = getPyramidSeed(lastRound);
+    let maxScore = Math.max(...columnScores);
+
+    if (nextSeed !== null) {
+        html += `<tr style="background:#fff7ed; border-top:2px solid #fdba74; border-bottom:2px solid #fdba74;">`;
+        html += `<td style="color:#d97706; font-weight:900;">รอผล</td>`;
+        html += `<td style="color:#94a3b8; font-style:italic;">?</td>`;
+        html += `<td style="color:#db2777; font-weight:900; background:#ffe4e6; border:1px solid #fbcfe8;">${nextSeed}</td>`;
+
+        for (let offset = 0; offset <= 9; offset++) {
+            let startDigit = (nextSeed + offset) % 10;
+            let numSet = [];
+            for (let k = 0; k < len; k++) numSet.push((startDigit + k) % 10);
+            
+            let isBestCol = (columnScores[offset] === maxScore && maxScore > 0);
+            let style = isBestCol ? "color:#d97706; font-weight:900; background:#ffedd5;" : "color:#64748b; opacity:0.8;";
+
+            html += `<td style="${style}">${numSet.join('')}</td>`;
+        }
+        html += `</tr>`;
+    }
+
+    // แถวสรุปคะแนน
+    html += `<tr style="background:#334155; color:white; font-weight:bold;"><td colspan="3">คะแนน</td>`;
+    for(let s=0; s<10; s++) {
+        let bg = (columnScores[s] === maxScore && maxScore > 0) ? '#10b981' : 'transparent';
+        html += `<td style="background:${bg};">${columnScores[s]}</td>`;
+    }
+    html += `</tr></tbody></table></div>`; // ปิด wrapper
+
+    // 2. ส่วนสรุปด้านล่าง (Prediction Cards)
+    let bestOffsets = [];
+    columnScores.forEach((score, idx) => { if(score === maxScore && maxScore > 0) bestOffsets.push(idx); });
+
+    let forecastHtml = "";
+    if (nextSeed !== null) {
+        forecastHtml = `
+        <div style="margin-top:10px; border-top: 3px solid #334155; background:white; border-radius: 0 0 10px 10px; padding:15px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div style="font-weight:800; color:#334155; font-size:16px; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:5px;">
+                🌸 ฐานงวดหน้า: 
+                <span style="display:inline-flex; width:30px; height:30px; background:#db2777; color:white; border-radius:50%; align-items:center; justify-content:center; font-size:18px;">${nextSeed}</span>
+            </div>
+            <div style="font-size:13px; color:#64748b; margin-bottom:15px;">
+                สูตรที่เดินดีที่สุด (+${bestOffsets.join(', +')})
+            </div>
+            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">`;
+        
+        bestOffsets.forEach(offset => {
+            let start = (nextSeed + offset) % 10;
+            let nums = [];
+            for(let k=0; k<len; k++) nums.push((start+k)%10);
+            
+            forecastHtml += `
+            <div style="background:#fdf2f8; border:1px solid #fce7f3; border-radius:12px; padding:8px 15px; text-align:center; min-width:80px;">
+                <div style="font-size:12px; color:#db2777; font-weight:bold;">สูตร +${offset}</div>
+                <div style="font-size:18px; font-weight:900; color:#1e293b; letter-spacing:2px; margin-top:2px;">${nums.join('')}</div>
+            </div>`;
+        });
+        
+        forecastHtml += `</div></div>`;
+    }
+
+    document.getElementById('garlandOutput').innerHTML = html + forecastHtml;
+}
+    </script>
 </body>
 </html>
