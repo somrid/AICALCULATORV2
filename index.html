@@ -531,6 +531,11 @@
             
             <div id="pairWinPrediction" style="margin-top:15px; display:none; grid-template-columns: 1fr; gap:10px;"></div>
             <div id="pairHlPrediction" style="margin-top:10px; padding:10px; background:white; border-radius:10px; display:none; border:1px solid #e2e8f0; text-align:center;"></div>
+	    <div id="pairTop10Action" style="display:none; justify-content:center; margin-top:15px; margin-bottom:5px;">
+                <button class="sf-btn" style="background:#4f46e5; padding:5px 15px; font-size:14px; box-shadow:0 2px 5px rgba(79, 70, 229, 0.3);" onclick="copyPairTop10()">
+                    📑 คัดลอก 10 คู่เด่น (ตัวเลข)
+                </button>
+            </div>
             <div id="pairOutput" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap:10px; margin-top:15px;"></div>
         </div>
     </div>
@@ -819,6 +824,7 @@
     // --- ตัวแปรหลักของระบบ ---
     let currentFollowStr = ""; 
     let currentPairWinStr = "";
+        let currentPairTop10Str = "";
     let currentTarget='hundred', currentTargetLabel='หลักร้อย', currentLen=5, displayMode='auto';
     let inputOrder = 'normal', isHuntingMode = false, sortMode = 'score';
     let currentStepMode = 'normal', currentStepLabel='เรียง (+1)';
@@ -1468,140 +1474,157 @@ function calcFollowing() {
     outputDiv.innerHTML = html;
 }
 
-// --- ฟังก์ชัน 2: วิเคราะห์เลขตามคู่ (แบบเลือกจำนวนงวดล่วงหน้าได้) ---
-function calcPairFollow() {
-    currentPairWinStr = ""; 
-    if (!currentData || currentData.length < 5) return alert("ข้อมูลไม่เพียงพอ");
-    
-    let inputVal = document.getElementById('pairInput').value;
-    if(inputVal === '' || inputVal.length < 2) return alert("กรุณาใส่เลขคู่ (เช่น 85)");
-    let targetPair = parseInt(inputVal);
-    let sPos = document.getElementById('pairSourcePos').value;
-    let tPos = document.getElementById('pairTargetPos').value;
-    let wantLen = parseInt(document.getElementById('winLength').value) || 7;
-    
-    // ✅ ดึงค่าระยะจากช่อง input
-    const lookForward = parseInt(document.getElementById('pairLookForward').value) || 3;
+// --- ฟังก์ชัน 2: วิเคราะห์เลขตามคู่ (อัปเดต: เพิ่มปุ่มคัดลอก 10 คู่) ---
+    function calcPairFollow() {
+        currentPairWinStr = ""; 
+        currentPairTop10Str = ""; // รีเซ็ตค่า
+        document.getElementById('pairTop10Action').style.display = 'none'; // ซ่อนปุ่มก่อน
 
-    const getPair = (row, type) => {
-        if(type === 'up') {
-            if(!isNaN(row[1]) && !isNaN(row[2])) return row[1]*10 + row[2];
-        } else {
-            if(!isNaN(row[3]) && !isNaN(row[4])) return row[3]*10 + row[4];
-        }
-        return NaN;
-    }
-    
-    const intData = currentData.map(r => [
-        parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
-        parseInt(r.down[0]), parseInt(r.down[1])
-    ]);
-
-    let counts = Array(100).fill(0);
-    let digitCounts = Array(10).fill(0);
-    let foundCount = 0;
-    let totalSamples = 0;
-    
-    let highCount = 0, lowCount = 0; 
-    let evenCount = 0, oddCount = 0;
-
-    for(let i = lookForward; i < intData.length; i++) {
-        let cur = getPair(intData[i], sPos);
+        if (!currentData || currentData.length < 5) return alert("ข้อมูลไม่เพียงพอ");
         
-        if(cur === targetPair) {
-            foundCount++;
-            
-            // ✅ Loop เก็บข้อมูลล่วงหน้า
-            for(let k=1; k<=lookForward; k++) {
-                let next = getPair(intData[i-k], tPos);
-                if(!isNaN(next)) {
-                    counts[next]++;
-                    totalSamples++;
-                    
-                    let d1 = Math.floor(next / 10);
-                    let d2 = next % 10;
-                    digitCounts[d1]++;
-                    digitCounts[d2]++;
+        let inputVal = document.getElementById('pairInput').value;
+        if(inputVal === '' || inputVal.length < 2) return alert("กรุณาใส่เลขคู่ (เช่น 85)");
+        let targetPair = parseInt(inputVal);
+        let sPos = document.getElementById('pairSourcePos').value;
+        let tPos = document.getElementById('pairTargetPos').value;
+        let wantLen = parseInt(document.getElementById('winLength').value) || 7;
+        
+        const lookForward = parseInt(document.getElementById('pairLookForward').value) || 3;
 
-                    if(next >= 50) highCount++; else lowCount++;
-                    if(next % 2 === 0) evenCount++; else oddCount++;
+        const getPair = (row, type) => {
+            if(type === 'up') {
+                if(!isNaN(row[1]) && !isNaN(row[2])) return row[1]*10 + row[2];
+            } else {
+                if(!isNaN(row[3]) && !isNaN(row[4])) return row[3]*10 + row[4];
+            }
+            return NaN;
+        }
+        
+        const intData = currentData.map(r => [
+            parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
+            parseInt(r.down[0]), parseInt(r.down[1])
+        ]);
+
+        let counts = Array(100).fill(0);
+        let digitCounts = Array(10).fill(0);
+        let foundCount = 0;
+        let totalSamples = 0;
+        let highCount = 0, lowCount = 0; 
+        let evenCount = 0, oddCount = 0;
+
+        for(let i = lookForward; i < intData.length; i++) {
+            let cur = getPair(intData[i], sPos);
+            if(cur === targetPair) {
+                foundCount++;
+                for(let k=1; k<=lookForward; k++) {
+                    let next = getPair(intData[i-k], tPos);
+                    if(!isNaN(next)) {
+                        counts[next]++;
+                        totalSamples++;
+                        
+                        let d1 = Math.floor(next / 10);
+                        let d2 = next % 10;
+                        digitCounts[d1]++;
+                        digitCounts[d2]++;
+
+                        if(next >= 50) highCount++; else lowCount++;
+                        if(next % 2 === 0) evenCount++; else oddCount++;
+                    }
                 }
             }
         }
-    }
-    
-    const outputDiv = document.getElementById('pairOutput');
-    const hlDiv = document.getElementById('pairHlPrediction');
-    const winDiv = document.getElementById('pairWinPrediction');
+        
+        const outputDiv = document.getElementById('pairOutput');
+        const hlDiv = document.getElementById('pairHlPrediction');
+        const winDiv = document.getElementById('pairWinPrediction');
 
-    if (foundCount === 0) {
-        outputDiv.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red;">ไม่พบประวัติคู่ ${targetPair}</div>`;
-        hlDiv.style.display = 'none';
-        winDiv.style.display = 'none';
-        return;
-    }
+        if (foundCount === 0) {
+            outputDiv.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red;">ไม่พบประวัติคู่ ${targetPair}</div>`;
+            hlDiv.style.display = 'none';
+            winDiv.style.display = 'none';
+            return;
+        }
 
-    let sortedDigits = digitCounts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c);
-    let mainSet = sortedDigits.slice(0, wantLen).map(x => x.n);
-    currentPairWinStr = mainSet.join('');
-    
-    winDiv.style.display = 'grid';
-    winDiv.innerHTML = `
-        <div style="background:white; padding:10px; border-radius:10px; border:1px solid #10b981; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-            <div style="font-weight:bold; color:#059669; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
-                <span>🎯 วินไหล (${wantLen} ตัว) - ระยะ ${lookForward} งวด</span>
-            </div>
-            <div style="font-size:20px; font-weight:800; color:#1e293b; letter-spacing:4px; text-align:center; margin:8px 0;">
-                ${mainSet.join('')}
-            </div>
-            <div style="font-size:12px; color:#64748b; text-align:center;">
-                (จากความถี่สะสม ${totalSamples} ชุดตัวเลข)
-            </div>
-        </div>
-    `;
-
-    let highP = Math.round((highCount / totalSamples) * 100);
-    let lowP = 100 - highP;
-    let evenP = Math.round((evenCount / totalSamples) * 100);
-    let oddP = 100 - evenP;
-
-    hlDiv.style.display = 'block';
-    hlDiv.innerHTML = `
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div style="background:white; padding:10px; border-radius:10px; border:1px solid #e2e8f0; text-align:center;">
-                <div style="font-weight:bold; color:#334155; margin-bottom:5px;">↕️ สูง-ต่ำ (รวม)</div>
-                <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-bottom:5px;">
-                    <div style="width:${lowP}%; background:#f59e0b;"></div>
-                    <div style="width:${highP}%; background:#10b981;"></div>
+        // ส่วนที่ 1: วินไหล (Digits)
+        let sortedDigits = digitCounts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c);
+        let mainSet = sortedDigits.slice(0, wantLen).map(x => x.n);
+        currentPairWinStr = mainSet.join('');
+        
+        winDiv.style.display = 'grid';
+        winDiv.innerHTML = `
+            <div style="background:white; padding:10px; border-radius:10px; border:1px solid #10b981; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                <div style="font-weight:bold; color:#059669; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>🎯 วินไหล (${wantLen} ตัว) - ระยะ ${lookForward} งวด</span>
                 </div>
-                <div style="font-size:12px;">ต่ำ ${lowP}% | สูง ${highP}%</div>
-            </div>
-            <div style="background:white; padding:10px; border-radius:10px; border:1px solid #e2e8f0; text-align:center;">
-                <div style="font-weight:bold; color:#334155; margin-bottom:5px;">🔢 คู่-คี่ (รวม)</div>
-                <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-bottom:5px;">
-                    <div style="width:${evenP}%; background:#3b82f6;"></div>
-                    <div style="width:${oddP}%; background:#ec4899;"></div>
+                <div style="font-size:20px; font-weight:800; color:#1e293b; letter-spacing:4px; text-align:center; margin:8px 0;">
+                    ${mainSet.join('')}
                 </div>
-                <div style="font-size:12px;">คู่ ${evenP}% | คี่ ${oddP}%</div>
-            </div>
-        </div>
-    `;
-
-    let sorted = counts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c).slice(0, 10);
-    let html = "";
-    sorted.forEach(item => {
-        if(item.c === 0) return;
-        let pairStr = item.n.toString().padStart(2, '0');
-        let percent = Math.round((item.c / totalSamples) * 100);
-        html += `
-            <div style="text-align:center; padding:5px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">
-                <div style="font-size:18px; font-weight:bold; color:#059669;">${pairStr}</div>
-                <div style="font-size:11px; color:#64748b;">${percent}% (${item.c})</div>
+                <div style="font-size:12px; color:#64748b; text-align:center;">
+                    (จากความถี่สะสม ${totalSamples} ชุดตัวเลข)
+                </div>
             </div>
         `;
-    });
-    outputDiv.innerHTML = html;
-}
+
+        // ส่วนที่ 2: สูงต่ำ/คู่คี่ (HL/EO)
+        let highP = Math.round((highCount / totalSamples) * 100);
+        let lowP = 100 - highP;
+        let evenP = Math.round((evenCount / totalSamples) * 100);
+        let oddP = 100 - evenP;
+
+        hlDiv.style.display = 'block';
+        hlDiv.innerHTML = `
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div style="background:white; padding:10px; border-radius:10px; border:1px solid #e2e8f0; text-align:center;">
+                    <div style="font-weight:bold; color:#334155; margin-bottom:5px;">↕️ สูง-ต่ำ (รวม)</div>
+                    <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-bottom:5px;">
+                        <div style="width:${lowP}%; background:#f59e0b;"></div>
+                        <div style="width:${highP}%; background:#10b981;"></div>
+                    </div>
+                    <div style="font-size:12px;">ต่ำ ${lowP}% | สูง ${highP}%</div>
+                </div>
+                <div style="background:white; padding:10px; border-radius:10px; border:1px solid #e2e8f0; text-align:center;">
+                    <div style="font-weight:bold; color:#334155; margin-bottom:5px;">🔢 คู่-คี่ (รวม)</div>
+                    <div style="display:flex; height:15px; border-radius:10px; overflow:hidden; margin-bottom:5px;">
+                        <div style="width:${evenP}%; background:#3b82f6;"></div>
+                        <div style="width:${oddP}%; background:#ec4899;"></div>
+                    </div>
+                    <div style="font-size:12px;">คู่ ${evenP}% | คี่ ${oddP}%</div>
+                </div>
+            </div>
+        `;
+
+        // ส่วนที่ 3: 10 คู่เด่น (Top 10 Pairs)
+        let sorted = counts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c).slice(0, 10);
+        
+        // ✅ เก็บค่า 10 คู่เด่นเป็น String (คั่นด้วย comma)
+        let top10Nums = sorted.filter(i => i.c > 0).map(i => i.n.toString().padStart(2, '0'));
+        currentPairTop10Str = top10Nums.join(', ');
+        
+        // ✅ สั่งโชว์ปุ่มถ้ามีข้อมูล
+        if(top10Nums.length > 0) {
+            document.getElementById('pairTop10Action').style.display = 'flex';
+        }
+
+        let html = "";
+        sorted.forEach(item => {
+            if(item.c === 0) return;
+            let pairStr = item.n.toString().padStart(2, '0');
+            let percent = Math.round((item.c / totalSamples) * 100);
+            html += `
+                <div style="text-align:center; padding:5px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">
+                    <div style="font-size:18px; font-weight:bold; color:#059669;">${pairStr}</div>
+                    <div style="font-size:11px; color:#64748b;">${percent}% (${item.c})</div>
+                </div>
+            `;
+        });
+        outputDiv.innerHTML = html;
+    }
+
+    // ✅ ฟังก์ชันสำหรับปุ่มคัดลอกใหม่
+    function copyPairTop10() {
+        if(!currentPairTop10Str) return alert("ไม่มีข้อมูลให้คัดลอก");
+        copyText(currentPairTop10Str);
+    }
         function copyFollowResult() {
     // เช็คว่าตัวแปร currentFollowStr มีค่าหรือไม่
     if (!currentFollowStr) {
