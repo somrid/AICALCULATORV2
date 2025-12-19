@@ -1756,17 +1756,19 @@ function calcPairFollow() {
         out.innerHTML = html;
         out.style.display = 'block';
     }
-// 🔥 ฟังก์ชันร้อยมาลัยเดินสูตร (เวอร์ชั่น 6: ดำ-ชมพู-พื้นเขียว) 🔥
+// 🔥 ฟังก์ชันร้อยมาลัยเดินสูตร (เวอร์ชั่นแก้ไข: เรียงลำดับถูกต้อง เก่า->ใหม่) 🔥
 function calcGarlandMatrix() {
     if (!currentData || currentData.length < 10) return alert("ข้อมูลไม่เพียงพอ (ต้องมีอย่างน้อย 10 งวด)");
 
     const len = parseInt(document.getElementById('glLen').value);
     const targetMode = parseInt(document.getElementById('glTarget').value); 
-    const lookBack = 20;
+    const lookBack = 20; // จำนวนงวดที่แสดง
 
-    const history = currentData.slice(0, lookBack + 1);
+    // ดึงข้อมูลมาคำนวณ (เอามากกว่า lookBack 1 งวด เพื่อใช้เป็นฐานงวดแรก)
+    let startIndex = Math.max(0, currentData.length - lookBack - 1);
+    const history = currentData.slice(startIndex);
 
-    // 1. สร้างตาราง
+    // สร้างตาราง
     let html = `<div class="garland-wrapper"><table class="garland-table">`;
     html += `<thead><tr>
         <th>งวด</th>
@@ -1779,6 +1781,7 @@ function calcGarlandMatrix() {
 
     let columnScores = Array(10).fill(0);
 
+    // สูตรพีระมิดหาเลขฐาน
     const getPyramidSeed = (round) => {
         let row1 = [parseInt(round.up[0]), parseInt(round.up[1]), parseInt(round.up[2]), parseInt(round.down[0]), parseInt(round.down[1])];
         if (row1.some(isNaN)) return null;
@@ -1788,9 +1791,10 @@ function calcGarlandMatrix() {
         return (row4[0] + row4[1]) % 10;
     };
 
-    for (let i = 0; i < Math.min(history.length - 1, lookBack); i++) {
-        let currentRound = history[i];     
-        let prevRound = history[i + 1];    
+    // วนลูป (เริ่มจาก 1 เพราะต้องใช้งวด 0 เป็นฐาน)
+    for (let i = 1; i < history.length; i++) {
+        let prevRound = history[i - 1]; // งวดก่อนหน้า (ใช้หาฐาน)
+        let currentRound = history[i];  // งวดปัจจุบัน (ใช้ตรวจผล)
 
         let seed = getPyramidSeed(prevRound);
         if (seed === null) continue;
@@ -1818,8 +1822,9 @@ function calcGarlandMatrix() {
             case 9: targets = [t, u, dt, du]; displayResult = `${t}${u}/${dt}${du}`; break;
         }
 
+        // แสดงผล
         html += `<tr>`;
-        html += `<td>${i+1}</td>`; 
+        html += `<td>${i}</td>`; // ลำดับงวด
         html += `<td>${displayResult}</td>`;
         html += `<td style="color:#db2777; font-weight:bold; background:#fff1f2;">${seed}</td>`;
 
@@ -1840,23 +1845,15 @@ function calcGarlandMatrix() {
 
             if (isWin) columnScores[offset]++;
 
-            // ✅ กำหนด Class สีพื้นหลัง
             let cellClass = isWin ? "g-cell-win" : "";
-            
-            // ✅ สร้าง HTML ตัวเลข (ถ้าเข้าเป้าให้เป็นสีชมพู)
             let displayStr = "";
+            
             numSet.forEach(n => {
                 if (targets.includes(n)) {
-                    // ถ้าถูกวิน หรือ ถูกตัววิ่ง -> เป็นสีชมพูเข้ม
-                    if (isVinMode && !isWin) {
-                         // กรณีวินมาไม่ครบ (แต่มีตัวเลขติด) ให้แสดงสีดำปกติ หรือจะไฮไลท์อ่อนๆ ก็ได้
-                         // ในที่นี้ขอแสดงสีดำเพื่อให้แยกชัดเจนว่า "ยังไม่ถูกวิน"
-                         displayStr += n;
-                    } else {
-                         displayStr += `<span class="g-num-hit">${n}</span>`; 
-                    }
+                    if (isVinMode && !isWin) displayStr += n;
+                    else displayStr += `<span class="g-num-hit">${n}</span>`; 
                 } else {
-                    displayStr += n; // สีดำปกติ
+                    displayStr += n;
                 }
             });
 
@@ -1865,9 +1862,10 @@ function calcGarlandMatrix() {
         html += `</tr>`;
     }
 
-    // เพิ่มบรรทัดทำนาย (Next Round)
-    let lastRound = currentData[0];
-    let nextSeed = getPyramidSeed(lastRound);
+    // --- ส่วนทำนายงวดถัดไป (Prediction) ---
+    // ใช้งวด "ล่าสุด" (ตัวสุดท้ายใน history) มาเป็นฐานทำนายอนาคต
+    let latestRound = history[history.length - 1];
+    let nextSeed = getPyramidSeed(latestRound);
     let maxScore = Math.max(...columnScores);
 
     if (nextSeed !== null) {
@@ -1895,9 +1893,9 @@ function calcGarlandMatrix() {
         let bg = (columnScores[s] === maxScore && maxScore > 0) ? '#10b981' : 'transparent';
         html += `<td style="background:${bg};">${columnScores[s]}</td>`;
     }
-    html += `</tr></tbody></table></div>`; // ปิด wrapper
+    html += `</tr></tbody></table></div>`;
 
-    // 2. ส่วนสรุปด้านล่าง (Prediction Cards)
+    // การ์ดสรุปผลด้านล่าง
     let bestOffsets = [];
     columnScores.forEach((score, idx) => { if(score === maxScore && maxScore > 0) bestOffsets.push(idx); });
 
