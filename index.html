@@ -1756,7 +1756,7 @@ function calcPairFollow() {
         out.innerHTML = html;
         out.style.display = 'block';
     }
-// 🔥 ฟังก์ชันร้อยมาลัยเดินสูตร (เวอร์ชั่น Pro: ถ่วงน้ำหนักความสด + ดูทิศทางฐาน) 🔥
+// 🔥 ฟังก์ชันร้อยมาลัยเดินสูตร (เวอร์ชั่น Pro: โชว์คะแนนถ่วงน้ำหนักจริง) 🔥
 function calcGarlandMatrix() {
     if (!currentData || currentData.length < 10) return alert("ข้อมูลไม่เพียงพอ (ต้องมีอย่างน้อย 10 งวด)");
 
@@ -1764,7 +1764,7 @@ function calcGarlandMatrix() {
     const targetMode = parseInt(document.getElementById('glTarget').value); 
     const lookBack = 20; // จำนวนงวดที่แสดง
 
-    // ดึงข้อมูล (เผื่อไว้ 1 งวดสำหรับหาฐานงวดแรก)
+    // ดึงข้อมูล
     let startIndex = Math.max(0, currentData.length - lookBack - 1);
     const history = currentData.slice(startIndex);
 
@@ -1779,10 +1779,9 @@ function calcGarlandMatrix() {
     }
     html += `</tr></thead><tbody>`;
 
-    let rawScores = Array(10).fill(0);      // คะแนนดิบ (นับจำนวนครั้งที่ถูก)
-    let weightedScores = Array(10).fill(0); // คะแนนถ่วงน้ำหนัก (เน้นงวดปัจจุบัน)
+    let rawScores = Array(10).fill(0);      
+    let weightedScores = Array(10).fill(0); 
 
-    // สูตรพีระมิด
     const getPyramidSeed = (round) => {
         let row1 = [parseInt(round.up[0]), parseInt(round.up[1]), parseInt(round.up[2]), parseInt(round.down[0]), parseInt(round.down[1])];
         if (row1.some(isNaN)) return null;
@@ -1792,9 +1791,8 @@ function calcGarlandMatrix() {
         return (row4[0] + row4[1]) % 10;
     };
 
-    let previousSeed = -1; // เก็บค่าฐานงวดก่อนหน้าเพื่อเทียบทิศทาง
+    let previousSeed = -1; 
 
-    // วนลูปแสดงผล (เริ่มจาก 1 เพราะต้องใช้งวด 0 เป็นฐาน)
     for (let i = 1; i < history.length; i++) {
         let prevRound = history[i - 1];
         let currentRound = history[i];
@@ -1802,12 +1800,11 @@ function calcGarlandMatrix() {
         let seed = getPyramidSeed(prevRound);
         if (seed === null) continue;
 
-        // --- 1. วิเคราะห์ทิศทางฐาน (Base Trend) ---
         let trendIcon = "";
-        let trendColor = "#64748b"; // สีเทา (เท่าเดิม)
+        let trendColor = "#64748b"; 
         if (previousSeed !== -1) {
-            if (seed > previousSeed) { trendIcon = "▲"; trendColor = "#10b981"; } // เขียว (ขึ้น)
-            else if (seed < previousSeed) { trendIcon = "▼"; trendColor = "#ef4444"; } // แดง (ลง)
+            if (seed > previousSeed) { trendIcon = "▲"; trendColor = "#10b981"; } 
+            else if (seed < previousSeed) { trendIcon = "▼"; trendColor = "#ef4444"; } 
             else { trendIcon = "━"; }
         }
         previousSeed = seed;
@@ -1838,7 +1835,6 @@ function calcGarlandMatrix() {
         html += `<tr>`;
         html += `<td>${i}</td>`;
         html += `<td>${displayResult}</td>`;
-        // แสดงฐานพร้อมลูกศรทิศทาง
         html += `<td style="color:${trendColor}; font-weight:900; background:#f8fafc; font-size:14px;">${seed} <span style="font-size:10px;">${trendIcon}</span></td>`;
 
         for (let offset = 0; offset <= 9; offset++) {
@@ -1857,11 +1853,13 @@ function calcGarlandMatrix() {
 
             if (isWin) {
                 rawScores[offset]++;
-                // --- 2. ให้คะแนนแบบถ่วงน้ำหนัก (Weighted Score) ---
-                // ยิ่งงวดท้ายๆ (ใกล้ปัจจุบัน) ยิ่งได้คะแนนเยอะ
+                // คำนวณคะแนนถ่วงน้ำหนัก
+                // 5 งวดล่าสุด = 3 คะแนน, 5 งวดถัดไป = 2 คะแนน, ที่เหลือ = 1 คะแนน
                 let recencyScore = 1;
-                if (i >= history.length - 5) recencyScore = 3; // 5 งวดล่าสุด คูณ 3
-                else if (i >= history.length - 10) recencyScore = 2; // 5-10 งวดก่อน คูณ 2
+                let dist = history.length - i; // ระยะห่างจากปัจจุบัน
+                if (dist <= 5) recencyScore = 3; 
+                else if (dist <= 10) recencyScore = 2;
+                
                 weightedScores[offset] += recencyScore;
             }
 
@@ -1886,10 +1884,9 @@ function calcGarlandMatrix() {
     let latestRound = history[history.length - 1];
     let nextSeed = getPyramidSeed(latestRound);
     
-    // หาคะแนนสูงสุดจากแบบถ่วงน้ำหนัก (แม่นกว่า)
+    // หาคะแนนสูงสุดจาก Weighted Scores
     let maxWeightedScore = Math.max(...weightedScores);
 
-    // ทำนายทิศทางฐานงวดหน้า
     let nextTrendIcon = "?";
     let nextTrendColor = "#64748b";
     if (nextSeed !== null && previousSeed !== -1) {
@@ -1909,7 +1906,7 @@ function calcGarlandMatrix() {
             let numSet = [];
             for (let k = 0; k < len; k++) numSet.push((startDigit + k) % 10);
             
-            // ไฮไลท์ช่องที่คะแนนถ่วงน้ำหนักดีที่สุด
+            // ไฮไลท์ช่องที่คะแนนดีที่สุด
             let isBestCol = (weightedScores[offset] === maxWeightedScore && maxWeightedScore > 0);
             let style = isBestCol ? "color:#d97706; font-weight:900; background:#ffedd5; border:2px solid #fdba74;" : "color:#64748b; opacity:0.8;";
 
@@ -1918,16 +1915,17 @@ function calcGarlandMatrix() {
         html += `</tr>`;
     }
 
-    // แถวสรุปคะแนน (โชว์คะแนนดิบให้ดูง่ายๆ)
-    html += `<tr style="background:#334155; color:white; font-weight:bold;"><td colspan="3">คะแนน</td>`;
-    let maxRaw = Math.max(...rawScores);
+    // ✅✅✅ แก้ไขตรงนี้: แสดงคะแนนถ่วงน้ำหนัก (Weighted Score) แทนคะแนนดิบ
+    html += `<tr style="background:#334155; color:white; font-weight:bold;"><td colspan="3">คะแนน (เต็ม 35)</td>`;
     for(let s=0; s<10; s++) {
-        let bg = (rawScores[s] === maxRaw && maxRaw > 0) ? '#10b981' : 'transparent';
-        html += `<td style="background:${bg};" title="Score: ${weightedScores[s]}">${rawScores[s]}</td>`;
+        // ใช้ weightedScores ในการแสดงผลและคำนวณสีพื้นหลัง
+        let bg = (weightedScores[s] === maxWeightedScore && maxWeightedScore > 0) ? '#10b981' : 'transparent';
+        // แสดงผล: คะแนนถ่วงน้ำหนัก (คะแนนดิบ)
+        html += `<td style="background:${bg}; font-size:14px;" title="ถูก ${rawScores[s]} งวด">${weightedScores[s]}</td>`;
     }
     html += `</tr></tbody></table></div>`;
 
-    // --- 3. การ์ดสรุปผล (ใช้คะแนนถ่วงน้ำหนักในการแนะนำ) ---
+    // --- การ์ดสรุปผล ---
     let bestOffsets = [];
     weightedScores.forEach((score, idx) => { if(score === maxWeightedScore && maxWeightedScore > 0) bestOffsets.push(idx); });
 
@@ -1959,6 +1957,7 @@ function calcGarlandMatrix() {
             <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; padding:8px 15px; text-align:center; min-width:80px; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
                 <div style="font-size:12px; color:#c2410c; font-weight:bold;">สูตร +${offset} 🔥</div>
                 <div style="font-size:20px; font-weight:900; color:#ea580c; letter-spacing:2px; margin-top:2px;">${nums.join('')}</div>
+                <div style="font-size:10px; color:#9a3412;">Score: ${weightedScores[offset]}</div>
             </div>`;
         });
         
