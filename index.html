@@ -820,59 +820,7 @@
             
             <div id="garlandOutput" style="overflow-x:auto;"></div>
         </div>
-<div class="collapsible-container" style="margin-top: 20px;">
-        <div class="collapsible-header" onclick="toggleSection('deepFollowContent', 'dfIcon')">
-            <span>🕵️‍♂️ เจาะลึกเลขตาม (Deep Follow Analysis)</span><span id="dfIcon">▼</span>
-        </div>
-        <div id="deepFollowContent" class="collapsible-content">
-            <div class="smart-flow-box" style="margin-top:0; border:none; box-shadow:none; background:#f0f9ff; border:2px dashed #0ea5e9;">
-                <div class="sf-header" style="justify-content:center;">
-                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
-                        
-                        <div style="background:rgba(255,255,255,0.8); padding:8px; border-radius:10px; border:1px solid #bae6fd; display:flex; align-items:center; gap:5px;">
-                            <span style="font-weight:bold; color:#0369a1;">ถ้า</span>
-                            <select id="dfSourcePos" class="btn" style="padding:4px;">
-                                <option value="0">หลักร้อย</option>
-                                <option value="1" selected>หลักสิบบน</option>
-                                <option value="2">หลักหน่วยบน</option>
-                                <option value="3">หลักสิบล่าง</option>
-                                <option value="4">หลักหน่วยล่าง</option>
-                            </select>
-                            <span style="font-weight:bold; color:#0369a1;">มาเลข</span>
-                            <select id="dfSourceNum" class="btn" style="padding:4px; width:50px;">
-                                <option value="0">0</option><option value="1" selected>1</option><option value="2">2</option>
-                                <option value="3">3</option><option value="4">4</option><option value="5">5</option>
-                                <option value="6">6</option><option value="7">7</option><option value="8">8</option>
-                                <option value="9">9</option>
-                            </select>
-                        </div>
-
-                        <span style="font-size:24px;">👉</span>
-
-                        <div style="background:rgba(255,255,255,0.8); padding:8px; border-radius:10px; border:1px solid #fef9c3; display:flex; align-items:center; gap:5px;">
-                            <span style="font-weight:bold; color:#b45309;">งวดต่อไป</span>
-                            <select id="dfTargetPos" class="btn" style="padding:4px;">
-                                <option value="0">หลักร้อย</option>
-                                <option value="1" selected>หลักสิบบน</option>
-                                <option value="2">หลักหน่วยบน</option>
-                                <option value="3">หลักสิบล่าง</option>
-                                <option value="4">หลักหน่วยล่าง</option>
-                            </select>
-                            <span style="font-weight:bold; color:#b45309;">ออกอะไร?</span>
-                        </div>
-
-                        <button class="sf-btn" style="background:#0ea5e9; box-shadow:0 4px 10px rgba(14, 165, 233, 0.3);" onclick="calcDeepFollow()">🚀 ค้นหา</button>
-    <button class="sf-btn" style="background:#ffffff; color:#0ea5e9; border:1px solid #0ea5e9; box-shadow:none;" onclick="copyDeepFollowResult()">📋 Copy</button>
-    </div>
 </div>
-
-                <div id="dfResultHeader" style="text-align:center; margin-top:20px; font-weight:bold; font-size:16px; color:#0f172a; display:none;"></div>
-                
-                <div id="dfOutput" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap:10px; margin-top:15px;"></div>
-            </div>
-        </div>
-    </div>
-
 <div class="collapsible-container" style="margin-top: 15px;">
         <div class="collapsible-header" onclick="toggleSection('wfContent', 'wfIcon')">
             <span>🧪 ทดสอบระบบย้อนหลัง (Walk-Forward Simulation)</span><span id="wfIcon">▼</span>
@@ -926,8 +874,63 @@
         </div>
     </div>
 
+<div class="collapsible-container" style="margin-top: 20px;">
+        <div class="collapsible-header" onclick="toggleSection('deepFollowContent', 'dfIcon')">
+            <span>🕵️‍♂️ เจาะลึกเลขตาม (Deep Follow Analysis)</span><span id="dfIcon">▼</span>
+        </div>
+        <div id="deepFollowContent" class="collapsible-content">
+            <div class="smart-flow-box" style="margin-top:0; border:none; box-shadow:none; background:#f0f9ff; border:2px dashed #0ea5e9;">
+                <div class="sf-header" style="justify-content:center;">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
+                        
+                        <div style="background:rgba(255,255,255,0.8); padding:8px; border-radius:10px; border:1px solid #bae6fd; display:flex; align-items:center; gap:5px;">
+                            <span style="font-weight:bold; color:#0369a1;">ถ้า</span>
+                            <select id="dfSourcePos" class="btn" style="padding:4px;">
+                                <option value="0">หลักร้อย</option>
+                                <option value="1" selected>หลักสิบบน</option>
+                                <option value="2">หลักหน่วยบน</option>
+                                <option value="3">หลักสิบล่าง</option>
+                                <option value="4">หลักหน่วยล่าง</option>
+                            </select>
+                            <span style="font-weight:bold; color:#0369a1;">มาเลข</span>
+                            <select id="dfSourceNum" class="btn" style="padding:4px; width:50px;">
+                                <option value="0">0</option><option value="1" selected>1</option><option value="2">2</option>
+                                <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                                <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+                                <option value="9">9</option>
+                            </select>
+                        </div>
 
-    </div><script>
+                        <span style="font-size:24px;">👉</span>
+
+                        <div style="background:rgba(255,255,255,0.8); padding:8px; border-radius:10px; border:1px solid #fef9c3; display:flex; align-items:center; gap:5px;">
+                            <span style="font-weight:bold; color:#b45309;">งวดต่อไป</span>
+                            <select id="dfTargetPos" class="btn" style="padding:4px;">
+                                <option value="0">หลักร้อย</option>
+                                <option value="1" selected>หลักสิบบน</option>
+                                <option value="2">หลักหน่วยบน</option>
+                                <option value="3">หลักสิบล่าง</option>
+                                <option value="4">หลักหน่วยล่าง</option>
+                            </select>
+                            <span style="font-weight:bold; color:#b45309;">ออกอะไร?</span>
+                        </div>
+
+                        <button class="sf-btn" style="background:#0ea5e9; box-shadow:0 4px 10px rgba(14, 165, 233, 0.3);" onclick="calcDeepFollow()">🚀 ค้นหา</button>
+    <button class="sf-btn" style="background:#ffffff; color:#0ea5e9; border:1px solid #0ea5e9; box-shadow:none;" onclick="copyDeepFollowResult()">📋 Copy</button>
+    </div>
+</div>
+
+                <div id="dfResultHeader" style="text-align:center; margin-top:20px; font-weight:bold; font-size:16px; color:#0f172a; display:none;"></div>
+                
+                <div id="dfOutput" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap:10px; margin-top:15px;"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+    </div>
+<script>
     // --- ตัวแปรหลักของระบบ ---
     let currentFollowStr = ""; 
     let currentPairWinStr = "";
