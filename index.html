@@ -873,6 +873,60 @@
         </div>
     </div>
 
+<div class="collapsible-container" style="margin-top: 15px;">
+        <div class="collapsible-header" onclick="toggleSection('wfContent', 'wfIcon')">
+            <span>🧪 ทดสอบระบบย้อนหลัง (Walk-Forward Simulation)</span><span id="wfIcon">▼</span>
+        </div>
+        <div id="wfContent" class="collapsible-content">
+            <div class="smart-flow-box" style="margin-top:0; border:none; background:#f0fdf4; border:2px dashed #22c55e;">
+                <div class="sf-header" style="justify-content:center; flex-wrap:wrap; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <span style="font-size:14px; color:#15803d; font-weight:bold;">จำลองการเล่น</span>
+                        <select id="wfTestCount" class="btn" style="padding:4px;">
+                            <option value="20">20 งวดล่าสุด</option>
+                            <option value="50" selected>50 งวดล่าสุด</option>
+                            <option value="100">100 งวดล่าสุด</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <span style="font-size:14px; color:#15803d; font-weight:bold;">โดยเลือกสูตรที่ดีที่สุดใน</span>
+                        <select id="wfLookback" class="btn" style="padding:4px;">
+                            <option value="3">3 งวดก่อนหน้า</option>
+                            <option value="5" selected>5 งวดก่อนหน้า</option>
+                            <option value="10">10 งวดก่อนหน้า</option>
+                        </select>
+                    </div>
+
+                    <button class="sf-btn" style="background:#22c55e; box-shadow:0 4px 10px rgba(34, 197, 94, 0.3);" onclick="runGarlandWalkForward()">
+                        ▶️ เริ่มทดสอบ
+                    </button>
+                </div>
+
+                <div id="wfResult" style="margin-top:15px; display:none;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                        <div style="background:white; padding:15px; border-radius:10px; text-align:center; border:1px solid #bbf7d0;">
+                            <div style="font-size:12px; color:#86efac; font-weight:bold;">ความแม่นยำ (Win Rate)</div>
+                            <div id="wfWinRate" style="font-size:24px; font-weight:900; color:#15803d;">0%</div>
+                            <div id="wfWinCount" style="font-size:12px; color:#64748b;">ถูก 0 / ผิด 0</div>
+                        </div>
+                        <div style="background:white; padding:15px; border-radius:10px; text-align:center; border:1px solid #bbf7d0;">
+                            <div style="font-size:12px; color:#86efac; font-weight:bold;">กำไรสะสม (P/L)</div>
+                            <div id="wfProfit" style="font-size:24px; font-weight:900; color:#15803d;">+0</div>
+                            <div style="font-size:10px; color:#94a3b8;">(สมมติลงทุนตัวละ 1 / จ่าย 90)</div>
+                        </div>
+                    </div>
+
+                    <div style="background:white; padding:10px; border-radius:10px; border:1px solid #e2e8f0;">
+                        <div style="font-size:12px; font-weight:bold; color:#334155; margin-bottom:10px;">📉 เส้นทางการลงทุน (Equity Curve)</div>
+                        <div id="wfEquityChart" style="display:flex; align-items:flex-end; height:100px; gap:2px; overflow-x:auto; padding-bottom:5px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     </div><script>
     // --- ตัวแปรหลักของระบบ ---
     let currentFollowStr = ""; 
@@ -2134,6 +2188,175 @@ function calcGarlandMatrix() {
         
         // สั่งคัดลอก
         copyText(currentDeepFollowStr);
-    }    </script>
+    } 
+
+// 🔥 ฟังก์ชัน Walk-Forward Simulation สำหรับร้อยมาลัย 🔥
+    function runGarlandWalkForward() {
+        if (!currentData || currentData.length < 50) return alert("ข้อมูลไม่เพียงพอสำหรับการทดสอบ (ต้องมีอย่างน้อย 50 งวด)");
+
+        const testCount = parseInt(document.getElementById('wfTestCount').value); // จำนวนงวดที่จะทดสอบ (Test Set)
+        const lookback = parseInt(document.getElementById('wfLookback').value);   // จำนวนงวดที่ใช้ตัดสินใจ (Train Set)
+        const len = parseInt(document.getElementById('glLen').value) || 5;        // จำนวนเลขที่เล่น (ต้นทุน)
+        const targetMode = parseInt(document.getElementById('glTarget').value);   // เป้าหมาย (บน/ล่าง/วิน)
+        
+        // แปลงข้อมูลทั้งหมดเป็นตัวเลข
+        const intData = currentData.map(r => [
+            parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
+            parseInt(r.down[0]), parseInt(r.down[1])
+        ]);
+
+        // สูตรหาฐาน (Pyramid Seed) - ก๊อปมาใช้ภายในเพื่อให้ทำงานอิสระ
+        const getSeed = (round) => {
+            if (round.some(isNaN)) return null;
+            let r2 = []; for(let i=0; i<4; i++) r2.push((round[i] + round[i+1]) % 10);
+            let r3 = []; for(let i=0; i<3; i++) r3.push((r2[i] + r2[i+1]) % 10);
+            let r4 = []; for(let i=0; i<2; i++) r4.push((r3[i] + r3[i+1]) % 10);
+            return (r4[0] + r4[1]) % 10;
+        };
+
+        // หาเป้าหมายที่ถูก (Winning Numbers)
+        const getTargets = (round) => {
+            let h=round[0], t=round[1], u=round[2], dt=round[3], du=round[4];
+            switch (targetMode) {
+                case 0: return [h];
+                case 1: return [t];
+                case 2: return [u];
+                case 3: return [dt];
+                case 4: return [du];
+                case 5: case 7: return [t, u]; // บน
+                case 6: case 8: return [dt, du]; // ล่าง
+                case 9: return [t, u, dt, du];
+                default: return [t, u];
+            }
+        };
+
+        // ตรวจสอบว่า rangeStart นั้นเพียงพอไหม
+        let startIndex = currentData.length - testCount;
+        if (startIndex < lookback + 1) {
+            alert("ข้อมูลไม่พอสำหรับการย้อนหลังตามจำนวนที่ระบุ");
+            return;
+        }
+
+        let wins = 0;
+        let totalBets = 0;
+        let balance = 0;
+        let equityCurve = [0]; // เก็บเส้นกราฟกำไร
+
+        // 🔄 เริ่มวนลูปจำลองเหตุการณ์ (Time Machine Loop)
+        for (let i = startIndex; i < currentData.length; i++) {
+            
+            // 1. ย้อนเวลาไป ณ ตอนนั้น (ยังไม่รู้ผลงวด i)
+            // ต้องตัดสินใจเลือกสูตร โดยดูสถิติจากงวด (i-lookback) ถึง (i-1)
+            let bestOffset = -1;
+            let maxScore = -1;
+
+            // คำนวณคะแนนสูตรย้อนหลังในช่วง lookback
+            let scoreBoard = Array(10).fill(0);
+            
+            for (let past = i - lookback; past < i; past++) {
+                let prevRound = intData[past - 1]; // ฐานของงวด past
+                let currRound = intData[past];     // ผลของงวด past
+                let seed = getSeed(prevRound);
+                let targets = getTargets(currRound);
+
+                if (seed === null) continue;
+
+                for (let off = 0; off <= 9; off++) {
+                    let startDigit = (seed + off) % 10;
+                    let mySet = [];
+                    for(let k=0; k<len; k++) mySet.push((startDigit+k)%10);
+                    
+                    // เช็คว่าสูตรนี้เข้าไหม
+                    let isHit = false;
+                    // (Logic ตรวจสอบการถูกรางวัลแบบง่าย)
+                    if ([7,8].includes(targetMode)) { // โหมดวิน
+                         let uniqT = [...new Set(targets)];
+                         let matches = mySet.filter(n => uniqT.includes(n));
+                         isHit = (matches.length === uniqT.length);
+                    } else {
+                         isHit = mySet.some(n => targets.includes(n));
+                    }
+                    if (isHit) scoreBoard[off]++;
+                }
+            }
+
+            // เลือกสูตรที่ดีที่สุด (ถ้าคะแนนเท่ากัน เอาสูตรแรกที่เจอ)
+            maxScore = Math.max(...scoreBoard);
+            bestOffset = scoreBoard.indexOf(maxScore);
+
+            // 2. แทงจริงในงวด i ด้วยสูตรที่เลือก (bestOffset)
+            let realPrev = intData[i-1];
+            let realCurr = intData[i];
+            let realSeed = getSeed(realPrev);
+            let realTargets = getTargets(realCurr);
+
+            if (realSeed !== null) {
+                let betStart = (realSeed + bestOffset) % 10;
+                let betSet = [];
+                for(let k=0; k<len; k++) betSet.push((betStart+k)%10);
+
+                // ตรวจผล
+                let isWin = false;
+                if ([7,8].includes(targetMode)) { 
+                    let uniqT = [...new Set(realTargets)];
+                    let matches = betSet.filter(n => uniqT.includes(n));
+                    isWin = (matches.length === uniqT.length);
+                } else {
+                    isWin = betSet.some(n => realTargets.includes(n));
+                }
+
+                // คำนวณเงิน (Win/Loss)
+                // ทุน = จำนวนเลข (len), รางวัล = 90 (สมมติ)
+                // ถ้า Win: +90 - len
+                // ถ้า Lose: -len
+                let payout = 90; 
+                let cost = len;
+                if (targetMode >= 5) cost = len * (len-1); // ถ้าเป็นเลขวิน ต้นทุนจะสูงกว่า (เช่น วิน 5 ตัว = 20 ชุด) แต่ที่นี้คิดแบบรูดง่ายๆไปก่อนเพื่อดู Trend
+                // *ปรับโมเดลเงินให้เข้าใจง่าย: คิดแบบรูด 19 ประตู หรือ ปักหลัก
+                // สมมติเล่นตัวละ 1 บาท: ทุน = len, กำไร = 90 (ถ้าถูกตัวเดียว) 
+                
+                let pnl = isWin ? (payout - cost) : -cost;
+                balance += pnl;
+                equityCurve.push(balance);
+
+                if (isWin) wins++;
+                totalBets++;
+            }
+        }
+
+        // แสดงผลลัพธ์
+        document.getElementById('wfResult').style.display = 'block';
+        
+        // Win Rate
+        let winRate = totalBets > 0 ? Math.round((wins / totalBets) * 100) : 0;
+        let wrElem = document.getElementById('wfWinRate');
+        wrElem.innerText = `${winRate}%`;
+        wrElem.style.color = winRate > 50 ? '#15803d' : '#ef4444'; // เขียวถ้าเกิน 50%
+        document.getElementById('wfWinCount').innerText = `ถูก ${wins} / ผิด ${totalBets - wins} (จาก ${totalBets} งวด)`;
+
+        // Profit
+        let profElem = document.getElementById('wfProfit');
+        profElem.innerText = (balance > 0 ? '+' : '') + balance;
+        profElem.style.color = balance > 0 ? '#15803d' : '#dc2626';
+
+        // Chart
+        let chartHtml = "";
+        let minVal = Math.min(...equityCurve);
+        let maxVal = Math.max(...equityCurve);
+        let range = maxVal - minVal || 1;
+        
+        equityCurve.forEach((val, idx) => {
+            // Normalize ความสูงกราฟให้พอดีกล่อง (0-100%)
+            let h = ((val - minVal) / range) * 80 + 10; 
+            let color = val >= 0 ? '#22c55e' : '#ef4444';
+            // แท่งกราฟ
+            chartHtml += `<div style="width:100%; background:${color}; height:${h}%; min-width:3px; opacity:0.6;" title="งวดที่ ${idx}: ${val}"></div>`;
+        });
+        document.getElementById('wfEquityChart').innerHTML = chartHtml;
+    }
+
+
+   
+</script>
 </body>
 </html>
