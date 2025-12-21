@@ -851,7 +851,11 @@
                     </button>
                 </div>
 
-                <div id="wfResult" style="margin-top:15px; display:none;">
+<div id="wfResult" style="margin-top:15px; display:none;">
+                    
+                    <div id="aiAdviceBox" style="margin-bottom: 15px;"></div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
                         <div style="background:white; padding:15px; border-radius:10px; text-align:center; border:1px solid #bbf7d0;">
                             <div style="font-size:12px; color:#86efac; font-weight:bold;">ความแม่นยำ (Win Rate)</div>
@@ -2367,6 +2371,49 @@ function calcGarlandMatrix() {
         let profElem = document.getElementById('wfProfit');
         profElem.innerText = (balance > 0 ? '+' : '') + balance;
         profElem.style.color = balance > 0 ? '#15803d' : '#dc2626';
+
+        // ✅✅✅ 2. วางโค้ดใหม่ชุดนี้ต่อจากบรรทัดข้างบนเลยครับ ✅✅✅
+        
+        // --- 🤖 AI Advisor Logic (ระบบช่วยตัดสินใจ) ---
+        let adviceHtml = "";
+        let adviceColor = "";
+        let adviceIcon = "";
+        
+        if (balance < 0) {
+            // 🔴 กรณีขาดทุน: เตือนให้หยุด
+            adviceColor = "#fee2e2"; // พื้นหลังแดงอ่อน
+            adviceIcon = "⛔️";
+            adviceHtml = `
+                <div style="color:#b91c1c; font-weight:bold; font-size:16px;">${adviceIcon} กราฟเป็นขาลง! (ขาดทุน ${balance})</div>
+                <div style="font-size:13px; color:#991b1b;">ความเสี่ยงสูงมาก AI แนะนำให้ <u>หยุดเล่นสูตรนี้</u> หรือเปลี่ยนการตั้งค่าใหม่</div>
+            `;
+        } else if (winRate < 50) {
+            // 🟡 กำไรแต่ไม่แม่น: เตือนให้ระวัง (ฟลุ๊คถูกตัวแพง)
+            adviceColor = "#fef3c7"; // พื้นหลังเหลืองอ่อน
+            adviceIcon = "⚠️";
+            adviceHtml = `
+                <div style="color:#b45309; font-weight:bold; font-size:16px;">${adviceIcon} กำไรแต่มีความเสี่ยง (Win Rate ${winRate}%)</div>
+                <div style="font-size:13px; color:#92400e;">ระบบทำกำไรได้ แต่ความแม่นยำยังไม่เสถียร ควรเล่นด้วย <u>ทุนน้อยๆ</u> หรือรอดูอีกนิด</div>
+            `;
+        } else {
+            // 🟢 กำไรและแม่น: ลุยได้
+            adviceColor = "#dcfce7"; // พื้นหลังเขียวอ่อน
+            adviceIcon = "✅";
+            adviceHtml = `
+                <div style="color:#15803d; font-weight:bold; font-size:16px;">${adviceIcon} สถานการณ์ดีเยี่ยม! (กำไร +${balance})</div>
+                <div style="font-size:13px; color:#166534;">กราฟสวยและความแม่นยำสูง (${winRate}%) <u>น่าลงทุน</u> ตามสูตรนี้</div>
+            `;
+        }
+
+        // แสดงผลลงในกล่อง
+        let adviceBox = document.getElementById('aiAdviceBox');
+        adviceBox.innerHTML = adviceHtml;
+        adviceBox.style.padding = "15px";
+        adviceBox.style.borderRadius = "10px";
+        adviceBox.style.textAlign = "center";
+        adviceBox.style.backgroundColor = adviceColor;
+        adviceBox.style.border = "1px solid rgba(0,0,0,0.1)";
+        // -----------------------------------------------------
 
         // Chart
         let chartHtml = "";
