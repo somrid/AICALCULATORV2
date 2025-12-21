@@ -2229,22 +2229,20 @@ function calcGarlandMatrix() {
         copyText(currentDeepFollowStr);
     } 
 
-// 🔥 ฟังก์ชัน Walk-Forward Simulation สำหรับร้อยมาลัย 🔥
+// 🔥 ฟังก์ชัน Walk-Forward (เวอร์ชั่นอัปเกรด: โชว์สูตรที่เลือก) 🔥
     function runGarlandWalkForward() {
-        if (!currentData || currentData.length < 50) return alert("ข้อมูลไม่เพียงพอสำหรับการทดสอบ (ต้องมีอย่างน้อย 50 งวด)");
+        if (!currentData || currentData.length < 50) return alert("ข้อมูลไม่เพียงพอ (ต้องมีอย่างน้อย 50 งวด)");
 
-        const testCount = parseInt(document.getElementById('wfTestCount').value); // จำนวนงวดที่จะทดสอบ (Test Set)
-        const lookback = parseInt(document.getElementById('wfLookback').value);   // จำนวนงวดที่ใช้ตัดสินใจ (Train Set)
-        const len = parseInt(document.getElementById('glLen').value) || 5;        // จำนวนเลขที่เล่น (ต้นทุน)
-        const targetMode = parseInt(document.getElementById('glTarget').value);   // เป้าหมาย (บน/ล่าง/วิน)
+        const testCount = parseInt(document.getElementById('wfTestCount').value);
+        const lookback = parseInt(document.getElementById('wfLookback').value);
+        const len = parseInt(document.getElementById('glLen').value) || 5;
+        const targetMode = parseInt(document.getElementById('glTarget').value);
         
-        // แปลงข้อมูลทั้งหมดเป็นตัวเลข
         const intData = currentData.map(r => [
             parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
             parseInt(r.down[0]), parseInt(r.down[1])
         ]);
 
-        // สูตรหาฐาน (Pyramid Seed) - ก๊อปมาใช้ภายในเพื่อให้ทำงานอิสระ
         const getSeed = (round) => {
             if (round.some(isNaN)) return null;
             let r2 = []; for(let i=0; i<4; i++) r2.push((round[i] + round[i+1]) % 10);
@@ -2253,48 +2251,34 @@ function calcGarlandMatrix() {
             return (r4[0] + r4[1]) % 10;
         };
 
-        // หาเป้าหมายที่ถูก (Winning Numbers)
         const getTargets = (round) => {
-            let h=round[0], t=round[1], u=round[2], dt=round[3], du=round[4];
+            let t = round;
             switch (targetMode) {
-                case 0: return [h];
-                case 1: return [t];
-                case 2: return [u];
-                case 3: return [dt];
-                case 4: return [du];
-                case 5: case 7: return [t, u]; // บน
-                case 6: case 8: return [dt, du]; // ล่าง
-                case 9: return [t, u, dt, du];
-                default: return [t, u];
+                case 0: return [t[0]]; case 1: return [t[1]]; case 2: return [t[2]];
+                case 3: return [t[3]]; case 4: return [t[4]];
+                case 5: case 7: return [t[1], t[2]]; 
+                case 6: case 8: return [t[3], t[4]];
+                default: return [t[1], t[2]];
             }
         };
 
-        // ตรวจสอบว่า rangeStart นั้นเพียงพอไหม
         let startIndex = currentData.length - testCount;
-        if (startIndex < lookback + 1) {
-            alert("ข้อมูลไม่พอสำหรับการย้อนหลังตามจำนวนที่ระบุ");
-            return;
-        }
+        if (startIndex < lookback + 1) return alert("ข้อมูลไม่พอสำหรับการย้อนหลัง");
 
         let wins = 0;
         let totalBets = 0;
         let balance = 0;
-        let equityCurve = [0]; // เก็บเส้นกราฟกำไร
+        let equityCurve = [0];
+        
+        // ✅ ตัวแปรเก็บประวัติการเลือกสูตร
+        let decisionLog = []; 
 
-        // 🔄 เริ่มวนลูปจำลองเหตุการณ์ (Time Machine Loop)
         for (let i = startIndex; i < currentData.length; i++) {
-            
-            // 1. ย้อนเวลาไป ณ ตอนนั้น (ยังไม่รู้ผลงวด i)
-            // ต้องตัดสินใจเลือกสูตร โดยดูสถิติจากงวด (i-lookback) ถึง (i-1)
-            let bestOffset = -1;
-            let maxScore = -1;
-
-            // คำนวณคะแนนสูตรย้อนหลังในช่วง lookback
+            // 1. Train Step: หาสูตรที่ดีที่สุดในอดีต (ณ เวลานั้น)
             let scoreBoard = Array(10).fill(0);
-            
             for (let past = i - lookback; past < i; past++) {
-                let prevRound = intData[past - 1]; // ฐานของงวด past
-                let currRound = intData[past];     // ผลของงวด past
+                let prevRound = intData[past - 1];
+                let currRound = intData[past];
                 let seed = getSeed(prevRound);
                 let targets = getTargets(currRound);
 
@@ -2302,28 +2286,23 @@ function calcGarlandMatrix() {
 
                 for (let off = 0; off <= 9; off++) {
                     let startDigit = (seed + off) % 10;
-                    let mySet = [];
-                    for(let k=0; k<len; k++) mySet.push((startDigit+k)%10);
+                    let mySet = []; for(let k=0; k<len; k++) mySet.push((startDigit+k)%10);
                     
-                    // เช็คว่าสูตรนี้เข้าไหม
                     let isHit = false;
-                    // (Logic ตรวจสอบการถูกรางวัลแบบง่าย)
-                    if ([7,8].includes(targetMode)) { // โหมดวิน
-                         let uniqT = [...new Set(targets)];
-                         let matches = mySet.filter(n => uniqT.includes(n));
-                         isHit = (matches.length === uniqT.length);
+                    if ([7,8].includes(targetMode)) { 
+                        let uniqT = [...new Set(targets)];
+                        isHit = (mySet.filter(n => uniqT.includes(n)).length === uniqT.length);
                     } else {
-                         isHit = mySet.some(n => targets.includes(n));
+                        isHit = mySet.some(n => targets.includes(n));
                     }
                     if (isHit) scoreBoard[off]++;
                 }
             }
 
-            // เลือกสูตรที่ดีที่สุด (ถ้าคะแนนเท่ากัน เอาสูตรแรกที่เจอ)
-            maxScore = Math.max(...scoreBoard);
-            bestOffset = scoreBoard.indexOf(maxScore);
+            let maxScore = Math.max(...scoreBoard);
+            let bestOffset = scoreBoard.indexOf(maxScore); // เลือกสูตรที่ดีที่สุด (ถ้าเท่ากันเอาตัวน้อยสุด)
 
-            // 2. แทงจริงในงวด i ด้วยสูตรที่เลือก (bestOffset)
+            // 2. Test Step: เอาสูตรนั้นมาเล่นจริง
             let realPrev = intData[i-1];
             let realCurr = intData[i];
             let realSeed = getSeed(realPrev);
@@ -2331,137 +2310,121 @@ function calcGarlandMatrix() {
 
             if (realSeed !== null) {
                 let betStart = (realSeed + bestOffset) % 10;
-                let betSet = [];
-                for(let k=0; k<len; k++) betSet.push((betStart+k)%10);
+                let betSet = []; for(let k=0; k<len; k++) betSet.push((betStart+k)%10);
 
-                // ตรวจผล
                 let isWin = false;
                 if ([7,8].includes(targetMode)) { 
                     let uniqT = [...new Set(realTargets)];
-                    let matches = betSet.filter(n => uniqT.includes(n));
-                    isWin = (matches.length === uniqT.length);
+                    isWin = (betSet.filter(n => uniqT.includes(n)).length === uniqT.length);
                 } else {
                     isWin = betSet.some(n => realTargets.includes(n));
                 }
 
-// --- 💰 ส่วนคำนวณเงินและต้นทุน (แก้ไข: คำนวณตามประเภทการเล่นอัตโนมัติ) ---
-                
-                let payout = 90;  // อัตราจ่าย (ปรับได้)
-                let cost = 0;     // ตัวแปรเก็บต้นทุน
+                // คำนวณเงิน
+                let payout = 90; 
+                let cost = 0;
+                if (targetMode >= 0 && targetMode <= 4) { cost = len * 10; } 
+                else if (targetMode === 5 || targetMode === 6) { cost = (20 * len) - (len * len); }
+                else if (targetMode === 7 || targetMode === 8) { cost = len * (len - 1); }
+                else { cost = len; }
 
-                // 🟢 กรณี 1: "ปักหลัก" (ร้อย/สิบ/หน่วย)
-                // ID: 0=ร้อย, 1=สิบบน, 2=หน่วยบน, 3=สิบล่าง, 4=หน่วยล่าง
-                if (targetMode >= 0 && targetMode <= 4) {
-                    cost = len * 10; 
-                    // เช่น ปัก 6 ตัว = 6 x 10 = 60 บาท
-                } 
-                
-                // 🔵 กรณี 2: "พิกัด/รูด 19 ประตู" (บน/ล่าง)
-                // ID: 5=พิกัดบน (รูด), 6=พิกัดล่าง (รูด)
-                else if (targetMode === 5 || targetMode === 6) {
-                    // สูตรคำนวณรูดรวมแบบหักตัวซ้ำ: (20 * len) - (len * len)
-                    // เช่น รูด 3 ตัว = (20*3) - (3*3) = 60 - 9 = 51 บาท
-                    cost = (20 * len) - (len * len);
-                }
-                
-                // 🟣 กรณี 3: "วิน/เลขชุด" (ครบ 2 ตัว)
-                // ID: 7=วินบน, 8=วินล่าง
-                else if (targetMode === 7 || targetMode === 8) {
-                    // สูตรวิน (ไป-กลับ): n * (n-1)
-                    // เช่น วิน 7 ตัว = 7 * 6 = 42 บาท
-                    cost = len * (len - 1);
-                }
-                
-                // 🟠 กรณีอื่นๆ (เช่น บน/ล่างรวม, แต้ม)
-                else {
-                    cost = len; // คิดตามจำนวนตัวไปก่อน
-                }
-
-                // คำนวณกำไร/ขาดทุนสุทธิ (Net Profit)
                 let pnl = isWin ? (payout - cost) : -cost;
-
-                // --- จบส่วนคำนวณเงิน ---
                 balance += pnl;
                 equityCurve.push(balance);
 
                 if (isWin) wins++;
                 totalBets++;
+                
+                // ✅ บันทึกการตัดสินใจลง Log
+                decisionLog.push({
+                    round: totalBets,
+                    offset: bestOffset,
+                    isWin: isWin,
+                    balance: balance,
+                    nums: betSet.join('')
+                });
             }
         }
 
         // แสดงผลลัพธ์
         document.getElementById('wfResult').style.display = 'block';
         
-        // Win Rate
         let winRate = totalBets > 0 ? Math.round((wins / totalBets) * 100) : 0;
         let wrElem = document.getElementById('wfWinRate');
         wrElem.innerText = `${winRate}%`;
-        wrElem.style.color = winRate > 50 ? '#15803d' : '#ef4444'; // เขียวถ้าเกิน 50%
-        document.getElementById('wfWinCount').innerText = `ถูก ${wins} / ผิด ${totalBets - wins} (จาก ${totalBets} งวด)`;
+        wrElem.style.color = winRate > 50 ? '#15803d' : '#ef4444';
+        document.getElementById('wfWinCount').innerText = `ถูก ${wins} / ผิด ${totalBets - wins}`;
 
-        // Profit
         let profElem = document.getElementById('wfProfit');
         profElem.innerText = (balance > 0 ? '+' : '') + balance;
         profElem.style.color = balance > 0 ? '#15803d' : '#dc2626';
 
-        // ✅✅✅ 2. วางโค้ดใหม่ชุดนี้ต่อจากบรรทัดข้างบนเลยครับ ✅✅✅
-        
-        // --- 🤖 AI Advisor Logic (ระบบช่วยตัดสินใจ) ---
+        // AI Advisor
         let adviceHtml = "";
         let adviceColor = "";
-        let adviceIcon = "";
-        
         if (balance < 0) {
-            // 🔴 กรณีขาดทุน: เตือนให้หยุด
-            adviceColor = "#fee2e2"; // พื้นหลังแดงอ่อน
-            adviceIcon = "⛔️";
-            adviceHtml = `
-                <div style="color:#b91c1c; font-weight:bold; font-size:16px;">${adviceIcon} กราฟเป็นขาลง! (ขาดทุน ${balance})</div>
-                <div style="font-size:13px; color:#991b1b;">ความเสี่ยงสูงมาก AI แนะนำให้ <u>หยุดเล่นสูตรนี้</u> หรือเปลี่ยนการตั้งค่าใหม่</div>
-            `;
+            adviceColor = "#fee2e2";
+            adviceHtml = `<div style="color:#b91c1c; font-weight:bold;">⛔️ กราฟเป็นขาลง (ขาดทุน ${balance})</div><div style="font-size:13px; color:#991b1b;">AI แนะนำ: หยุดเล่นหรือเปลี่ยนสูตร</div>`;
         } else if (winRate < 50) {
-            // 🟡 กำไรแต่ไม่แม่น: เตือนให้ระวัง (ฟลุ๊คถูกตัวแพง)
-            adviceColor = "#fef3c7"; // พื้นหลังเหลืองอ่อน
-            adviceIcon = "⚠️";
-            adviceHtml = `
-                <div style="color:#b45309; font-weight:bold; font-size:16px;">${adviceIcon} กำไรแต่มีความเสี่ยง (Win Rate ${winRate}%)</div>
-                <div style="font-size:13px; color:#92400e;">ระบบทำกำไรได้ แต่ความแม่นยำยังไม่เสถียร ควรเล่นด้วย <u>ทุนน้อยๆ</u> หรือรอดูอีกนิด</div>
-            `;
+            adviceColor = "#fef3c7";
+            adviceHtml = `<div style="color:#b45309; font-weight:bold;">⚠️ กำไรแต่เสี่ยง (Win Rate ${winRate}%)</div><div style="font-size:13px; color:#92400e;">AI แนะนำ: ระวังตัว หรือลดทุน</div>`;
         } else {
-            // 🟢 กำไรและแม่น: ลุยได้
-            adviceColor = "#dcfce7"; // พื้นหลังเขียวอ่อน
-            adviceIcon = "✅";
-            adviceHtml = `
-                <div style="color:#15803d; font-weight:bold; font-size:16px;">${adviceIcon} สถานการณ์ดีเยี่ยม! (กำไร +${balance})</div>
-                <div style="font-size:13px; color:#166534;">กราฟสวยและความแม่นยำสูง (${winRate}%) <u>น่าลงทุน</u> ตามสูตรนี้</div>
-            `;
+            adviceColor = "#dcfce7";
+            adviceHtml = `<div style="color:#15803d; font-weight:bold;">✅ สถานการณ์ดีเยี่ยม (+${balance})</div><div style="font-size:13px; color:#166534;">AI แนะนำ: ลุยต่อได้เลย</div>`;
         }
-
-        // แสดงผลลงในกล่อง
         let adviceBox = document.getElementById('aiAdviceBox');
         adviceBox.innerHTML = adviceHtml;
-        adviceBox.style.padding = "15px";
-        adviceBox.style.borderRadius = "10px";
-        adviceBox.style.textAlign = "center";
         adviceBox.style.backgroundColor = adviceColor;
-        adviceBox.style.border = "1px solid rgba(0,0,0,0.1)";
-        // -----------------------------------------------------
+        adviceBox.style.padding = "10px";
+        adviceBox.style.borderRadius = "8px";
+        adviceBox.style.textAlign = "center";
 
-        // Chart
+        // Chart & Log Visualization
         let chartHtml = "";
         let minVal = Math.min(...equityCurve);
         let maxVal = Math.max(...equityCurve);
         let range = maxVal - minVal || 1;
         
+        // สร้างกราฟ
         equityCurve.forEach((val, idx) => {
-            // Normalize ความสูงกราฟให้พอดีกล่อง (0-100%)
             let h = ((val - minVal) / range) * 80 + 10; 
             let color = val >= 0 ? '#22c55e' : '#ef4444';
-            // แท่งกราฟ
-            chartHtml += `<div style="width:100%; background:${color}; height:${h}%; min-width:3px; opacity:0.6;" title="งวดที่ ${idx}: ${val}"></div>`;
+            
+            // ✅ ดึงข้อมูลสูตรมาแสดงใน Tooltip
+            let tip = `เริ่มต้น`;
+            if(idx > 0) {
+                let log = decisionLog[idx-1];
+                tip = `งวดที่ ${log.round}: ${log.isWin?'✅ถูก':'❌ผิด'} (ใช้สูตร +${log.offset}) | ยอด: ${val}`;
+            }
+
+            chartHtml += `<div style="width:100%; background:${color}; height:${h}%; min-width:3px; opacity:0.8; cursor:pointer;" title="${tip}"></div>`;
         });
+        
+        // ✅ สร้างส่วนแสดง Log ใต้กราฟ (เพิ่มใหม่)
+        let logHtml = `<div style="margin-top:10px; height:100px; overflow-y:auto; border:1px solid #e2e8f0; padding:5px; background:white; border-radius:5px; font-size:12px;">`;
+        decisionLog.slice().reverse().forEach(log => {
+            let color = log.isWin ? '#16a34a' : '#dc2626';
+            let icon = log.isWin ? '✓' : '✗';
+            logHtml += `<div style="border-bottom:1px dashed #f1f5f9; padding:2px;">
+                <span style="color:#64748b; font-weight:bold;">#${log.round}</span> 
+                ใช้สูตร <span style="background:#f1f5f9; padding:1px 4px; border-radius:4px; font-weight:bold;">+${log.offset}</span> 
+                (${log.nums}) = <span style="color:${color}; font-weight:bold;">${icon}</span> 
+                <span style="float:right; color:${log.balance>=0?'#16a34a':'#dc2626'}">${log.balance}</span>
+            </div>`;
+        });
+        logHtml += `</div>`;
+
         document.getElementById('wfEquityChart').innerHTML = chartHtml;
+        
+        // แทรก Log ต่อท้ายกราฟ
+        let existingLog = document.getElementById('wfLogBox');
+        if(existingLog) existingLog.remove(); // ลบอันเก่าถ้ามี
+        let logBox = document.createElement('div');
+        logBox.id = 'wfLogBox';
+        logBox.innerHTML = `<div style="font-size:11px; font-weight:bold; color:#64748b; margin-top:5px;">📜 บันทึกการเปลี่ยนสูตรของ AI (ล่าสุดอยู่บน)</div>` + logHtml;
+        document.getElementById('wfEquityChart').parentNode.appendChild(logBox);
     }
+
 
 
    
