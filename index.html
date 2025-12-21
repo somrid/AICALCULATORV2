@@ -398,7 +398,7 @@
                             <option value="0">1. หลักร้อย</option>
                             <option value="1">2. หลักสิบบน</option>
                             <option value="2">3. หลักหน่วยบน</option>
-                            <option value="3">4. พิกัดบน (ไม่รวมร้อย)</option>
+                            <option value="3" selected>4. พิกัดบน (ไม่รวมร้อย)</option>
                             <option value="4">5. หลักสิบล่าง</option>
                             <option value="5">6. หลักหน่วยล่าง</option>
                             <option value="6">7. พิกัดล่าง</option>
@@ -459,7 +459,7 @@
                             <option value="0">หลักร้อย</option>
                             <option value="1">สิบบน</option>
                             <option value="2">หน่วยบน</option>
-                            <option value="3">สิบล่าง</option>
+                            <option value="1" selected>สิบบน</option>
                             <option value="4">หน่วยล่าง</option>
                             <option value="5">แต้มบน</option>
                             <option value="6">แต้มล่าง</option>
@@ -520,7 +520,7 @@
 
                     <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #3b82f6; display:flex; align-items:center; gap:5px;">
                         <span style="font-weight:bold; color:#2563eb; font-size:13px;">เอา:</span>
-                        <input type="number" id="winLength" value="7" min="3" max="9" class="btn" style="width:40px; padding:2px; color:#2563eb; border-color:#2563eb;">
+                        <input type="number" id="winLength" value="8" min="3" max="9" class="btn" style="width:40px; padding:2px; color:#2563eb; border-color:#2563eb;">
                         <span style="font-size:12px;">ตัว</span>
                     </div>
                     
@@ -618,18 +618,21 @@
             </div>
         </div>
 
-        <div class="grid-targets">
-    <button class="btn-target active" onclick="setTarget('hundred', this)">💯 หลักร้อย</button>
-    <button class="btn-target" onclick="setTarget('tens_up', this)">⬆️ สิบบน</button>
-    <button class="btn-target" onclick="setTarget('units_up', this)">↗️ หน่วยบน</button>
-    <button class="btn-target" onclick="setTarget('tens_down', this)">⬇️ สิบล่าง</button>
-    <button class="btn-target" onclick="setTarget('units_down', this)">↘️ หน่วยล่าง</button>
-    <button class="btn-target" style="color:var(--p); border-color:var(--p);" onclick="setTarget('tf_up', this)">🎲 พิกัดบน</button>
-    <button class="btn-target" style="color:var(--p); border-color:var(--p);" onclick="setTarget('tf_down', this)">🎲 พิกัดล่าง</button>
-    <button class="btn-target" style="color:#6610f2; border-color:#6610f2;" onclick="setTarget('pair_up', this)">🍒 วินบน</button>
-    <button class="btn-target" style="color:#6610f2; border-color:#6610f2;" onclick="setTarget('pair_down', this)">🍒 วินล่าง</button>
-    <button class="btn-target" style="color:#dc3545; border-color:#dc3545;" onclick="setTarget('any_no_hundred', this)">🎲 บน/ล่าง</button>
-</div>
+       <div class="grid-targets">
+            <button class="btn-target" onclick="setTarget('hundred', this)">💯 หลักร้อย</button>
+            
+            <button class="btn-target" onclick="setTarget('tens_up', this)">⬆️ สิบบน</button>
+            <button class="btn-target" onclick="setTarget('units_up', this)">↗️ หน่วยบน</button>
+            <button class="btn-target" onclick="setTarget('tens_down', this)">⬇️ สิบล่าง</button>
+            <button class="btn-target" onclick="setTarget('units_down', this)">↘️ หน่วยล่าง</button>
+            
+            <button class="btn-target active" style="color:var(--p); border-color:var(--p);" onclick="setTarget('tf_up', this)">🎲 พิกัดบน</button>
+            
+            <button class="btn-target" style="color:var(--p); border-color:var(--p);" onclick="setTarget('tf_down', this)">🎲 พิกัดล่าง</button>
+            <button class="btn-target" style="color:#6610f2; border-color:#6610f2;" onclick="setTarget('pair_up', this)">🍒 วินบน</button>
+            <button class="btn-target" style="color:#6610f2; border-color:#6610f2;" onclick="setTarget('pair_down', this)">🍒 วินล่าง</button>
+            <button class="btn-target" style="color:#dc3545; border-color:#dc3545;" onclick="setTarget('any_no_hundred', this)">🎲 บน/ล่าง</button>
+        </div>
 
         <button class="btn-add" style="background:var(--p); width:200px; display:block; margin:0 auto;" onclick="runProgram()">🚀 คำนวณใหม่</button>
     </div>
@@ -793,7 +796,7 @@
                         <option value="4">4 ตัว</option>
                         <option value="5">5 ตัว</option>
                         <option value="6">6 ตัว</option>
-                        <option value="7" selected>7 ตัว</option>
+                        <option value="7">7 ตัว</option>
                         <option value="8">8 ตัว</option>
                         <option value="9">9 ตัว</option>
                     </select>
@@ -889,19 +892,19 @@
                         
                         <div style="background:rgba(255,255,255,0.8); padding:8px; border-radius:10px; border:1px solid #bae6fd; display:flex; align-items:center; gap:5px;">
                             <span style="font-weight:bold; color:#0369a1;">ถ้า</span>
-                            <select id="dfSourcePos" class="btn" style="padding:4px;">
+                            
+                            <select id="dfSourcePos" class="btn" style="padding:4px;" onchange="autoFillInputs()">
                                 <option value="0">หลักร้อย</option>
-                                <option value="1" selected>หลักสิบบน</option>
-                                <option value="2">หลักหน่วยบน</option>
-                                <option value="3">หลักสิบล่าง</option>
-                                <option value="4">หลักหน่วยล่าง</option>
+                                <option value="1" selected>สิบบน</option>
+                                <option value="2">หน่วยบน</option>
+                                <option value="3">สิบล่าง</option>
+                                <option value="4">หน่วยล่าง</option>
                             </select>
-                            <span style="font-weight:bold; color:#0369a1;">มาเลข</span>
+
+                            <span style="font-weight:bold; color:#0369a1;">มา</span>
                             <select id="dfSourceNum" class="btn" style="padding:4px; width:50px;">
-                                <option value="0">0</option><option value="1" selected>1</option><option value="2">2</option>
-                                <option value="3">3</option><option value="4">4</option><option value="5">5</option>
-                                <option value="6">6</option><option value="7">7</option><option value="8">8</option>
-                                <option value="9">9</option>
+                                <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                                <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option>
                             </select>
                         </div>
 
@@ -940,7 +943,9 @@
     let currentPairWinStr = "";
         let currentPairTop10Str = "";
 	let currentDeepFollowStr = "";
-    let currentTarget='hundred', currentTargetLabel='หลักร้อย', currentLen=5, displayMode='auto';
+let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLen=5, displayMode='auto';
+
+
     let inputOrder = 'normal', isHuntingMode = false, sortMode = 'score';
     let currentStepMode = 'normal', currentStepLabel='เรียง (+1)';
     let isHeatmapMode = false, myWorker = null, isEditing = false, pinnedList = [];
@@ -1763,7 +1768,33 @@ function calcFollowing() {
     function getLatestRound() { if (!currentData || currentData.length === 0) return null; return currentData[currentData.length - 1]; }
     function setFollowFromLatest() { const latest = getLatestRound(); if (!latest) return; const sPos = parseInt(document.getElementById('sourcePos').value); let val = NaN; if (sPos === 0) val = parseInt(latest.up[0]); else if (sPos === 1) val = parseInt(latest.up[1]); else if (sPos === 2) val = parseInt(latest.up[2]); else if (sPos === 3) val = parseInt(latest.down[0]); else if (sPos === 4) val = parseInt(latest.down[1]); else if (sPos === 5) val = (parseInt(latest.up[1]) + parseInt(latest.up[2])) % 10; else if (sPos === 6) val = (parseInt(latest.down[0]) + parseInt(latest.down[1])) % 10; if (!isNaN(val)) { document.getElementById('followNum').value = val; } }
     function setPairFromLatest() { const latest = getLatestRound(); if (!latest) return; const sPos = document.getElementById('pairSourcePos').value; let val = ""; if (sPos === 'up') { val = latest.up.substring(1, 3); } else { val = latest.down; } if (val) { document.getElementById('pairInput').value = val; } }
-    function autoFillInputs() { setFollowFromLatest(); setPairFromLatest(); }
+    // ✅ ฟังก์ชันดึงค่าล่าสุดมาใส่กล่อง Input อัตโนมัติ (รวม Deep Follow แล้ว)
+    function autoFillInputs() {
+        if (!currentData || currentData.length === 0) return;
+        const latest = currentData[currentData.length - 1]; // งวดล่าสุด
+
+        // 1. ส่วนวิเคราะห์เลขตาม (Cross-Position) - ของเดิม
+        setFollowFromLatest(); 
+        
+        // 2. ส่วนจับคู่ (Pair Follow) - ของเดิม
+        setPairFromLatest();
+
+        // 3. ✅✅✅ ส่วนเจาะลึกเลขตาม (Deep Follow) - เพิ่มใหม่ตรงนี้ ✅✅✅
+        const dfPos = parseInt(document.getElementById('dfSourcePos').value);
+        let dfVal = null;
+
+        // ดึงค่าตามตำแหน่งที่เลือก
+        if (dfPos === 0) dfVal = latest.up[0];      // หลักร้อย
+        else if (dfPos === 1) dfVal = latest.up[1]; // สิบบน
+        else if (dfPos === 2) dfVal = latest.up[2]; // หน่วยบน
+        else if (dfPos === 3) dfVal = latest.down[0]; // สิบล่าง
+        else if (dfPos === 4) dfVal = latest.down[1]; // หน่วยล่าง
+
+        // ถ้าได้ตัวเลขมา ก็จับใส่กล่องเลย
+        if (dfVal !== null && !isNaN(dfVal)) {
+            document.getElementById('dfSourceNum').value = parseInt(dfVal);
+        }
+    }
 
     function calcAllStats() {
         if (!currentData || currentData.length === 0) return;
