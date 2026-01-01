@@ -958,13 +958,12 @@ let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLe
     let globalRawResults = [];
     let currentData = []; 
 
-    // --- WORKER SCRIPT: ส่วนคำนวณเบื้องหลัง (หัวใจสำคัญ) ---
+ 
+// --- WORKER SCRIPT: ส่วนคำนวณเบื้องหลัง (ฉบับอัปเกรด Hunting Mode สมบูรณ์) ---
     const workerScript = `
     self.onmessage = function(e) {
         try {
             const { intData, targetType, len, displayMode, startIdx, endIdx, manualLimit, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize, forwardTest } = e.data;
-            
-            // กำหนดเป้าหมายจำนวนสูตร
             const targetCount = (displayMode === 'all') ? (manualLimit || 100) : 2000;
             
             // เรียกฟังก์ชันคำนวณ
@@ -986,63 +985,36 @@ let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLe
 
     function getAdditives(len, mode) {
         let arr = [];
-        if (mode === 'step5') { // สูตรข้าม 5 (เลขเงา)
-            let baseLen = Math.ceil(len / 2);
-            for (let i = 0; i < baseLen; i++) arr.push(i);
-            for (let i = 0; i < baseLen; i++) arr.push((i + 5) % 10);
-            return arr.slice(0, len);
-        }
+        if (mode === 'step5') { let baseLen = Math.ceil(len / 2); for (let i = 0; i < baseLen; i++) arr.push(i); for (let i = 0; i < baseLen; i++) arr.push((i + 5) % 10); return arr.slice(0, len); }
         let step = 1; let start = 0;
-        if(mode === 'odd') { start=1; step=2; } 
-        else if(mode === 'even') { start=0; step=2; } 
-        else if(mode === 'step3') { start=0; step=3; }
+        if(mode === 'odd') { start=1; step=2; } else if(mode === 'even') { start=0; step=2; } else if(mode === 'step3') { start=0; step=3; }
         for(let i=0; i<len; i++) arr.push((start + (i*step)) % 10);
         return arr;
     }
 
     function getTargetValue(roundArr, type) {
         if (!roundArr) return [];
-        if(type==='hundred') return [roundArr[0]]; 
-        if(type==='tens_up') return [roundArr[1]]; 
-        if(type==='units_up') return [roundArr[2]];
-        if(type==='tens_down') return [roundArr[3]]; 
-        if(type==='units_down') return [roundArr[4]];
-        if(type==='tf_up') return [roundArr[1], roundArr[2]]; 
-        if(type==='tf_down') return [roundArr[3], roundArr[4]]; 
-        if(type==='pair_up') return [roundArr[1], roundArr[2]]; 
-        if(type==='pair_down') return [roundArr[3], roundArr[4]]; 
+        if(type==='hundred') return [roundArr[0]]; if(type==='tens_up') return [roundArr[1]]; if(type==='units_up') return [roundArr[2]];
+        if(type==='tens_down') return [roundArr[3]]; if(type==='units_down') return [roundArr[4]];
+        if(type==='tf_up') return [roundArr[1], roundArr[2]]; if(type==='tf_down') return [roundArr[3], roundArr[4]]; 
+        if(type==='pair_up') return [roundArr[1], roundArr[2]]; if(type==='pair_down') return [roundArr[3], roundArr[4]]; 
         if(type==='any_no_hundred') return [roundArr[1], roundArr[2], roundArr[3], roundArr[4]]; 
         return []; 
     }
 
-    // ✅ ฟังก์ชันเช็คผลรางวัล (แก้ไขให้แม่นยำ)
     function checkWin(targets, nums, type) {
-        let match = 0; 
-        for (let t of targets) if (nums.includes(t)) match++;
-        
-        // ถ้าเป็น วิน (Pair) ต้องมีครบทุกตัวในเป้าหมาย (เช่น มาทั้งสิบและหน่วย)
+        let match = 0; for (let t of targets) if (nums.includes(t)) match++;
         if (type.includes('pair')) return match === targets.length; 
-        
-        // ถ้าเป็น พิกัด/วิ่ง (TF/Any) ขอแค่มีสักตัว
         if (type.includes('tf') || type.includes('any')) return match > 0;
-        
         return match > 0; 
     }
 
     function findFormulasLite(intData, targetType, len, displayMode, startIdx, endIdx, targetCount, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize, forwardTest) {
-// ✅ แทรกตรงนี้: จำกัดจำนวนเลขคี่/คู่ ไม่ให้เกิน 5 ตัว
-        if ((stepMode === 'odd' || stepMode === 'even') && len > 5) {
-            len = 5;
-        }
-        // คำนวณขอบเขตข้อมูล (ใช้ i-1 ทำนาย i)
-        // ข้อมูลต้องมีอย่างน้อย 2 งวด (งวดตั้งต้น + งวดทำนาย)
-        let activeEndIdx = Math.min(endIdx - (forwardTest || 0), intData.length - 1);
+        if ((stepMode === 'odd' || stepMode === 'even') && len > 5) len = 5;
         
-        // เตรียมเฉลยคำตอบของแต่ละงวดไว้ล่วงหน้า
+        let activeEndIdx = Math.min(endIdx - (forwardTest || 0), intData.length - 1);
         const targetVals = new Array(intData.length).fill(null);
-        for(let i=1; i < intData.length; i++) {
-             targetVals[i] = getTargetValue(intData[i], targetType);
-        }
+        for(let i=1; i < intData.length; i++) targetVals[i] = getTargetValue(intData[i], targetType);
 
         let randFunc = Math.random;
         if (displayMode === 'all' || isHuntingMode) {
@@ -1054,12 +1026,10 @@ let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLe
         let allResults = [];
         let additives = getAdditives(len, stepMode);
 
-        // วนลูปสุ่มสูตร
         for (let r = 0; r < targetCount; r++) {
             let p1 = positions[Math.floor(randFunc() * 5)]; let p2 = positions[Math.floor(randFunc() * 5)];
             let op = operators[Math.floor(randFunc() * 3)]; let con = constants[Math.floor(randFunc() * 10)]; let m1 = Math.floor(randFunc() * 5) + 1;
             
-            // คำนวณค่าพื้นฐานของสูตรทุกงวดเก็บไว้
             const baseSums = new Int8Array(intData.length);
             for(let i=0; i<intData.length; i++) { 
                 let v1 = intData[i][p1]; let v2 = intData[i][p2]; let res = 0;
@@ -1070,44 +1040,57 @@ let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLe
             
             let name = \`(\${m1>1?m1+'x':''}\${['ร','ส','น','ลส','ลน'][p1]} \${op} \${['ร','ส','น','ลส','ลน'][p2]}) + \${con}\`;
 
-            // ลองขยับค่า Start (0-9) เพื่อหาสูตรที่เดินดีที่สุด
+            // วนลูปหาค่า +Offset ที่ดีที่สุด (R0-R9)
             for(let start=0; start<=9; start++) {
-                let score=0; 
-                let currentLoss = 0;
-                let maxCons = 0;
-                let totalLoss = 0;
+                let score=0; let currentLoss = 0; let maxCons = 0; let totalLoss = 0;
                 
-                // ✅ แก้ไข Loop: เริ่มที่ 1 (เพราะต้องใช้งวด 0 ทำนายงวด 1)
+                // --- Logic การล่า (Training) ---
                 let loopStart = Math.max(1, startIdx);
+                
+                // ตัวแปรจำสถานะการล่า
+                let currentSourceIdx = loopStart - 1; 
+                let huntStep = 1;
 
                 for(let i=loopStart; i<=activeEndIdx; i++) { 
-                    // ใช้ผลงวดก่อนหน้า (i-1) มาคำนวณเลขทำนายงวดนี้ (i)
-                    let sourceIdx = i - 1;
-                    
+                    // คำนวณเลขทำนาย (ใช้ Source ที่จำไว้)
                     let numsToCheck = [];
-                    for(let k=0; k<len; k++) numsToCheck.push((baseSums[sourceIdx]+start+additives[k])%10);
+                    for(let k=0; k<len; k++) numsToCheck.push((baseSums[currentSourceIdx]+start+additives[k])%10);
                     
-                    if (targetVals[i]) { // ถ้ามีเฉลยของงวดนี้
-                        if(checkWin(targetVals[i], numsToCheck, targetType)) {
-                            score++;
-                            currentLoss = 0;
+                    let isWin = false;
+                    if (targetVals[i]) {
+                        isWin = checkWin(targetVals[i], numsToCheck, targetType);
+                        if(isWin) {
+                            score++; currentLoss = 0;
                         } else {
-                            currentLoss++;
-                            totalLoss++;
+                            currentLoss++; totalLoss++;
                             if(currentLoss > maxCons) maxCons = currentLoss;
                         }
                     }
+
+                    // --- อัปเดตสถานะการล่า (State Update) ---
+                    if (isHuntingMode) {
+                        if (isWin) {
+                            // ถ้าถูก: รีเซ็ตไปเริ่มใช้งวดปัจจุบันเป็นตัวตั้งต้นใหม่
+                            currentSourceIdx = i;
+                            huntStep = 1;
+                        } else {
+                            // ถ้าผิด: เช็คโควต้า
+                            if (huntStep < huntMax) {
+                                // ยังไม่ครบโควต้า: ย้ำที่เดิม (currentSourceIdx ไม่เปลี่ยน)
+                                huntStep++;
+                            } else {
+                                // ครบโควต้าแล้ว (ยอมแพ้): เปลี่ยนไปใช้งวดปัจจุบันเริ่มใหม่
+                                currentSourceIdx = i;
+                                huntStep = 1;
+                            }
+                        }
+                    } else {
+                        // โหมดปกติ: เปลี่ยนงวดทุกครั้ง
+                        currentSourceIdx = i;
+                    }
                 }
                 
-                allResults.push({ 
-                    name: name+" (R"+start+")", 
-                    score: score, 
-                    totalLoss: totalLoss, 
-                    maxCons: maxCons,
-                    p1, p2, op, con, m1, start, baseSums,
-                    lastProcessedIdx: activeEndIdx 
-                });
-                
+                allResults.push({ name: name+" (R"+start+")", score, totalLoss, maxCons, p1, p2, op, con, m1, start, baseSums, lastProcessedIdx: activeEndIdx });
                 if (allResults.length >= targetCount) break;
             }
              if (allResults.length >= targetCount) break;
@@ -1116,48 +1099,78 @@ let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLe
         allResults.sort((a,b)=>b.score-a.score);
         if (displayMode === 'auto') allResults = allResults.slice(0, 5);
 
-        // สร้างประวัติการเดินสูตรเพื่อส่งกลับไปแสดงผล
+        // สร้างข้อมูลประวัติเพื่อแสดงผล (History Generation)
         return allResults.map(res => {
             let history = [];
             
-            for(let i=1; i < intData.length; i++) {
-                 // สูตรจาก i-1 ทำนาย i
-                 let sourceIdx = i - 1;
+            // เริ่มต้นสถานะการล่าใหม่ สำหรับการแสดงผล
+            let loopStart = 1; 
+            let currentSourceIdx = loopStart - 1;
+            let huntStep = 1;
+
+            for(let i=loopStart; i < intData.length; i++) {
+                 // คำนวณเลข
                  let numsToCheck = [];
-                 for(let k=0; k<len; k++) numsToCheck.push((res.baseSums[sourceIdx]+res.start+additives[k])%10);
+                 for(let k=0; k<len; k++) numsToCheck.push((res.baseSums[currentSourceIdx]+res.start+additives[k])%10);
                  
                  let target = getTargetValue(intData[i], targetType);
                  let isWin = checkWin(target, numsToCheck, targetType);
-                 
-                 // เช็คว่าเป็นงวดทดสอบหรือไม่ (อนาคต หรือ Forward Test)
                  let isTest = (i > res.lastProcessedIdx); 
                  
-                 // rowIdx = i หมายถึงแถวนี้คือผลของงวดที่ i
-                 let record = { nums: numsToCheck, win: isWin, rowIdx: i, isTest: isTest }; 
+                 // บันทึกผล
+                 let record = { 
+                    nums: numsToCheck, 
+                    win: isWin, 
+                    rowIdx: i, 
+                    isTest: isTest,
+                    // ส่งค่าสถานะการล่ากลับไปด้วย
+                    huntRound: isHuntingMode ? huntStep : null,
+                    huntMax: huntMax
+                 }; 
                  
                  if (i >= startIdx && i <= endIdx) {
                     history.push(record);
                  }
+
+                 // --- อัปเดตสถานะการล่า (Logic เดียวกับตอน Train) ---
+                 if (isHuntingMode) {
+                    if (isWin) {
+                        currentSourceIdx = i;
+                        huntStep = 1;
+                    } else {
+                        if (huntStep < huntMax) {
+                            huntStep++;
+                        } else {
+                            currentSourceIdx = i;
+                            huntStep = 1;
+                        }
+                    }
+                 } else {
+                    currentSourceIdx = i;
+                 }
             }
             
-            // ✅ ทำนายงวดถัดไป (งวดอนาคตที่ยังไม่ออก)
-            // ใช้งวดสุดท้ายที่มี (last index) เป็นตัวตั้งต้นคำนวณ
-            let lastIdx = intData.length - 1;
+            // ทำนายงวดอนาคต (ใช้สถานะล่าสุดจากลูป)
             let predNums = [];
-            for(let k=0; k<len; k++) predNums.push((res.baseSums[lastIdx]+res.start+additives[k])%10);
+            for(let k=0; k<len; k++) predNums.push((res.baseSums[currentSourceIdx]+res.start+additives[k])%10);
             
-            history.push({ nums: predNums, win: null, rowIdx: -1, isTest: true });
+            // งวดทำนาย ให้แสดงสถานะการล่าต่อจากงวดล่าสุด
+            history.push({ 
+                nums: predNums, 
+                win: null, 
+                rowIdx: -1, 
+                isTest: true,
+                huntRound: isHuntingMode ? huntStep : null,
+                huntMax: huntMax
+            });
 
-            return { 
-                name: res.name, 
-                score: res.score, 
-                totalLoss: res.totalLoss, 
-                maxCons: res.maxCons,
-                history: history
-            };
+            return { name: res.name, score: res.score, totalLoss: res.totalLoss, maxCons: res.maxCons, history: history };
         });
     }
     `;
+
+
+
 
     // --- ส่วนจัดการหน้าจอ (UI Functions) ---
 
