@@ -704,6 +704,8 @@
     let globalFlowData = {}, currentPage = 1, pageSize = 10;
     let lastCalculatedResults = [], globalRawResults = [], currentData = [];
 
+
+
     const workerScript = `
     self.onmessage = function(e) {
         try {
@@ -1551,6 +1553,10 @@ function calcGarlandMatrix() {
             logHtml += `<div style="font-size:12px; font-weight:bold; color:#64748b; margin-bottom:8px;">📜 บันทึกการเปลี่ยนสูตรของ AI (เรียงตามลำดับ)</div>`;
             logHtml += `<div style="height:120px; overflow-y:auto; padding-right:5px;">`;
             
+// ✅ ส่วนนี้สำคัญ: ต้องตั้งชื่อ id="wfLogScrollArea" ไว้ที่นี่ก่อน
+logHtml += `<div id="wfLogScrollArea" style="height:120px; overflow-y:auto; padding-right:5px; scroll-behavior: smooth;">`;
+
+
             decisionLog.forEach(log => {
                 let icon = log.isWin ? '✓' : '✗';
                 let iconColor = log.isWin ? '#16a34a' : '#dc2626';
@@ -1575,6 +1581,16 @@ function calcGarlandMatrix() {
             currentWfLogStr += "----------------------------\nBy Ultimate AI Calculator";
 
             document.getElementById('wfLogContainer').innerHTML = logHtml;
+
+
+            // ✅ สั่งเลื่อน Scrollbar ลงล่างสุดอัตโนมัติ
+            setTimeout(() => {
+                let scrollBox = document.getElementById('wfLogScrollArea');
+                if(scrollBox) {
+                    scrollBox.scrollTop = scrollBox.scrollHeight;
+                }
+            }, 100); // หน่วงเวลาเล็กน้อยเพื่อให้ DOM render เสร็จ
+
 
             let adviceHtml = "", adviceColor = "", adviceBg = "";
             if (balance < 0) { adviceBg = "#fee2e2"; adviceColor = "#b91c1c"; adviceHtml = `⛔ กราฟเป็นขาลง (ขาดทุน ${balance})<br><span style="font-size:12px; font-weight:normal;">AI แนะนำ: หยุดเล่นหรือเปลี่ยนสูตร</span>`; } 
