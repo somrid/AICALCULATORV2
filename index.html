@@ -273,9 +273,9 @@
                             <span style="font-size:14px;">ดู</span>
                             <select id="targetPos" class="btn" style="padding:2px 5px; border-color:#b45309; color:#b45309;">
                                 <option value="0">หลักร้อย</option>
-                                <option value="1">สิบบน</option>
+                                <option value="1"selected>สิบบน</option>
                                 <option value="2">หน่วยบน</option>
-                                <option value="1" selected>สิบบน</option>
+                                <option value="1">สิบล่าง</option>
                                 <option value="4">หน่วยล่าง</option>
                                 <option value="5">แต้มบน</option>
                                 <option value="6">แต้มล่าง</option>
@@ -580,34 +580,34 @@
                 </select>
             </div>
             <div style="display:flex; align-items:center; gap:5px; background:#f1f5f9; padding:5px 10px; border-radius:10px; border:1px solid #cbd5e1;">
-                <span style="font-weight:bold; color:#475569; font-size:13px;">เดิน:</span>
-                <select id="glLen" class="btn" style="padding:2px 5px; border:1px solid #cbd5e1;" onchange="calcGarlandMatrix()">
-                    <option value="1">1 ตัว</option>
-                    <option value="2">2 ตัว</option>
-                    <option value="3">3 ตัว</option>
-                    <option value="4">4 ตัว</option>
-                    <option value="5">5 ตัว</option>
-                    <option value="6">6 ตัว</option>
-                    <option value="7">7 ตัว</option>
-                    <option value="8">8 ตัว</option>
-                    <option value="9">9 ตัว</option>
-                </select>
-            </div>
-            <div style="display:flex; align-items:center; gap:5px; background:#f1f5f9; padding:5px 10px; border-radius:10px; border:1px solid #cbd5e1;">
-                <span style="font-weight:bold; color:#475569; font-size:13px;">เป้าหมาย:</span>
-                <select id="glTarget" class="btn" style="padding:2px 5px; border:1px solid #cbd5e1;" onchange="calcGarlandMatrix()">
-                    <option value="0">1. หลักร้อย</option>
-                    <option value="1">2. หลักสิบบน</option>
-                    <option value="2">3. หลักหน่วยบน</option>
-                    <option value="3">4. หลักสิบล่าง</option>
-                    <option value="4">5. หลักหน่วยล่าง</option>
-                    <option value="5" style="color:#059669; font-weight:bold;">6. พิกัดบน (รูด)</option>
-                    <option value="6" style="color:#059669; font-weight:bold;">7. พิกัดล่าง (รูด)</option>
-                    <option value="7" style="color:#db2777; font-weight:bold;">8. วินบน (ครบ2ตัว)</option>
-                    <option value="8" style="color:#2563eb; font-weight:bold;">9. วินล่าง (ครบ2ตัว)</option>
-                    <option value="9" style="color:#7c3aed; font-weight:bold;">10. บน/ล่าง (รวม)</option>
-                </select>
-            </div>
+                    <span style="font-weight:bold; color:#475569; font-size:13px;">เดิน:</span>
+                    <select id="glLen" class="btn" style="padding:2px 5px; border:1px solid #cbd5e1;" onchange="calcGarlandMatrix()">
+                        <option value="1">1 ตัว</option>
+                        <option value="2">2 ตัว</option>
+                        <option value="3">3 ตัว</option>
+                        <option value="4">4 ตัว</option>
+                        <option value="5" selected>5 ตัว</option> <option value="6">6 ตัว</option>
+                        <option value="7">7 ตัว</option>
+                        <option value="8">8 ตัว</option>
+                        <option value="9">9 ตัว</option>
+                    </select>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:5px; background:#f1f5f9; padding:5px 10px; border-radius:10px; border:1px solid #cbd5e1;">
+                    <span style="font-weight:bold; color:#475569; font-size:13px;">เป้าหมาย:</span>
+                    <select id="glTarget" class="btn" style="padding:2px 5px; border:1px solid #cbd5e1;" onchange="calcGarlandMatrix()">
+                        <option value="0">1. หลักร้อย</option>
+                        <option value="1">2. หลักสิบบน</option>
+                        <option value="2">3. หลักหน่วยบน</option>
+                        <option value="3">4. หลักสิบล่าง</option>
+                        <option value="4">5. หลักหน่วยล่าง</option>
+                        <option value="5" style="color:#059669; font-weight:bold;" selected>6. พิกัดบน (รูด)</option> 
+			<option value="6" style="color:#059669; font-weight:bold;">7. พิกัดล่าง (รูด)</option>
+                        <option value="7" style="color:#db2777; font-weight:bold;">8. วินบน (ครบ2ตัว)</option>
+                        <option value="8" style="color:#2563eb; font-weight:bold;">9. วินล่าง (ครบ2ตัว)</option>
+                        <option value="9" style="color:#7c3aed; font-weight:bold;">10. บน/ล่าง (รวม)</option>
+                    </select>
+                </div>
             <button class="sf-btn" style="background:#db2777; box-shadow:0 4px 10px rgba(219, 39, 119, 0.3);" onclick="calcGarlandMatrix()">🌸 รันสูตร</button>
         </div>
         <div id="garlandOutput" style="overflow-x:auto;"></div>
