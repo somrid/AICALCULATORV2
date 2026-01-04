@@ -656,6 +656,9 @@
                 <button class="sf-btn" style="background:#22c55e; box-shadow:0 4px 10px rgba(34, 197, 94, 0.3);" onclick="runUniversalWalkForward()">
                     ▶️ เริ่มทดสอบ
                 </button>
+		<button class="sf-btn" style="background:#ffffff; color:#16a34a; border:1px solid #16a34a; box-shadow:none;" onclick="copyWalkForwardLog()">
+                        📋 Copy
+                    </button>
             </div>
 
             <div id="wfResult" style="margin-top:15px; display:none;">
@@ -692,6 +695,7 @@
 
 <script>
     let currentFollowStr = "", currentPairWinStr = "", currentPairTop10Str = "", currentDeepFollowStr = "";
+        let currentWfLogStr = "";
     let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLen=5, displayMode='auto';
     let inputOrder = 'normal', isHuntingMode = false, sortMode = 'score';
     let currentStepMode = 'normal', currentStepLabel='เรียง (+1)';
@@ -1517,7 +1521,8 @@ function calcGarlandMatrix() {
                 } else { equityCurve.push(balance); }
             }
 
-            // --- 3. แสดงผล ---
+
+// --- แสดงผล ---
             document.getElementById('wfResult').style.display = 'block';
             let winRate = totalBets > 0 ? Math.round((wins / totalBets) * 100) : 0;
             document.getElementById('wfWinRate').innerText = `${winRate}%`;
@@ -1535,15 +1540,26 @@ function calcGarlandMatrix() {
             });
             document.getElementById('wfEquityChart').innerHTML = chartHtml;
 
-            // --- 4. Log (แสดงผลแบบ Clean ตามสั่ง) ---
+
+
+
+
+// --- 4. Log & Prepare Text for Copy ---
+            currentWfLogStr = "📜 ผลการทดสอบย้อนหลัง\n----------------------------\n";
+            
             let logHtml = `<div style="padding:10px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0;">`;
-            logHtml += `<div style="font-size:12px; font-weight:bold; color:#64748b; margin-bottom:8px;">📜 บันทึกการเปลี่ยนสูตรของ AI (ล่าสุดอยู่บน)</div>`;
+            logHtml += `<div style="font-size:12px; font-weight:bold; color:#64748b; margin-bottom:8px;">📜 บันทึกการเปลี่ยนสูตรของ AI (เรียงตามลำดับ)</div>`;
             logHtml += `<div style="height:120px; overflow-y:auto; padding-right:5px;">`;
-            decisionLog.slice().reverse().forEach(log => {
+            
+            decisionLog.forEach(log => {
                 let icon = log.isWin ? '✓' : '✗';
                 let iconColor = log.isWin ? '#16a34a' : '#dc2626';
                 let balanceColor = log.balance >= 0 ? '#16a34a' : '#dc2626';
                 
+                // สร้าง Text สำหรับ Copy (ลบ HTML Tags ออก)
+                let plainInfo = log.info.replace(/<[^>]*>?/gm, ''); 
+                currentWfLogStr += `#${log.round} ใช้${plainInfo} (${log.nums}) = ${icon}\n${log.balance}\n`;
+
                 logHtml += `<div style="border-bottom:1px dashed #e2e8f0; padding:4px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
                     <div style="color:#334155;">
                         <span style="color:#94a3b8; margin-right:5px;">#${log.round}</span>
@@ -1554,8 +1570,10 @@ function calcGarlandMatrix() {
                     <div style="font-weight:bold; color:${balanceColor};">${log.balance}</div>
                 </div>`;
             });
-            logHtml += `</div></div>`;
             
+            logHtml += `</div></div>`;
+            currentWfLogStr += "----------------------------\nBy Ultimate AI Calculator";
+
             document.getElementById('wfLogContainer').innerHTML = logHtml;
 
             let adviceHtml = "", adviceColor = "", adviceBg = "";
@@ -1566,7 +1584,17 @@ function calcGarlandMatrix() {
 
         } catch (err) { console.error(err); alert("Error: " + err.message); }
     }
+
+    // ฟังก์ชันสำหรับปุ่ม Copy
+    function copyWalkForwardLog() {
+        if (!currentWfLogStr) {
+            alert("กรุณากด 'เริ่มทดสอบ' ก่อนคัดลอก");
+            return;
+        }
+        copyText(currentWfLogStr);
+    }
+
+          
 </script>
 </body>
 </html>
-
