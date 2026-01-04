@@ -1418,7 +1418,7 @@ function calcGarlandMatrix() {
     function copyDeepFollowResult() { if (!currentDeepFollowStr) return alert("กรุณากดค้นหาก่อน"); copyText(currentDeepFollowStr); }
 
   
-// 🔥 ฟังก์ชัน Walk-Forward (แก้ไข: จูนตรรกะร้อยมาลัยทิศทาง ให้ตรงกับตารางเป๊ะๆ) 🔥
+// 🔥 ฟังก์ชัน Walk-Forward (แก้ไข Fix: ตรวจผลคู่/คี่ ให้รองรับ พิกัด/วิน) 🔥
     function runUniversalWalkForward() {
         try {
             if (!currentData || currentData.length < 50) return alert("ข้อมูลไม่เพียงพอ (ต้องมีอย่างน้อย 50 งวด)");
@@ -1453,15 +1453,35 @@ function calcGarlandMatrix() {
                 // --- 1. คำนวณสูตร ---
                 if (strategyType === 'garland_parity') {
                     const getSeed = (r) => { if(r.some(isNaN))return null; let b=[];for(let k=0;k<4;k++)b.push((r[k]+r[k+1])%10); let c=[];for(let k=0;k<3;k++)c.push((b[k]+b[k+1])%10); let d=[];for(let k=0;k<2;k++)d.push((c[k]+c[k+1])%10); return (d[0]+d[1])%10; };
-                    const getTargets = (r) => { let t=r; switch(glTarget){case 0:return[t[0]]; case 1:return[t[1]]; case 2:return[t[2]]; case 3:return[t[3]]; case 4:return[t[4]]; default:return[t[2]]; } };
+                    // Helper หาเป้าหมาย (ใช้ร่วมกันทั้งคำนวณและตรวจผล)
+                    const getTargets = (r) => { 
+                        let t=r; 
+                        switch(glTarget){
+                            case 0:return[t[0]]; // ร้อย
+                            case 1:return[t[1]]; // สิบบน
+                            case 2:return[t[2]]; // หน่วยบน
+                            case 3:return[t[3]]; // สิบล่าง
+                            case 4:return[t[4]]; // หน่วยล่าง
+                            case 5:case 7:return[t[1],t[2]]; // พิกัดบน/วินบน (เอาทั้งสิบและหน่วย)
+                            case 6:case 8:return[t[3],t[4]]; // พิกัดล่าง/วินล่าง (เอาทั้งสิบและหน่วย)
+                            case 9: return[t[1],t[2],t[3],t[4]]; // บนล่าง
+                            default:return[t[2]]; 
+                        } 
+                    };
                     let scoreZero = 0, scoreOne = 0;
                     for(let p=0; p<pastData.length; p++) {
-                        let prev = (p===0) ? intData[i-lookback-1] : pastData[p-1]; let curr = pastData[p];
-                        let seed = getSeed(prev); let tgList = [getTargets(curr)]; 
-                        let valCheck = Array.isArray(tgList[0]) ? tgList[0][0] : tgList[0]; 
+                        let prev = (p===0) ? intData[i-lookback-1] : pastData[p-1]; 
+                        let curr = pastData[p];
+                        let seed = getSeed(prev); 
+                        let tgList = getTargets(curr); // ได้ Array เป้าหมาย เช่น [8, 9]
+                        
                         if(seed === null) continue;
-                        if(valCheck % 2 === seed % 2) scoreZero++; else scoreOne++;
+                        
+                        // เช็คคะแนนย้อนหลัง (ถ้ามีตัวไหนตรง Parity ให้ถือว่าถูก)
+                        let isMatchZero = tgList.some(val => val % 2 === seed % 2);
+                        if(isMatchZero) scoreZero++; else scoreOne++;
                     }
+                    
                     let realPrev = intData[i-1]; let realSeed = getSeed(realPrev);
                     if (realSeed !== null) {
                         let playParity = (scoreZero >= scoreOne) ? (realSeed % 2) : ((realSeed + 1) % 2);
@@ -1470,7 +1490,9 @@ function calcGarlandMatrix() {
                         else { prediction = [1, 3, 5, 7, 9]; algoName += " [คี่]"; }
                         cost = 50; payout = 90;
                     }
-                } else if (strategyType.startsWith('eo_')) {
+                } 
+                else if (strategyType.startsWith('eo_')) {
+                    // (Logic เดิมของ eo_...)
                     let pos = 2; let posName = "หน่วยบน";
                     if (strategyType === 'eo_ten_up') { pos = 1; posName = "สิบบน"; } else if (strategyType === 'eo_unit_up') { pos = 2; posName = "หน่วยบน"; } else if (strategyType === 'eo_ten_down') { pos = 3; posName = "สิบล่าง"; } else if (strategyType === 'eo_unit_down') { pos = 4; posName = "หน่วยล่าง"; }
                     let scoreFlow = 0; let scoreSwitch = 0;
@@ -1484,7 +1506,9 @@ function calcGarlandMatrix() {
                     algoName = `☯ คู่/คี่ (${posName})`; 
                     if (predictParity === 0) { prediction = [0, 2, 4, 6, 8]; algoName += " [คู่]"; } else { prediction = [1, 3, 5, 7, 9]; algoName += " [คี่]"; }
                     cost = 50; payout = 90;
-                } else if (strategyType === 'garland') {
+                } 
+                else if (strategyType === 'garland') {
+                    // (Logic เดิมของ garland มาตรฐาน)
                     const getSeed = (r) => { if(r.some(isNaN))return null; let b=[];for(let k=0;k<4;k++)b.push((r[k]+r[k+1])%10); let c=[];for(let k=0;k<3;k++)c.push((b[k]+b[k+1])%10); let d=[];for(let k=0;k<2;k++)d.push((c[k]+c[k+1])%10); return (d[0]+d[1])%10; };
                     const getTargets = (r) => { let t=r; switch(glTarget){case 0:return[t[0]];case 1:return[t[1]];case 2:return[t[2]];case 3:return[t[3]];case 4:return[t[4]];case 5:case 7:return[t[1],t[2]];case 6:case 8:return[t[3],t[4]];case 9: return[t[1],t[2],t[3],t[4]]; default:return[t[1],t[2]];} };
                     let scores = Array(10).fill(0);
@@ -1508,12 +1532,11 @@ function calcGarlandMatrix() {
                         if(glTarget <= 4) { cost = glLen * 10; } else if(glTarget === 5 || glTarget === 6) { cost = (20 * glLen) - (glLen * glLen); } else if(glTarget === 7 || glTarget === 8) { cost = glLen * (glLen - 1); } else if(glTarget === 9) { cost = 2 * ((20 * glLen) - (glLen * glLen)); } 
                     }
                 } 
-                // ✅ ปรับปรุง: ร้อยมาลัย ทิศทาง +/- (คิดคะแนนแบบถ่วงน้ำหนัก เหมือนตาราง)
                 else if (strategyType === 'garland_direction') {
+                    // (Logic เดิมของ garland direction)
                     const getSeed = (r) => { if(r.some(isNaN))return null; let b=[];for(let k=0;k<4;k++)b.push((r[k]+r[k+1])%10); let c=[];for(let k=0;k<3;k++)c.push((b[k]+b[k+1])%10); let d=[];for(let k=0;k<2;k++)d.push((c[k]+c[k+1])%10); return (d[0]+d[1])%10; };
                     const getTargets = (r) => { let t=r; switch(glTarget){case 0:return[t[0]];case 1:return[t[1]];case 2:return[t[2]];case 3:return[t[3]];case 4:return[t[4]];default:return[t[2]];} };
                     let scorePlus = 0, scoreMinus = 0;
-                    
                     for(let p=0; p<pastData.length; p++) {
                         let prev = (p===0) ? intData[i-lookback-1] : pastData[p-1]; 
                         let curr = pastData[p];
@@ -1521,65 +1544,65 @@ function calcGarlandMatrix() {
                         let tgList = [getTargets(curr)]; 
                         let valCheck = Array.isArray(tgList[0]) ? tgList[0][0] : tgList[0];
                         if(seed === null) continue;
-                        
-                        // 🔥 สูตรคิดคะแนนถ่วงน้ำหนัก (เหมือนตาราง) 🔥
-                        // ยิ่งใกล้งวดปัจจุบัน (p เยอะ) ยิ่งได้คะแนนเยอะ
-                        // pastData.length คือจำนวนงวดที่ดู (เช่น 20)
-                        // dist = 1 คือ งวดล่าสุด
-                        let dist = pastData.length - p; 
-                        let weight = 1;
-                        if (dist <= 5) weight = 3;      // 5 งวดล่าสุด คูณ 3
-                        else if (dist <= 10) weight = 2; // 6-10 งวดก่อน คูณ 2
-                        else weight = 1;                 // เก่ากว่านั้น คูณ 1
-
-                        // เช็คทิศ + (เดินหน้า)
+                        let dist = pastData.length - p; let weight = (dist <= 5) ? 3 : ((dist <= 10) ? 2 : 1);
                         let setPlus=[]; for(let k=0; k<glLen; k++) setPlus.push((seed+k)%10);
-                        if(setPlus.includes(valCheck)) scorePlus += weight; // ✅ บวกตามน้ำหนัก
-
-                        // เช็คทิศ - (ถอยหลัง)
+                        if(setPlus.includes(valCheck)) scorePlus += weight;
                         let setMinus=[]; for(let k=0; k<glLen; k++) setMinus.push((seed-k+10)%10);
-                        if(setMinus.includes(valCheck)) scoreMinus += weight; // ✅ บวกตามน้ำหนัก
+                        if(setMinus.includes(valCheck)) scoreMinus += weight;
                     }
-                    
                     let realPrev = intData[i-1]; let realSeed = getSeed(realPrev);
                     if (realSeed !== null) {
                         let direction = (scorePlus >= scoreMinus) ? 1 : -1;
                         algoName = (direction === 1) ? `▲ เดินหน้า (+)` : `▼ ถอยหลัง (-)`;
-                        
                         prediction = [];
                         for(let k=0; k<glLen; k++) {
-                            if(direction === 1) prediction.push((realSeed+k)%10);
-                            else prediction.push((realSeed-k+10)%10);
+                            if(direction === 1) prediction.push((realSeed+k)%10); else prediction.push((realSeed-k+10)%10);
                         }
-                        
                         payout = 90;
-                        if(glTarget <= 4) { cost = glLen * 10; } 
-                        else if(glTarget === 5 || glTarget === 6) { cost = (20 * glLen) - (glLen * glLen); }
-                        else { cost = glLen * (glLen - 1); } 
+                        if(glTarget <= 4) { cost = glLen * 10; } else if(glTarget === 5 || glTarget === 6) { cost = (20 * glLen) - (glLen * glLen); } else { cost = glLen * (glLen - 1); } 
                     }
                 }
 
-                // --- 2. ตรวจผลรางวัล ---
+                // --- 2. ตรวจผลรางวัล (Check Results) ---
                 if (prediction !== null) {
                     let targets = [];
-                    if (strategyType.startsWith('eo_') || strategyType === 'garland_parity' || strategyType === 'garland_direction') {
-                        let pos = 2; if (strategyType === 'eo_ten_up') pos = 1; else if (strategyType === 'eo_ten_down') pos = 3; else if (strategyType === 'eo_unit_down') pos = 4;
-                        if(strategyType.startsWith('garland')) { switch(glTarget){case 0:pos=0;break; case 1:pos=1;break; case 2:pos=2;break; case 3:pos=3;break; case 4:pos=4;break; default:pos=2;} }
+                    // ✅✅✅ แก้ไขจุดนี้: รวม Logic การหาเป้าหมายให้รองรับ Array (พิกัด/วิน) ✅✅✅
+                    if (strategyType === 'garland_parity' || strategyType === 'garland' || strategyType === 'garland_direction') {
+                        // ใช้ Logic เดียวกันหมดสำหรับ 3 โหมดนี้
+                        const getT = (r) => { 
+                            let t=r; 
+                            switch(glTarget){
+                                case 0:return[t[0]]; case 1:return[t[1]]; case 2:return[t[2]]; 
+                                case 3:return[t[3]]; case 4:return[t[4]]; 
+                                case 5:case 7:return[t[1],t[2]]; // พิกัดบน/วินบน -> คืนค่า Array [สิบ, หน่วย]
+                                case 6:case 8:return[t[3],t[4]]; // พิกัดล่าง/วินล่าง -> คืนค่า Array [สิบ, หน่วย]
+                                case 9: return[t[1],t[2],t[3],t[4]]; 
+                                default:return[t[2]];
+                            } 
+                        };
+                        targets = getT(currentRound);
+                    } 
+                    else if (strategyType.startsWith('eo_')) {
+                        // โหมดคู่/คี่ แบบระบุตำแหน่ง (อันนี้คืนค่าตัวเดียวถูกแล้ว)
+                        let pos = 2; 
+                        if (strategyType === 'eo_ten_up') pos = 1; else if (strategyType === 'eo_ten_down') pos = 3; else if (strategyType === 'eo_unit_down') pos = 4;
                         targets = [getVal(currentRound, pos)];
-                    } else if (strategyType === 'garland') {
-                        const getT = (r, m) => { let t=r; switch(glTarget){case 0:return[t[0]];case 1:return[t[1]];case 2:return[t[2]];case 3:return[t[3]];case 4:return[t[4]];case 5:case 7:return[t[1],t[2]];case 6:case 8:return[t[3],t[4]];case 9: return[t[1],t[2],t[3],t[4]]; default:return[t[1],t[2]];} };
-                        targets = getT(currentRound, glTarget);
                     }
 
                     let isWin = false;
-                    if ((strategyType === 'garland' || strategyType === 'garland_direction') && [7,8].includes(glTarget)) {
-                        let uniqT = [...new Set(targets)]; isWin = prediction.filter(n => uniqT.includes(n)).length === uniqT.length;
+                    // ตรวจผล (ถ้าเป็นวิน ต้องถูกทุกตัว / ถ้าพิกัดหรืออื่นๆ ถูกตัวเดียวก็พอ)
+                    if ((strategyType === 'garland' || strategyType === 'garland_direction' || strategyType === 'garland_parity') && [7,8].includes(glTarget)) {
+                        // เฉพาะวิน (7, 8) ต้องครบ
+                        let uniqT = [...new Set(targets)]; 
+                        isWin = prediction.filter(n => uniqT.includes(n)).length === uniqT.length;
                     } else {
+                        // พิกัด/ปัก/คู่คี่ -> มีเลขในเป้าหมายก็ถือว่าถูก
                         isWin = prediction.some(n => targets.includes(n));
                     }
 
                     let pnl = isWin ? (payout - cost) : -cost;
-                    balance += pnl; equityCurve.push(balance);
+                    balance += pnl;
+                    equityCurve.push(balance);
                     if (isWin) wins++; totalBets++;
 
                     decisionLog.push({ round: totalBets, info: algoName, isWin: isWin, balance: balance, nums: prediction.join('') });
@@ -1634,9 +1657,7 @@ function calcGarlandMatrix() {
             // Auto Scroll
             setTimeout(() => {
                 let scrollBox = document.getElementById('wfLogScrollArea');
-                if(scrollBox) {
-                    scrollBox.scrollTop = scrollBox.scrollHeight;
-                }
+                if(scrollBox) { scrollBox.scrollTop = scrollBox.scrollHeight; }
             }, 100);
 
             let adviceHtml = "", adviceColor = "", adviceBg = "";
@@ -1646,15 +1667,6 @@ function calcGarlandMatrix() {
             let advBox = document.getElementById('aiAdviceBox'); advBox.innerHTML = adviceHtml; advBox.style.backgroundColor = adviceBg; advBox.style.color = adviceColor; advBox.style.border = `1px solid ${adviceColor}`;
 
         } catch (err) { console.error(err); alert("Error: " + err.message); }
-    }
-
-    // ฟังก์ชันสำหรับปุ่ม Copy
-    function copyWalkForwardLog() {
-        if (!currentWfLogStr) {
-            alert("กรุณากด 'เริ่มทดสอบ' ก่อนคัดลอก");
-            return;
-        }
-        copyText(currentWfLogStr);
     }
 
           
