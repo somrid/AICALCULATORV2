@@ -412,7 +412,7 @@
                         <input type="number" id="sfLen" value="4" min="1" max="9" style="width:40px;" title="จำนวนตัวเลข">
                         <span style="font-size:12px; font-weight:bold;">ย้อน:</span>
                         <input type="number" id="sfLookback" value="10" style="width:40px;" title="จำนวนงวด">
-                        <button class="sf-btn" onclick="genSmartFlow()">🚀 วิเคราะห์</button>
+                        <button class="sf-btn" style="background:#16a34a; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);" onclick="genSmartFlow()">🚀 วิเคราะห์</button>
                         <button class="btn" onclick="copySmartFlow()">Copy All</button>
                     </div>
                 </div>
@@ -540,6 +540,64 @@
             <div id="pairOutput" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap:10px; margin-top:15px;"></div>
         </div>
     </div>
+
+
+
+
+<div class="collapsible-container" style="margin-top: 20px;">
+        <div class="collapsible-header" onclick="toggleSection('deepFollowContent', 'dfIcon')">
+            <span>🕵️‍♂️ เจาะลึกเลขตาม (Deep Follow Analysis)</span><span id="dfIcon">▼</span>
+        </div>
+        <div id="deepFollowContent" class="collapsible-content">
+            <div class="smart-flow-box" style="margin-top:0; border:none; box-shadow:none; background:#ecfdf5; border:2px dashed #059669;">
+                <div class="sf-header">
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center;">
+                        
+                        <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #a7f3d0; display:flex; align-items:center; gap:5px;">
+                            <span style="font-weight:bold; color:#059669; font-size:13px;">ถ้า</span>
+                            <select id="dfSourcePos" class="btn" style="padding:2px;" onchange="autoFillInputs()">
+                                <option value="0">หลักร้อย</option>
+                                <option value="1" selected>สิบบน</option>
+                                <option value="2">หน่วยบน</option>
+                                <option value="3">สิบล่าง</option>
+                                <option value="4">หน่วยล่าง</option>
+                            </select>
+                            <span style="font-weight:bold; color:#059669; font-size:13px;">มา</span>
+                            <select id="dfSourceNum" class="btn" style="padding:2px; width:50px;">
+                                <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                                <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                            </select>
+                        </div>
+
+                        <span style="font-size:16px; color:#059669;">👉</span>
+
+                        <div style="background:rgba(255,255,255,0.6); padding:5px; border-radius:10px; border:1px solid #fef9c3; display:flex; align-items:center; gap:5px;">
+                            <span style="font-size:13px; font-weight:bold; color:#b45309;">งวดต่อไป</span>
+                            <select id="dfTargetPos" class="btn" style="padding:2px;">
+                                <option value="0">หลักร้อย</option>
+                                <option value="1" selected>หลักสิบบน</option>
+                                <option value="2">หลักหน่วยบน</option>
+                                <option value="3">หลักสิบล่าง</option>
+                                <option value="4">หลักหน่วยล่าง</option>
+                            </select>
+                            <span style="font-size:13px; font-weight:bold; color:#b45309;">ออกอะไร?</span>
+                        </div>
+
+                        <button class="sf-btn" style="background:#059669;" onclick="calcDeepFollow()">🚀 ค้นหา</button>
+                        <button class="sf-btn" style="background:#ffffff; color:#059669; border:1px solid #059669; box-shadow:none;" onclick="copyDeepFollowResult()">📋 Copy</button>
+                    </div>
+                </div>
+
+                <div id="dfResultHeader" style="text-align:center; margin-top:20px; font-weight:bold; font-size:16px; color:#0f172a; display:none;"></div>
+                <div id="dfOutput" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap:10px; margin-top:15px;"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
 
     <div class="control-panel">
         <div class="display-mode-group">
@@ -786,11 +844,20 @@
             <span>🌸 ร้อยมาลัยเดินสูตร (Garland Matrix 10 ทิศ)</span><span id="garlandIcon">▼</span>
         </div>
         <div id="garlandContent" class="collapsible-content">
-            <div style="display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+            
+<div style="display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
                 
                 <div style="display:flex; align-items:center; gap:5px; background:#f1f5f9; padding:5px 10px; border-radius:10px; border:1px solid #cbd5e1;">
+                    <span style="font-weight:bold; color:#475569; font-size:13px;">ระบบ:</span>
+                    <select id="glSystemType" class="btn" style="padding:2px 5px; border:1px solid #cbd5e1; color:#0f172a; font-weight:bold;" onchange="calcGarlandMatrix()">
+                        <option value="standard">1. ร้อยมาลัย (มาตรฐาน 10 ทิศ)</option>
+                        <option value="parity">2. ร้อยมาลัย (คู่/คี่ +0/+1)</option>
+                    </select>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:5px; background:#f1f5f9; padding:5px 10px; border-radius:10px; border:1px solid #cbd5e1;">
                     <span style="font-weight:bold; color:#475569; font-size:13px;">เดิน:</span>
-                    <select id="glLen" class="btn" style="padding:2px 5px; border:1px solid #cbd5e1;">
+                    <select id="glLen" class="btn" style="padding:2px 5px; border:1px solid #cbd5e1;" onchange="calcGarlandMatrix()">
                         <option value="1">1 ตัว</option>
                         <option value="2">2 ตัว</option>
                         <option value="3">3 ตัว</option>
@@ -805,7 +872,7 @@
 
                 <div style="display:flex; align-items:center; gap:5px; background:#f1f5f9; padding:5px 10px; border-radius:10px; border:1px solid #cbd5e1;">
                     <span style="font-weight:bold; color:#475569; font-size:13px;">เป้าหมาย:</span>
-                    <select id="glTarget" class="btn" style="padding:2px 5px; border:1px solid #cbd5e1;">
+                    <select id="glTarget" class="btn" style="padding:2px 5px; border:1px solid #cbd5e1;" onchange="calcGarlandMatrix()">
                         <option value="0">1. หลักร้อย</option>
                         <option value="1">2. หลักสิบบน</option>
                         <option value="2">3. หลักหน่วยบน</option>
@@ -821,123 +888,92 @@
 
                 <button class="sf-btn" style="background:#db2777; box-shadow:0 4px 10px rgba(219, 39, 119, 0.3);" onclick="calcGarlandMatrix()">🌸 รันสูตร</button>
             </div>
+
+
             
             <div id="garlandOutput" style="overflow-x:auto;"></div>
         </div>
 </div>
-<div class="collapsible-container" style="margin-top: 15px;">
-        <div class="collapsible-header" onclick="toggleSection('wfContent', 'wfIcon')">
-            <span>🧪 ทดสอบระบบย้อนหลัง (Walk-Forward Simulation)</span><span id="wfIcon">▼</span>
+
+
+<div class="collapsible-container" style="margin-top: 20px; border: 2px solid #22c55e;">
+        <div class="collapsible-header" onclick="toggleSection('wfContent', 'wfIcon')" style="background:#f0fdf4;">
+            <span style="color:#15803d;">🧪 ทดสอบระบบย้อนหลัง (Universal Walk-Forward)</span><span id="wfIcon">▼</span>
         </div>
         <div id="wfContent" class="collapsible-content">
-            <div class="smart-flow-box" style="margin-top:0; border:none; background:#f0fdf4; border:2px dashed #22c55e;">
-                <div class="sf-header" style="justify-content:center; flex-wrap:wrap; gap:10px;">
+            <div class="smart-flow-box" style="margin-top:0; border:none; background:#ffffff;">
+                
+                <div class="sf-header" style="justify-content:center; flex-wrap:wrap; gap:10px; border-bottom:1px dashed #cbd5e1; padding-bottom:15px; margin-bottom:15px;">
+                    
+                    <div style="display:flex; align-items:center; gap:5px; background:#f8fafc; padding:5px 10px; border-radius:8px; border:1px solid #cbd5e1;">
+                        <span style="font-size:14px; color:#334155; font-weight:bold;">1. เลือกระบบ:</span>
+                        <select id="wfStrategyType" class="btn" style="padding:4px; font-weight:bold; color:#15803d; border:1px solid #22c55e;">
+                            <optgroup label="🔥 สูตรหลัก">
+                                <option value="garland">🌸 ร้อยมาลัย (มาตรฐาน)</option>
+                                <option value="garland_parity">🌸 ร้อยมาลัย (คู่/คี่ Base+0/+1)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
                     <div style="display:flex; align-items:center; gap:5px;">
-                        <span style="font-size:14px; color:#15803d; font-weight:bold;">จำลองการเล่น</span>
+                        <span style="font-size:14px; color:#334155; font-weight:bold;">2. จำลอง:</span>
                         <select id="wfTestCount" class="btn" style="padding:4px;">
-                            <option value="20">20 งวดล่าสุด</option>
-                            <option value="50" selected>50 งวดล่าสุด</option>
-                            <option value="100">100 งวดล่าสุด</option>
+                            <option value="20">20 งวด</option>
+                            <option value="50" selected>50 งวด</option>
+                            <option value="100">100 งวด</option>
                         </select>
                     </div>
                     
                     <div style="display:flex; align-items:center; gap:5px;">
-                        <span style="font-size:14px; color:#15803d; font-weight:bold;">โดยเลือกสูตรที่ดีที่สุดใน</span>
+                        <span style="font-size:14px; color:#334155; font-weight:bold;">ย้อนหลัง:</span>
                         <select id="wfLookback" class="btn" style="padding:4px;">
-                            <option value="3">3 งวดก่อนหน้า</option>
-                            <option value="5" selected>5 งวดก่อนหน้า</option>
-                            <option value="10">10 งวดก่อนหน้า</option>
+                            <option value="5" selected>5 งวด</option>
+                            <option value="10">10 งวด</option>
+                            <option value="20">20 งวด</option>
                         </select>
                     </div>
 
-                    <button class="sf-btn" style="background:#22c55e; box-shadow:0 4px 10px rgba(34, 197, 94, 0.3);" onclick="runGarlandWalkForward()">
+                    <button class="sf-btn" style="background:#22c55e; box-shadow:0 4px 10px rgba(34, 197, 94, 0.3);" onclick="runUniversalWalkForward()">
                         ▶️ เริ่มทดสอบ
                     </button>
                 </div>
 
-<div id="wfResult" style="margin-top:15px; display:none;">
+                <div id="wfResult" style="margin-top:15px; display:none;">
                     
-                    <div id="aiAdviceBox" style="margin-bottom: 15px;"></div>
+                    <div id="aiAdviceBox" style="margin-bottom: 15px; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold;"></div>
 
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                        <div style="background:white; padding:15px; border-radius:10px; text-align:center; border:1px solid #bbf7d0;">
-                            <div style="font-size:12px; color:#86efac; font-weight:bold;">ความแม่นยำ (Win Rate)</div>
-                            <div id="wfWinRate" style="font-size:24px; font-weight:900; color:#15803d;">0%</div>
-                            <div id="wfWinCount" style="font-size:12px; color:#64748b;">ถูก 0 / ผิด 0</div>
+                    <div style="display:flex; gap:15px; margin-bottom:15px;">
+                        <div style="flex:1; background:white; padding:15px; border-radius:10px; text-align:center; border:1px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                            <div style="font-size:12px; color:#64748b; font-weight:bold; margin-bottom:5px;">ความแม่นยำ (Win Rate)</div>
+                            <div id="wfWinRate" style="font-size:28px; font-weight:900; color:#10b981; line-height:1;">0%</div>
+                            <div id="wfWinCount" style="font-size:12px; color:#94a3b8; margin-top:5px;">-</div>
                         </div>
-                        <div style="background:white; padding:15px; border-radius:10px; text-align:center; border:1px solid #bbf7d0;">
-                            <div style="font-size:12px; color:#86efac; font-weight:bold;">กำไรสะสม (P/L)</div>
-                            <div id="wfProfit" style="font-size:24px; font-weight:900; color:#15803d;">+0</div>
-                            <div style="font-size:10px; color:#94a3b8;">(สมมติลงทุนตัวละ 1 / จ่าย 90)</div>
+                        <div style="flex:1; background:white; padding:15px; border-radius:10px; text-align:center; border:1px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                            <div style="font-size:12px; color:#64748b; font-weight:bold; margin-bottom:5px;">กำไรสะสม (P/L)</div>
+                            <div id="wfProfit" style="font-size:28px; font-weight:900; color:#10b981; line-height:1;">+0</div>
+                            <div style="font-size:10px; color:#94a3b8; margin-top:5px;">(หน่วย)</div>
                         </div>
                     </div>
 
-                    <div style="background:white; padding:10px; border-radius:10px; border:1px solid #e2e8f0;">
-                        <div style="font-size:12px; font-weight:bold; color:#334155; margin-bottom:10px;">📉 เส้นทางการลงทุน (Equity Curve)</div>
-                        <div id="wfEquityChart" style="display:flex; align-items:flex-end; height:100px; gap:2px; overflow-x:auto; padding-bottom:5px;"></div>
+                    <div style="background:white; padding:15px; border-radius:10px; border:1px solid #e2e8f0; position:relative;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <div style="font-size:12px; font-weight:bold; color:#334155;">📈 เส้นทางการเติบโตของทุน (Equity Curve)</div>
+                            <div style="font-size:10px; color:#94a3b8;">*กราฟสูงขึ้น = ดี</div>
+                        </div>
+                        <div id="wfEquityChart" style="display:flex; align-items:flex-end; height:120px; gap:2px; overflow-x:auto; padding-bottom:5px;"></div>
                     </div>
+
+                    <div id="wfLogContainer" style="margin-top:15px;"></div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-<div class="collapsible-container" style="margin-top: 20px;">
-        <div class="collapsible-header" onclick="toggleSection('deepFollowContent', 'dfIcon')">
-            <span>🕵️‍♂️ เจาะลึกเลขตาม (Deep Follow Analysis)</span><span id="dfIcon">▼</span>
-        </div>
-        <div id="deepFollowContent" class="collapsible-content">
-            <div class="smart-flow-box" style="margin-top:0; border:none; box-shadow:none; background:#f0f9ff; border:2px dashed #0ea5e9;">
-                <div class="sf-header" style="justify-content:center;">
-                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;">
-                        
-                        <div style="background:rgba(255,255,255,0.8); padding:8px; border-radius:10px; border:1px solid #bae6fd; display:flex; align-items:center; gap:5px;">
-                            <span style="font-weight:bold; color:#0369a1;">ถ้า</span>
-                            
-                            <select id="dfSourcePos" class="btn" style="padding:4px;" onchange="autoFillInputs()">
-                                <option value="0">หลักร้อย</option>
-                                <option value="1" selected>สิบบน</option>
-                                <option value="2">หน่วยบน</option>
-                                <option value="3">สิบล่าง</option>
-                                <option value="4">หน่วยล่าง</option>
-                            </select>
-
-                            <span style="font-weight:bold; color:#0369a1;">มา</span>
-                            <select id="dfSourceNum" class="btn" style="padding:4px; width:50px;">
-                                <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
-                                <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                            </select>
-                        </div>
-
-                        <span style="font-size:24px;">👉</span>
-
-                        <div style="background:rgba(255,255,255,0.8); padding:8px; border-radius:10px; border:1px solid #fef9c3; display:flex; align-items:center; gap:5px;">
-                            <span style="font-weight:bold; color:#b45309;">งวดต่อไป</span>
-                            <select id="dfTargetPos" class="btn" style="padding:4px;">
-                                <option value="0">หลักร้อย</option>
-                                <option value="1" selected>หลักสิบบน</option>
-                                <option value="2">หลักหน่วยบน</option>
-                                <option value="3">หลักสิบล่าง</option>
-                                <option value="4">หลักหน่วยล่าง</option>
-                            </select>
-                            <span style="font-weight:bold; color:#b45309;">ออกอะไร?</span>
-                        </div>
-
-                        <button class="sf-btn" style="background:#0ea5e9; box-shadow:0 4px 10px rgba(14, 165, 233, 0.3);" onclick="calcDeepFollow()">🚀 ค้นหา</button>
-    <button class="sf-btn" style="background:#ffffff; color:#0ea5e9; border:1px solid #0ea5e9; box-shadow:none;" onclick="copyDeepFollowResult()">📋 Copy</button>
-    </div>
-</div>
-
-                <div id="dfResultHeader" style="text-align:center; margin-top:20px; font-weight:bold; font-size:16px; color:#0f172a; display:none;"></div>
-                
-                <div id="dfOutput" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap:10px; margin-top:15px;"></div>
             </div>
         </div>
     </div>
 
 
 
-    </div>
+
+
 <script>
     // --- ตัวแปรหลักของระบบ ---
     let currentFollowStr = ""; 
@@ -958,12 +994,13 @@ let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLe
     let globalRawResults = [];
     let currentData = []; 
 
- 
-// --- WORKER SCRIPT: ส่วนคำนวณเบื้องหลัง (ฉบับอัปเกรด Hunting Mode สมบูรณ์) ---
+    // --- WORKER SCRIPT: ส่วนคำนวณเบื้องหลัง (หัวใจสำคัญ) ---
     const workerScript = `
     self.onmessage = function(e) {
         try {
             const { intData, targetType, len, displayMode, startIdx, endIdx, manualLimit, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize, forwardTest } = e.data;
+            
+            // กำหนดเป้าหมายจำนวนสูตร
             const targetCount = (displayMode === 'all') ? (manualLimit || 100) : 2000;
             
             // เรียกฟังก์ชันคำนวณ
@@ -985,36 +1022,63 @@ let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLe
 
     function getAdditives(len, mode) {
         let arr = [];
-        if (mode === 'step5') { let baseLen = Math.ceil(len / 2); for (let i = 0; i < baseLen; i++) arr.push(i); for (let i = 0; i < baseLen; i++) arr.push((i + 5) % 10); return arr.slice(0, len); }
+        if (mode === 'step5') { // สูตรข้าม 5 (เลขเงา)
+            let baseLen = Math.ceil(len / 2);
+            for (let i = 0; i < baseLen; i++) arr.push(i);
+            for (let i = 0; i < baseLen; i++) arr.push((i + 5) % 10);
+            return arr.slice(0, len);
+        }
         let step = 1; let start = 0;
-        if(mode === 'odd') { start=1; step=2; } else if(mode === 'even') { start=0; step=2; } else if(mode === 'step3') { start=0; step=3; }
+        if(mode === 'odd') { start=1; step=2; } 
+        else if(mode === 'even') { start=0; step=2; } 
+        else if(mode === 'step3') { start=0; step=3; }
         for(let i=0; i<len; i++) arr.push((start + (i*step)) % 10);
         return arr;
     }
 
     function getTargetValue(roundArr, type) {
         if (!roundArr) return [];
-        if(type==='hundred') return [roundArr[0]]; if(type==='tens_up') return [roundArr[1]]; if(type==='units_up') return [roundArr[2]];
-        if(type==='tens_down') return [roundArr[3]]; if(type==='units_down') return [roundArr[4]];
-        if(type==='tf_up') return [roundArr[1], roundArr[2]]; if(type==='tf_down') return [roundArr[3], roundArr[4]]; 
-        if(type==='pair_up') return [roundArr[1], roundArr[2]]; if(type==='pair_down') return [roundArr[3], roundArr[4]]; 
+        if(type==='hundred') return [roundArr[0]]; 
+        if(type==='tens_up') return [roundArr[1]]; 
+        if(type==='units_up') return [roundArr[2]];
+        if(type==='tens_down') return [roundArr[3]]; 
+        if(type==='units_down') return [roundArr[4]];
+        if(type==='tf_up') return [roundArr[1], roundArr[2]]; 
+        if(type==='tf_down') return [roundArr[3], roundArr[4]]; 
+        if(type==='pair_up') return [roundArr[1], roundArr[2]]; 
+        if(type==='pair_down') return [roundArr[3], roundArr[4]]; 
         if(type==='any_no_hundred') return [roundArr[1], roundArr[2], roundArr[3], roundArr[4]]; 
         return []; 
     }
 
+    // ✅ ฟังก์ชันเช็คผลรางวัล (แก้ไขให้แม่นยำ)
     function checkWin(targets, nums, type) {
-        let match = 0; for (let t of targets) if (nums.includes(t)) match++;
+        let match = 0; 
+        for (let t of targets) if (nums.includes(t)) match++;
+        
+        // ถ้าเป็น วิน (Pair) ต้องมีครบทุกตัวในเป้าหมาย (เช่น มาทั้งสิบและหน่วย)
         if (type.includes('pair')) return match === targets.length; 
+        
+        // ถ้าเป็น พิกัด/วิ่ง (TF/Any) ขอแค่มีสักตัว
         if (type.includes('tf') || type.includes('any')) return match > 0;
+        
         return match > 0; 
     }
 
     function findFormulasLite(intData, targetType, len, displayMode, startIdx, endIdx, targetCount, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize, forwardTest) {
-        if ((stepMode === 'odd' || stepMode === 'even') && len > 5) len = 5;
-        
+// ✅ แทรกตรงนี้: จำกัดจำนวนเลขคี่/คู่ ไม่ให้เกิน 5 ตัว
+        if ((stepMode === 'odd' || stepMode === 'even') && len > 5) {
+            len = 5;
+        }
+        // คำนวณขอบเขตข้อมูล (ใช้ i-1 ทำนาย i)
+        // ข้อมูลต้องมีอย่างน้อย 2 งวด (งวดตั้งต้น + งวดทำนาย)
         let activeEndIdx = Math.min(endIdx - (forwardTest || 0), intData.length - 1);
+        
+        // เตรียมเฉลยคำตอบของแต่ละงวดไว้ล่วงหน้า
         const targetVals = new Array(intData.length).fill(null);
-        for(let i=1; i < intData.length; i++) targetVals[i] = getTargetValue(intData[i], targetType);
+        for(let i=1; i < intData.length; i++) {
+             targetVals[i] = getTargetValue(intData[i], targetType);
+        }
 
         let randFunc = Math.random;
         if (displayMode === 'all' || isHuntingMode) {
@@ -1026,10 +1090,12 @@ let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLe
         let allResults = [];
         let additives = getAdditives(len, stepMode);
 
+        // วนลูปสุ่มสูตร
         for (let r = 0; r < targetCount; r++) {
             let p1 = positions[Math.floor(randFunc() * 5)]; let p2 = positions[Math.floor(randFunc() * 5)];
             let op = operators[Math.floor(randFunc() * 3)]; let con = constants[Math.floor(randFunc() * 10)]; let m1 = Math.floor(randFunc() * 5) + 1;
             
+            // คำนวณค่าพื้นฐานของสูตรทุกงวดเก็บไว้
             const baseSums = new Int8Array(intData.length);
             for(let i=0; i<intData.length; i++) { 
                 let v1 = intData[i][p1]; let v2 = intData[i][p2]; let res = 0;
@@ -1040,57 +1106,44 @@ let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLe
             
             let name = \`(\${m1>1?m1+'x':''}\${['ร','ส','น','ลส','ลน'][p1]} \${op} \${['ร','ส','น','ลส','ลน'][p2]}) + \${con}\`;
 
-            // วนลูปหาค่า +Offset ที่ดีที่สุด (R0-R9)
+            // ลองขยับค่า Start (0-9) เพื่อหาสูตรที่เดินดีที่สุด
             for(let start=0; start<=9; start++) {
-                let score=0; let currentLoss = 0; let maxCons = 0; let totalLoss = 0;
+                let score=0; 
+                let currentLoss = 0;
+                let maxCons = 0;
+                let totalLoss = 0;
                 
-                // --- Logic การล่า (Training) ---
+                // ✅ แก้ไข Loop: เริ่มที่ 1 (เพราะต้องใช้งวด 0 ทำนายงวด 1)
                 let loopStart = Math.max(1, startIdx);
-                
-                // ตัวแปรจำสถานะการล่า
-                let currentSourceIdx = loopStart - 1; 
-                let huntStep = 1;
 
                 for(let i=loopStart; i<=activeEndIdx; i++) { 
-                    // คำนวณเลขทำนาย (ใช้ Source ที่จำไว้)
-                    let numsToCheck = [];
-                    for(let k=0; k<len; k++) numsToCheck.push((baseSums[currentSourceIdx]+start+additives[k])%10);
+                    // ใช้ผลงวดก่อนหน้า (i-1) มาคำนวณเลขทำนายงวดนี้ (i)
+                    let sourceIdx = i - 1;
                     
-                    let isWin = false;
-                    if (targetVals[i]) {
-                        isWin = checkWin(targetVals[i], numsToCheck, targetType);
-                        if(isWin) {
-                            score++; currentLoss = 0;
+                    let numsToCheck = [];
+                    for(let k=0; k<len; k++) numsToCheck.push((baseSums[sourceIdx]+start+additives[k])%10);
+                    
+                    if (targetVals[i]) { // ถ้ามีเฉลยของงวดนี้
+                        if(checkWin(targetVals[i], numsToCheck, targetType)) {
+                            score++;
+                            currentLoss = 0;
                         } else {
-                            currentLoss++; totalLoss++;
+                            currentLoss++;
+                            totalLoss++;
                             if(currentLoss > maxCons) maxCons = currentLoss;
                         }
                     }
-
-                    // --- อัปเดตสถานะการล่า (State Update) ---
-                    if (isHuntingMode) {
-                        if (isWin) {
-                            // ถ้าถูก: รีเซ็ตไปเริ่มใช้งวดปัจจุบันเป็นตัวตั้งต้นใหม่
-                            currentSourceIdx = i;
-                            huntStep = 1;
-                        } else {
-                            // ถ้าผิด: เช็คโควต้า
-                            if (huntStep < huntMax) {
-                                // ยังไม่ครบโควต้า: ย้ำที่เดิม (currentSourceIdx ไม่เปลี่ยน)
-                                huntStep++;
-                            } else {
-                                // ครบโควต้าแล้ว (ยอมแพ้): เปลี่ยนไปใช้งวดปัจจุบันเริ่มใหม่
-                                currentSourceIdx = i;
-                                huntStep = 1;
-                            }
-                        }
-                    } else {
-                        // โหมดปกติ: เปลี่ยนงวดทุกครั้ง
-                        currentSourceIdx = i;
-                    }
                 }
                 
-                allResults.push({ name: name+" (R"+start+")", score, totalLoss, maxCons, p1, p2, op, con, m1, start, baseSums, lastProcessedIdx: activeEndIdx });
+                allResults.push({ 
+                    name: name+" (R"+start+")", 
+                    score: score, 
+                    totalLoss: totalLoss, 
+                    maxCons: maxCons,
+                    p1, p2, op, con, m1, start, baseSums,
+                    lastProcessedIdx: activeEndIdx 
+                });
+                
                 if (allResults.length >= targetCount) break;
             }
              if (allResults.length >= targetCount) break;
@@ -1099,78 +1152,48 @@ let currentTarget='tf_up', currentTargetLabel='พิกัดบน', currentLe
         allResults.sort((a,b)=>b.score-a.score);
         if (displayMode === 'auto') allResults = allResults.slice(0, 5);
 
-        // สร้างข้อมูลประวัติเพื่อแสดงผล (History Generation)
+        // สร้างประวัติการเดินสูตรเพื่อส่งกลับไปแสดงผล
         return allResults.map(res => {
             let history = [];
             
-            // เริ่มต้นสถานะการล่าใหม่ สำหรับการแสดงผล
-            let loopStart = 1; 
-            let currentSourceIdx = loopStart - 1;
-            let huntStep = 1;
-
-            for(let i=loopStart; i < intData.length; i++) {
-                 // คำนวณเลข
+            for(let i=1; i < intData.length; i++) {
+                 // สูตรจาก i-1 ทำนาย i
+                 let sourceIdx = i - 1;
                  let numsToCheck = [];
-                 for(let k=0; k<len; k++) numsToCheck.push((res.baseSums[currentSourceIdx]+res.start+additives[k])%10);
+                 for(let k=0; k<len; k++) numsToCheck.push((res.baseSums[sourceIdx]+res.start+additives[k])%10);
                  
                  let target = getTargetValue(intData[i], targetType);
                  let isWin = checkWin(target, numsToCheck, targetType);
+                 
+                 // เช็คว่าเป็นงวดทดสอบหรือไม่ (อนาคต หรือ Forward Test)
                  let isTest = (i > res.lastProcessedIdx); 
                  
-                 // บันทึกผล
-                 let record = { 
-                    nums: numsToCheck, 
-                    win: isWin, 
-                    rowIdx: i, 
-                    isTest: isTest,
-                    // ส่งค่าสถานะการล่ากลับไปด้วย
-                    huntRound: isHuntingMode ? huntStep : null,
-                    huntMax: huntMax
-                 }; 
+                 // rowIdx = i หมายถึงแถวนี้คือผลของงวดที่ i
+                 let record = { nums: numsToCheck, win: isWin, rowIdx: i, isTest: isTest }; 
                  
                  if (i >= startIdx && i <= endIdx) {
                     history.push(record);
                  }
-
-                 // --- อัปเดตสถานะการล่า (Logic เดียวกับตอน Train) ---
-                 if (isHuntingMode) {
-                    if (isWin) {
-                        currentSourceIdx = i;
-                        huntStep = 1;
-                    } else {
-                        if (huntStep < huntMax) {
-                            huntStep++;
-                        } else {
-                            currentSourceIdx = i;
-                            huntStep = 1;
-                        }
-                    }
-                 } else {
-                    currentSourceIdx = i;
-                 }
             }
             
-            // ทำนายงวดอนาคต (ใช้สถานะล่าสุดจากลูป)
+            // ✅ ทำนายงวดถัดไป (งวดอนาคตที่ยังไม่ออก)
+            // ใช้งวดสุดท้ายที่มี (last index) เป็นตัวตั้งต้นคำนวณ
+            let lastIdx = intData.length - 1;
             let predNums = [];
-            for(let k=0; k<len; k++) predNums.push((res.baseSums[currentSourceIdx]+res.start+additives[k])%10);
+            for(let k=0; k<len; k++) predNums.push((res.baseSums[lastIdx]+res.start+additives[k])%10);
             
-            // งวดทำนาย ให้แสดงสถานะการล่าต่อจากงวดล่าสุด
-            history.push({ 
-                nums: predNums, 
-                win: null, 
-                rowIdx: -1, 
-                isTest: true,
-                huntRound: isHuntingMode ? huntStep : null,
-                huntMax: huntMax
-            });
+            history.push({ nums: predNums, win: null, rowIdx: -1, isTest: true });
 
-            return { name: res.name, score: res.score, totalLoss: res.totalLoss, maxCons: res.maxCons, history: history };
+            return { 
+                name: res.name, 
+                score: res.score, 
+                totalLoss: res.totalLoss, 
+                maxCons: res.maxCons,
+                history: history
+            };
         });
     }
     `;
-
-
-
 
     // --- ส่วนจัดการหน้าจอ (UI Functions) ---
 
@@ -1939,31 +1962,46 @@ function calcFollowing() {
         out.innerHTML = html;
         out.style.display = 'block';
     }
-// 🔥 ฟังก์ชันร้อยมาลัยเดินสูตร (เวอร์ชั่น Pro: โชว์คะแนนถ่วงน้ำหนักจริง) 🔥
+
+
+// 🔥 ฟังก์ชันร้อยมาลัยเดินสูตร (อัปเกรด: รองรับโหมดคู่/คี่ +0/+1) 🔥
 function calcGarlandMatrix() {
     if (!currentData || currentData.length < 10) return alert("ข้อมูลไม่เพียงพอ (ต้องมีอย่างน้อย 10 งวด)");
 
+    const systemType = document.getElementById('glSystemType').value; // รับค่าระบบที่เลือก
     const len = parseInt(document.getElementById('glLen').value);
     const targetMode = parseInt(document.getElementById('glTarget').value); 
-    const lookBack = 20; // จำนวนงวดที่แสดง
+    const lookBack = 20;
 
-    // ดึงข้อมูล
     let startIndex = Math.max(0, currentData.length - lookBack - 1);
     const history = currentData.slice(startIndex);
 
-    // สร้างตาราง
     let html = `<div class="garland-wrapper"><table class="garland-table">`;
-    html += `<thead><tr>
-        <th>งวด</th>
-        <th>ผล</th>
-        <th>ฐาน (Trend)</th>`;
-    for(let i=0; i<=9; i++) {
-        html += `<th>+${i}</th>`;
+    
+    // --- สร้างหัวตาราง (แยกกรณี) ---
+    if (systemType === 'parity') {
+        // หัวตารางแบบคู่/คี่ (มีแค่ +0 กับ +1)
+        html += `<thead><tr>
+            <th>งวด</th>
+            <th>ผล</th>
+            <th>ฐาน (Trend)</th>
+            <th>🌸 ฐานแม่น (+0)</th>
+            <th>⚡ ฐานพลิก (+1)</th>
+        </tr></thead><tbody>`;
+    } else {
+        // หัวตารางแบบมาตรฐาน (เดิม)
+        html += `<thead><tr>
+            <th>งวด</th>
+            <th>ผล</th>
+            <th>ฐาน (Trend)</th>`;
+        for(let i=0; i<=9; i++) html += `<th>+${i}</th>`;
+        html += `</tr></thead><tbody>`;
     }
-    html += `</tr></thead><tbody>`;
 
-    let rawScores = Array(10).fill(0);      
-    let weightedScores = Array(10).fill(0); 
+    // กำหนดขนาด Array คะแนนตามโหมด
+    let maxCols = (systemType === 'parity') ? 2 : 10;
+    let rawScores = Array(maxCols).fill(0);      
+    let weightedScores = Array(maxCols).fill(0); 
 
     const getPyramidSeed = (round) => {
         let row1 = [parseInt(round.up[0]), parseInt(round.up[1]), parseInt(round.up[2]), parseInt(round.down[0]), parseInt(round.down[1])];
@@ -1979,12 +2017,10 @@ function calcGarlandMatrix() {
     for (let i = 1; i < history.length; i++) {
         let prevRound = history[i - 1];
         let currentRound = history[i];
-
         let seed = getPyramidSeed(prevRound);
         if (seed === null) continue;
 
-        let trendIcon = "";
-        let trendColor = "#64748b"; 
+        let trendIcon = ""; let trendColor = "#64748b"; 
         if (previousSeed !== -1) {
             if (seed > previousSeed) { trendIcon = "▲"; trendColor = "#10b981"; } 
             else if (seed < previousSeed) { trendIcon = "▼"; trendColor = "#ef4444"; } 
@@ -1992,455 +2028,549 @@ function calcGarlandMatrix() {
         }
         previousSeed = seed;
 
-        let h = parseInt(currentRound.up[0]);
-        let t = parseInt(currentRound.up[1]);
-        let u = parseInt(currentRound.up[2]);
-        let dt = parseInt(currentRound.down[0]);
-        let du = parseInt(currentRound.down[1]);
-
-        let targets = []; 
-        let displayResult = "";
-        let isVinMode = false;
+        let h = parseInt(currentRound.up[0]), t = parseInt(currentRound.up[1]), u = parseInt(currentRound.up[2]), dt = parseInt(currentRound.down[0]), du = parseInt(currentRound.down[1]);
+        let targets = [], displayResult = "", isVinMode = false;
 
         switch (targetMode) {
-            case 0: targets = [h]; displayResult = `${h}`; break;
-            case 1: targets = [t]; displayResult = `${t}`; break;
-            case 2: targets = [u]; displayResult = `${u}`; break;
-            case 3: targets = [dt]; displayResult = `${dt}`; break;
-            case 4: targets = [du]; displayResult = `${du}`; break;
-            case 5: targets = [t, u]; displayResult = `${t}${u}`; break;
-            case 6: targets = [dt, du]; displayResult = `${dt}${du}`; break;
-            case 7: targets = [t, u]; displayResult = `${t}${u}`; isVinMode = true; break;
-            case 8: targets = [dt, du]; displayResult = `${dt}${du}`; isVinMode = true; break;
-            case 9: targets = [t, u, dt, du]; displayResult = `${t}${u}/${dt}${du}`; break;
+            case 0: targets=[h]; displayResult=`${h}`; break; case 1: targets=[t]; displayResult=`${t}`; break; case 2: targets=[u]; displayResult=`${u}`; break; case 3: targets=[dt]; displayResult=`${dt}`; break; case 4: targets=[du]; displayResult=`${du}`; break; case 5: targets=[t,u]; displayResult=`${t}${u}`; break; case 6: targets=[dt,du]; displayResult=`${dt}${du}`; break; case 7: targets=[t,u]; displayResult=`${t}${u}`; isVinMode=true; break; case 8: targets=[dt,du]; displayResult=`${dt}${du}`; isVinMode=true; break; case 9: targets=[t,u,dt,du]; displayResult=`${t}${u}/${dt}${du}`; break;
         }
 
-        html += `<tr>`;
-        html += `<td>${i}</td>`;
-        html += `<td>${displayResult}</td>`;
-        html += `<td style="color:${trendColor}; font-weight:900; background:#f8fafc; font-size:14px;">${seed} <span style="font-size:10px;">${trendIcon}</span></td>`;
+        html += `<tr><td>${i}</td><td>${displayResult}</td><td style="color:${trendColor}; font-weight:900; background:#f8fafc; font-size:14px;">${seed} <span style="font-size:10px;">${trendIcon}</span></td>`;
 
-        for (let offset = 0; offset <= 9; offset++) {
-            let startDigit = (seed + offset) % 10;
+        // --- วนลูปสร้างคอลัมน์ (ตามโหมด) ---
+        for (let offset = 0; offset < maxCols; offset++) {
             let numSet = [];
-            for (let k = 0; k < len; k++) numSet.push((startDigit + k) % 10);
+            
+            if (systemType === 'parity') {
+                // โหมดคู่/คี่: ถ้า offset 0 คือตามฐาน, 1 คือสวนฐาน
+                let baseParity = (seed + offset) % 2; 
+                if (baseParity === 0) numSet = [0, 2, 4, 6, 8]; // คู่
+                else numSet = [1, 3, 5, 7, 9]; // คี่
+            } else {
+                // โหมดมาตรฐาน: ไล่ตามจำนวนตัว (len)
+                let startDigit = (seed + offset) % 10; 
+                for (let k = 0; k < len; k++) numSet.push((startDigit + k) % 10);
+            }
 
             let isWin = false;
-            if (isVinMode) {
-                let uniqueTargets = [...new Set(targets)];
-                let uniqueMatches = numSet.filter(n => uniqueTargets.includes(n));
-                isWin = (uniqueMatches.length === uniqueTargets.length);
-            } else {
-                isWin = numSet.some(n => targets.includes(n));
-            }
+            if (isVinMode) { let uniqueTargets = [...new Set(targets)]; let uniqueMatches = numSet.filter(n => uniqueTargets.includes(n)); isWin = (uniqueMatches.length === uniqueTargets.length); } 
+            else { isWin = numSet.some(n => targets.includes(n)); }
 
             if (isWin) {
                 rawScores[offset]++;
-                // คำนวณคะแนนถ่วงน้ำหนัก
-                // 5 งวดล่าสุด = 3 คะแนน, 5 งวดถัดไป = 2 คะแนน, ที่เหลือ = 1 คะแนน
-                let recencyScore = 1;
-                let dist = history.length - i; // ระยะห่างจากปัจจุบัน
-                if (dist <= 5) recencyScore = 3; 
-                else if (dist <= 10) recencyScore = 2;
-                
+                let recencyScore = 1; let dist = history.length - i;
+                if (dist <= 5) recencyScore = 3; else if (dist <= 10) recencyScore = 2;
                 weightedScores[offset] += recencyScore;
             }
-
-            let cellClass = isWin ? "g-cell-win" : "";
+            
+            // การแสดงผลในช่อง
+            let cellClass = isWin ? "g-cell-win" : ""; 
             let displayStr = "";
             
-            numSet.forEach(n => {
-                if (targets.includes(n)) {
-                    if (isVinMode && !isWin) displayStr += n;
-                    else displayStr += `<span class="g-num-hit">${n}</span>`; 
-                } else {
-                    displayStr += n;
-                }
-            });
-
+            if (systemType === 'parity') {
+                // แสดงแบบย่อ (คู่/คี่)
+                let parityName = (numSet[0] === 0) ? "คู่" : "คี่";
+                if (isWin) displayStr = `<span style="font-weight:bold;">${parityName} <span style="font-size:10px;">(${numSet.join('')})</span></span>`;
+                else displayStr = `<span style="color:#94a3b8;">${parityName}</span>`;
+            } else {
+                // แสดงเลขปกติ
+                numSet.forEach(n => { if (targets.includes(n)) { if (isVinMode && !isWin) displayStr += n; else displayStr += `<span class="g-num-hit">${n}</span>`; } else { displayStr += n; } });
+            }
+            
             html += `<td class="${cellClass}">${displayStr}</td>`;
         }
         html += `</tr>`;
     }
 
-    // --- ส่วนทำนาย (Next Round) ---
-    let latestRound = history[history.length - 1];
-    let nextSeed = getPyramidSeed(latestRound);
-    
-    // หาคะแนนสูงสุดจาก Weighted Scores
+    // --- ส่วนทำนายงวดถัดไป ---
+    let latestRound = history[history.length - 1]; let nextSeed = getPyramidSeed(latestRound);
     let maxWeightedScore = Math.max(...weightedScores);
-
-    let nextTrendIcon = "?";
-    let nextTrendColor = "#64748b";
-    if (nextSeed !== null && previousSeed !== -1) {
-        if (nextSeed > previousSeed) { nextTrendIcon = "▲ (ขึ้น)"; nextTrendColor = "#10b981"; }
-        else if (nextSeed < previousSeed) { nextTrendIcon = "▼ (ลง)"; nextTrendColor = "#ef4444"; }
-        else { nextTrendIcon = "━ (คงที่)"; }
-    }
+    let nextTrendIcon = "?", nextTrendColor = "#64748b";
+    if (nextSeed !== null && previousSeed !== -1) { if (nextSeed > previousSeed) { nextTrendIcon = "▲ (ขึ้น)"; nextTrendColor = "#10b981"; } else if (nextSeed < previousSeed) { nextTrendIcon = "▼ (ลง)"; nextTrendColor = "#ef4444"; } else { nextTrendIcon = "━ (คงที่)"; } }
 
     if (nextSeed !== null) {
-        html += `<tr style="background:#fff7ed; border-top:2px solid #fdba74; border-bottom:2px solid #fdba74;">`;
-        html += `<td style="color:#d97706; font-weight:900;">รอผล</td>`;
-        html += `<td style="color:#94a3b8; font-style:italic;">?</td>`;
-        html += `<td style="color:${nextTrendColor}; font-weight:900; background:#ffe4e6; border:1px solid #fbcfe8;">${nextSeed}</td>`;
-
-        for (let offset = 0; offset <= 9; offset++) {
-            let startDigit = (nextSeed + offset) % 10;
+        html += `<tr style="background:#fff7ed; border-top:2px solid #fdba74; border-bottom:2px solid #fdba74;">
+        <td style="color:#d97706; font-weight:900;">รอผล</td><td style="color:#94a3b8; font-style:italic;">?</td><td style="color:${nextTrendColor}; font-weight:900; background:#ffe4e6; border:1px solid #fbcfe8;">${nextSeed}</td>`;
+        
+        for (let offset = 0; offset < maxCols; offset++) {
             let numSet = [];
-            for (let k = 0; k < len; k++) numSet.push((startDigit + k) % 10);
-            
-            // ไฮไลท์ช่องที่คะแนนดีที่สุด
+            if (systemType === 'parity') {
+                let baseParity = (nextSeed + offset) % 2;
+                numSet = (baseParity === 0) ? [0, 2, 4, 6, 8] : [1, 3, 5, 7, 9];
+            } else {
+                let startDigit = (nextSeed + offset) % 10; 
+                for (let k = 0; k < len; k++) numSet.push((startDigit + k) % 10);
+            }
+
             let isBestCol = (weightedScores[offset] === maxWeightedScore && maxWeightedScore > 0);
             let style = isBestCol ? "color:#d97706; font-weight:900; background:#ffedd5; border:2px solid #fdba74;" : "color:#64748b; opacity:0.8;";
+            
+            let displayWait = "";
+            if (systemType === 'parity') displayWait = (numSet[0] === 0) ? `คู่ <div style="font-size:10px;">${numSet.join('')}</div>` : `คี่ <div style="font-size:10px;">${numSet.join('')}</div>`;
+            else displayWait = numSet.join('');
 
-            html += `<td style="${style}">${numSet.join('')}</td>`;
+            html += `<td style="${style}">${displayWait}</td>`;
         }
         html += `</tr>`;
     }
 
-    // ✅✅✅ แก้ไขตรงนี้: แสดงคะแนนถ่วงน้ำหนัก (Weighted Score) แทนคะแนนดิบ
-    html += `<tr style="background:#334155; color:white; font-weight:bold;"><td colspan="3">คะแนน (เต็ม 35)</td>`;
-    for(let s=0; s<10; s++) {
-        // ใช้ weightedScores ในการแสดงผลและคำนวณสีพื้นหลัง
+    // --- แถบคะแนน ---
+    html += `<tr style="background:#334155; color:white; font-weight:bold;">
+        <td colspan="3" style="border-right:2px solid #475569; position: static !important;">คะแนน (เต็ม 35)</td>`;
+    
+    for(let s=0; s < maxCols; s++) {
         let bg = (weightedScores[s] === maxWeightedScore && maxWeightedScore > 0) ? '#10b981' : 'transparent';
-        // แสดงผล: คะแนนถ่วงน้ำหนัก (คะแนนดิบ)
-        html += `<td style="background:${bg}; font-size:14px;" title="ถูก ${rawScores[s]} งวด">${weightedScores[s]}</td>`;
+        html += `<td style="background:${bg}; font-size:14px; position: static !important;" title="ถูก ${rawScores[s]} งวด">${weightedScores[s]}</td>`;
     }
     html += `</tr></tbody></table></div>`;
 
-    // --- การ์ดสรุปผล ---
-    let bestOffsets = [];
-    weightedScores.forEach((score, idx) => { if(score === maxWeightedScore && maxWeightedScore > 0) bestOffsets.push(idx); });
-
+    // Forecast Card (แสดงผลลัพธ์ด้านล่างตาราง)
+    let bestOffsets = []; weightedScores.forEach((score, idx) => { if(score === maxWeightedScore && maxWeightedScore > 0) bestOffsets.push(idx); });
     let forecastHtml = "";
     if (nextSeed !== null) {
-        forecastHtml = `
-        <div style="margin-top:10px; border-top: 3px solid #334155; background:white; border-radius: 0 0 10px 10px; padding:15px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            
-            <div style="display:flex; justify-content:center; gap:20px; margin-bottom:15px;">
-                <div style="font-weight:800; color:#334155; font-size:16px; display:flex; align-items:center; gap:5px;">
-                    🌸 ฐาน: <span style="display:inline-flex; width:30px; height:30px; background:#db2777; color:white; border-radius:50%; align-items:center; justify-content:center; font-size:18px;">${nextSeed}</span>
-                </div>
-                <div style="font-weight:800; color:${nextTrendColor}; font-size:14px; display:flex; align-items:center; gap:5px; border:1px solid ${nextTrendColor}; padding:2px 10px; border-radius:15px;">
-                    แนวโน้ม: ${nextTrendIcon}
-                </div>
-            </div>
-
-            <div style="font-size:13px; color:#64748b; margin-bottom:10px;">
-                สูตรที่เดินดีที่สุด (เน้นระยะสั้น) (+${bestOffsets.join(', +')})
-            </div>
-            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">`;
+        forecastHtml = `<div style="margin-top:10px; border-top: 3px solid #334155; background:white; border-radius: 0 0 10px 10px; padding:15px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <div style="display:flex; justify-content:center; gap:20px; margin-bottom:15px;">
+            <div style="font-weight:800; color:#334155; font-size:16px; display:flex; align-items:center; gap:5px;">🌸 ฐาน: <span style="display:inline-flex; width:30px; height:30px; background:#db2777; color:white; border-radius:50%; align-items:center; justify-content:center; font-size:18px;">${nextSeed}</span></div>
+            <div style="font-weight:800; color:${nextTrendColor}; font-size:14px; display:flex; align-items:center; gap:5px; border:1px solid ${nextTrendColor}; padding:2px 10px; border-radius:15px;">แนวโน้ม: ${nextTrendIcon}</div>
+        </div>
+        <div style="font-size:13px; color:#64748b; margin-bottom:10px;">สูตรที่เดินดีที่สุด (เน้นระยะสั้น)</div>
+        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">`;
         
         bestOffsets.forEach(offset => {
-            let start = (nextSeed + offset) % 10;
-            let nums = [];
-            for(let k=0; k<len; k++) nums.push((start+k)%10);
-            
-            forecastHtml += `
-            <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; padding:8px 15px; text-align:center; min-width:80px; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
-                <div style="font-size:12px; color:#c2410c; font-weight:bold;">สูตร +${offset} 🔥</div>
-                <div style="font-size:20px; font-weight:900; color:#ea580c; letter-spacing:2px; margin-top:2px;">${nums.join('')}</div>
+            let label = "", nums = "";
+            if (systemType === 'parity') {
+                label = (offset === 0) ? "ฐานแม่น (+0)" : "ฐานพลิก (+1)";
+                let baseParity = (nextSeed + offset) % 2;
+                nums = (baseParity === 0) ? "คู่ (02468)" : "คี่ (13579)";
+            } else {
+                label = `สูตร +${offset}`;
+                let start = (nextSeed + offset) % 10; 
+                let tmp = []; for(let k=0; k<len; k++) tmp.push((start+k)%10);
+                nums = tmp.join('');
+            }
+
+            forecastHtml += `<div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; padding:8px 15px; text-align:center; min-width:80px; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+                <div style="font-size:12px; color:#c2410c; font-weight:bold;">${label} 🔥</div>
+                <div style="font-size:18px; font-weight:900; color:#ea580c; letter-spacing:1px; margin-top:2px;">${nums}</div>
                 <div style="font-size:10px; color:#9a3412;">Score: ${weightedScores[offset]}</div>
             </div>`;
         });
-        
         forecastHtml += `</div></div>`;
     }
 
     document.getElementById('garlandOutput').innerHTML = html + forecastHtml;
 }
-// 🔥 ฟังก์ชันเจาะลึกเลขตาม (Deep Follow) - แก้ไข: คัดลอกแบบมีลูกน้ำ (เหมือน Pair Follow) 🔥
-    function calcDeepFollow() {
-        currentDeepFollowStr = ""; // รีเซ็ตค่า
+
+// =========================================================
+// 🕵️‍♂️ ส่วนวิเคราะห์เจาะลึก (Deep Follow Analysis)
+// =========================================================
+function calcDeepFollow() {
+    if (!currentData || currentData.length < 5) return alert("ข้อมูลไม่เพียงพอ");
+
+    const sPos = parseInt(document.getElementById('dfSourcePos').value);
+    const sNum = parseInt(document.getElementById('dfSourceNum').value);
+    const tPos = parseInt(document.getElementById('dfTargetPos').value);
+    
+    // ดึงข้อมูลทั้งหมด
+    const intData = currentData.map(r => [
+        parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
+        parseInt(r.down[0]), parseInt(r.down[1])
+    ]);
+
+    const getVal = (row, pos) => {
+        if (pos <= 4) return row[pos];
+        return NaN;
+    };
+
+    let counts = Array(10).fill(0);
+    let totalFound = 0;
+
+    // วนลูปหาข้อมูล
+    for (let i = 1; i < intData.length; i++) {
+        let prevRound = intData[i-1];
+        let currRound = intData[i];
         
-        if (!currentData || currentData.length < 10) return alert("ข้อมูลไม่เพียงพอ");
+        let prevVal = getVal(prevRound, sPos);
+        let currVal = getVal(currRound, tPos);
 
-        const sPos = parseInt(document.getElementById('dfSourcePos').value);
-        const sNum = parseInt(document.getElementById('dfSourceNum').value);
-        const tPos = parseInt(document.getElementById('dfTargetPos').value);
-
-        const posNames = ["หลักร้อย", "สิบบน", "หน่วยบน", "สิบล่าง", "หน่วยล่าง"];
-
-        let counts = Array(10).fill(0);
-        let totalFound = 0;
-
-        const intData = currentData.map(r => [
-            parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
-            parseInt(r.down[0]), parseInt(r.down[1])
-        ]);
-
-        for (let i = 0; i < intData.length - 1; i++) {
-            let currentRound = intData[i];
-            let nextRound = intData[i+1]; 
-
-            if (currentRound.some(isNaN) || nextRound.some(isNaN)) continue;
-
-            if (currentRound[sPos] === sNum) {
-                let targetVal = nextRound[tPos];
-                counts[targetVal]++;
-                totalFound++;
-            }
+        if (!isNaN(prevVal) && prevVal === sNum && !isNaN(currVal)) {
+            counts[currVal]++;
+            totalFound++;
         }
+    }
 
-        const resultDiv = document.getElementById('dfOutput');
-        const headerDiv = document.getElementById('dfResultHeader');
+    // แสดงผล
+    const headerDiv = document.getElementById('dfResultHeader');
+    const outputDiv = document.getElementById('dfOutput');
+    
+    // แปลงชื่อตำแหน่ง
+    const posNames = ["หลักร้อย", "สิบบน", "หน่วยบน", "สิบล่าง", "หน่วยล่าง"];
+    const sName = posNames[sPos];
+    const tName = posNames[tPos];
 
-        if (totalFound === 0) {
-            headerDiv.style.display = 'block';
-            headerDiv.innerHTML = `<span style="color:red;">ไม่พบประวัติที่ ${posNames[sPos]} ออกเลข ${sNum}</span>`;
-            resultDiv.innerHTML = '';
-            return;
-        }
-
+    if (totalFound === 0) {
         headerDiv.style.display = 'block';
-        headerDiv.innerHTML = `
-            จากสถิติทั้งหมด ${currentData.length} งวด <br>
-            พบ <span style="color:#0ea5e9;">${posNames[sPos]} เป็นเลข ${sNum}</span> จำนวน <span style="font-size:20px; color:#d97706;">${totalFound}</span> ครั้ง <br>
-            <span style="font-size:14px; color:#64748b;">สถิติเลข ${posNames[tPos]} ในงวดถัดไป คือ:</span>
-        `;
+        headerDiv.innerHTML = `<span style="color:#ef4444;">ไม่พบสถิติ ${sName} เป็นเลข ${sNum}</span>`;
+        outputDiv.innerHTML = "";
+        currentDeepFollowStr = "";
+        return;
+    }
 
-        // เรียงลำดับจากมากไปน้อย
-        let sorted = counts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c);
+    headerDiv.style.display = 'block';
+    headerDiv.innerHTML = `
+        <div style="color:#334155;">จากสถิติทั้งหมด ${intData.length} งวด</div>
+        <div style="font-size:18px; margin-top:5px;">
+            พบ <span style="color:#059669;">${sName} เป็นเลข ${sNum}</span> จำนวน <span style="color:#d97706; font-size:24px;">${totalFound}</span> ครั้ง
+        </div>
+        <div style="color:#64748b; font-size:14px; margin-top:2px;">สถิติเลข ${tName} ในงวดถัดไป คือ:</div>
+    `;
 
-        // ✅✅✅ ส่วนที่แก้ไข: สร้างรูปแบบการคัดลอกแบบมีลูกน้ำ (เหมือน Pair Follow) ✅✅✅
-        // 1. กรองเอาเฉพาะตัวที่เคยออก (c > 0)
-        // 2. ดึงเฉพาะตัวเลข (item.n) ออกมา
-        let foundNumbers = sorted.filter(item => item.c > 0).map(item => item.n);
+    // เรียงลำดับผลลัพธ์
+    let sorted = counts.map((c, n) => ({ n, c })).sort((a, b) => b.c - a.c);
+    
+    // สร้าง String สำหรับ Copy
+    let topNums = sorted.filter(x => x.c > 0).map(x => x.n).join('');
+    currentDeepFollowStr = `สูตรเจาะลึก: เมื่อ ${sName} มา ${sNum}\nเลข ${tName} ที่ตามมาบ่อยคือ: ${topNums}\n(จากสถิติ ${totalFound} รอบ)`;
+
+    let html = "";
+    sorted.forEach(item => {
+        let percent = Math.round((item.c / totalFound) * 100);
+        let barColor = percent >= 15 ? '#ef4444' : (percent >= 10 ? '#f59e0b' : '#10b981');
         
-        // 3. เชื่อมด้วย "" (ไม่มีช่องว่าง) จะได้ผลลัพธ์เป็น "2590178"
-        currentDeepFollowStr = foundNumbers.join('');
-        // -----------------------------------------------------------------------
-
-        let html = "";
-        sorted.forEach((item, idx) => {
-            let percent = ((item.c / totalFound) * 100).toFixed(1);
-            let barColor = idx < 3 ? '#ef4444' : (idx < 6 ? '#f59e0b' : '#3b82f6');
-            let rankBadge = idx === 0 ? '🏆' : (idx+1)+'.';
-            
+        if (item.c > 0) {
             html += `
-                <div style="background:white; padding:10px; border-radius:10px; border:1px solid #e2e8f0; text-align:center; position:relative; overflow:hidden;">
-                    <div style="position:absolute; top:0; left:0; height:4px; width:100%; background:#f1f5f9;">
-                        <div style="height:100%; width:${percent}%; background:${barColor};"></div>
+                <div style="display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">
+                    <div style="font-size:12px; font-weight:bold; color:#64748b;">${percent}%</div>
+                    <div style="width:100%; height:40px; background:#f1f5f9; border-radius:5px; position:relative; display:flex; align-items:flex-end; justify-content:center;">
+                        <div style="width:60%; height:${Math.max(10, percent * 3)}%; background:${barColor}; border-radius:3px 3px 0 0;"></div>
                     </div>
-                    <div style="font-size:12px; color:#94a3b8; margin-top:5px;">อันดับ ${rankBadge}</div>
-                    <div style="font-size:28px; font-weight:800; color:#1e293b; line-height:1.2;">${item.n}</div>
-                    <div style="font-size:12px; font-weight:bold; color:${barColor};">${percent}%</div>
-                    <div style="font-size:10px; color:#64748b;">(มา ${item.c} ครั้ง)</div>
+                    <div style="font-size:20px; font-weight:800; color:#1e293b;">${item.n}</div>
+                    <div style="font-size:11px; color:#94a3b8;">(${item.c})</div>
                 </div>
             `;
-        });
-        
-        resultDiv.innerHTML = html;
-    }
-
-    // ✅ ฟังก์ชันปุ่ม Copy (ให้ทำงานได้จริง)
-    function copyDeepFollowResult() {
-        // เช็คว่ามีข้อมูลให้ก๊อปไหม
-        if(!currentDeepFollowStr) return alert("กรุณากด 'ค้นหา' เพื่อวิเคราะห์ข้อมูลก่อนคัดลอก");
-        
-        // สั่งคัดลอก
-        copyText(currentDeepFollowStr);
-    } 
-
-// 🔥 ฟังก์ชัน Walk-Forward (เวอร์ชั่นอัปเกรด: โชว์สูตรที่เลือก) 🔥
-    function runGarlandWalkForward() {
-        if (!currentData || currentData.length < 50) return alert("ข้อมูลไม่เพียงพอ (ต้องมีอย่างน้อย 50 งวด)");
-
-        const testCount = parseInt(document.getElementById('wfTestCount').value);
-        const lookback = parseInt(document.getElementById('wfLookback').value);
-        const len = parseInt(document.getElementById('glLen').value) || 5;
-        const targetMode = parseInt(document.getElementById('glTarget').value);
-        
-        const intData = currentData.map(r => [
-            parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
-            parseInt(r.down[0]), parseInt(r.down[1])
-        ]);
-
-        const getSeed = (round) => {
-            if (round.some(isNaN)) return null;
-            let r2 = []; for(let i=0; i<4; i++) r2.push((round[i] + round[i+1]) % 10);
-            let r3 = []; for(let i=0; i<3; i++) r3.push((r2[i] + r2[i+1]) % 10);
-            let r4 = []; for(let i=0; i<2; i++) r4.push((r3[i] + r3[i+1]) % 10);
-            return (r4[0] + r4[1]) % 10;
-        };
-
-        const getTargets = (round) => {
-            let t = round;
-            switch (targetMode) {
-                case 0: return [t[0]]; case 1: return [t[1]]; case 2: return [t[2]];
-                case 3: return [t[3]]; case 4: return [t[4]];
-                case 5: case 7: return [t[1], t[2]]; 
-                case 6: case 8: return [t[3], t[4]];
-                default: return [t[1], t[2]];
-            }
-        };
-
-        let startIndex = currentData.length - testCount;
-        if (startIndex < lookback + 1) return alert("ข้อมูลไม่พอสำหรับการย้อนหลัง");
-
-        let wins = 0;
-        let totalBets = 0;
-        let balance = 0;
-        let equityCurve = [0];
-        
-        // ✅ ตัวแปรเก็บประวัติการเลือกสูตร
-        let decisionLog = []; 
-
-        for (let i = startIndex; i < currentData.length; i++) {
-            // 1. Train Step: หาสูตรที่ดีที่สุดในอดีต (ณ เวลานั้น)
-            let scoreBoard = Array(10).fill(0);
-            for (let past = i - lookback; past < i; past++) {
-                let prevRound = intData[past - 1];
-                let currRound = intData[past];
-                let seed = getSeed(prevRound);
-                let targets = getTargets(currRound);
-
-                if (seed === null) continue;
-
-                for (let off = 0; off <= 9; off++) {
-                    let startDigit = (seed + off) % 10;
-                    let mySet = []; for(let k=0; k<len; k++) mySet.push((startDigit+k)%10);
-                    
-                    let isHit = false;
-                    if ([7,8].includes(targetMode)) { 
-                        let uniqT = [...new Set(targets)];
-                        isHit = (mySet.filter(n => uniqT.includes(n)).length === uniqT.length);
-                    } else {
-                        isHit = mySet.some(n => targets.includes(n));
-                    }
-                    if (isHit) scoreBoard[off]++;
-                }
-            }
-
-            let maxScore = Math.max(...scoreBoard);
-            let bestOffset = scoreBoard.indexOf(maxScore); // เลือกสูตรที่ดีที่สุด (ถ้าเท่ากันเอาตัวน้อยสุด)
-
-            // 2. Test Step: เอาสูตรนั้นมาเล่นจริง
-            let realPrev = intData[i-1];
-            let realCurr = intData[i];
-            let realSeed = getSeed(realPrev);
-            let realTargets = getTargets(realCurr);
-
-            if (realSeed !== null) {
-                let betStart = (realSeed + bestOffset) % 10;
-                let betSet = []; for(let k=0; k<len; k++) betSet.push((betStart+k)%10);
-
-                let isWin = false;
-                if ([7,8].includes(targetMode)) { 
-                    let uniqT = [...new Set(realTargets)];
-                    isWin = (betSet.filter(n => uniqT.includes(n)).length === uniqT.length);
-                } else {
-                    isWin = betSet.some(n => realTargets.includes(n));
-                }
-
-                // คำนวณเงิน
-                let payout = 90; 
-                let cost = 0;
-                if (targetMode >= 0 && targetMode <= 4) { cost = len * 10; } 
-                else if (targetMode === 5 || targetMode === 6) { cost = (20 * len) - (len * len); }
-                else if (targetMode === 7 || targetMode === 8) { cost = len * (len - 1); }
-                else { cost = len; }
-
-                let pnl = isWin ? (payout - cost) : -cost;
-                balance += pnl;
-                equityCurve.push(balance);
-
-                if (isWin) wins++;
-                totalBets++;
-                
-                // ✅ บันทึกการตัดสินใจลง Log
-                decisionLog.push({
-                    round: totalBets,
-                    offset: bestOffset,
-                    isWin: isWin,
-                    balance: balance,
-                    nums: betSet.join('')
-                });
-            }
         }
+    });
+    outputDiv.innerHTML = html;
+}
 
-        // แสดงผลลัพธ์
-        document.getElementById('wfResult').style.display = 'block';
-        
-        let winRate = totalBets > 0 ? Math.round((wins / totalBets) * 100) : 0;
-        let wrElem = document.getElementById('wfWinRate');
-        wrElem.innerText = `${winRate}%`;
-        wrElem.style.color = winRate > 50 ? '#15803d' : '#ef4444';
-        document.getElementById('wfWinCount').innerText = `ถูก ${wins} / ผิด ${totalBets - wins}`;
+function copyDeepFollowResult() {
+    if (!currentDeepFollowStr) return alert("กรุณากดค้นหาก่อน");
+    copyText(currentDeepFollowStr);
+}
 
-        let profElem = document.getElementById('wfProfit');
-        profElem.innerText = (balance > 0 ? '+' : '') + balance;
-        profElem.style.color = balance > 0 ? '#15803d' : '#dc2626';
+// =========================================================
+// 🧪 ส่วนทดสอบย้อนหลัง (Universal Walk-Forward) - กู้คืน & แก้ไขสมบูรณ์
+// =========================================================
+// 🔥 ฟังก์ชัน Walk-Forward รวมศูนย์ (แก้ไข: สีเครื่องหมาย ถูก=เขียว / ผิด=แดง) 🔥
+    function runUniversalWalkForward() {
+        try {
+            // --- 1. ตรวจสอบข้อมูลเบื้องต้น ---
+            if (!currentData || currentData.length < 50) return alert("ข้อมูลไม่เพียงพอ (ต้องมีอย่างน้อย 50 งวด)");
 
-        // AI Advisor
-        let adviceHtml = "";
-        let adviceColor = "";
-        if (balance < 0) {
-            adviceColor = "#fee2e2";
-            adviceHtml = `<div style="color:#b91c1c; font-weight:bold;">⛔️ กราฟเป็นขาลง (ขาดทุน ${balance})</div><div style="font-size:13px; color:#991b1b;">AI แนะนำ: หยุดเล่นหรือเปลี่ยนสูตร</div>`;
-        } else if (winRate < 50) {
-            adviceColor = "#fef3c7";
-            adviceHtml = `<div style="color:#b45309; font-weight:bold;">⚠️ กำไรแต่เสี่ยง (Win Rate ${winRate}%)</div><div style="font-size:13px; color:#92400e;">AI แนะนำ: ระวังตัว หรือลดทุน</div>`;
-        } else {
-            adviceColor = "#dcfce7";
-            adviceHtml = `<div style="color:#15803d; font-weight:bold;">✅ สถานการณ์ดีเยี่ยม (+${balance})</div><div style="font-size:13px; color:#166534;">AI แนะนำ: ลุยต่อได้เลย</div>`;
-        }
-        let adviceBox = document.getElementById('aiAdviceBox');
-        adviceBox.innerHTML = adviceHtml;
-        adviceBox.style.backgroundColor = adviceColor;
-        adviceBox.style.padding = "10px";
-        adviceBox.style.borderRadius = "8px";
-        adviceBox.style.textAlign = "center";
-
-        // Chart & Log Visualization
-        let chartHtml = "";
-        let minVal = Math.min(...equityCurve);
-        let maxVal = Math.max(...equityCurve);
-        let range = maxVal - minVal || 1;
-        
-        // สร้างกราฟ
-        equityCurve.forEach((val, idx) => {
-            let h = ((val - minVal) / range) * 80 + 10; 
-            let color = val >= 0 ? '#22c55e' : '#ef4444';
+            const strategyType = document.getElementById('wfStrategyType').value;
+            const testCount = parseInt(document.getElementById('wfTestCount').value);
+            const lookback = parseInt(document.getElementById('wfLookback').value);
+            const glLen = parseInt(document.getElementById('glLen').value) || 5;
+            const glTarget = parseInt(document.getElementById('glTarget').value) || 1;
             
-            // ✅ ดึงข้อมูลสูตรมาแสดงใน Tooltip
-            let tip = `เริ่มต้น`;
-            if(idx > 0) {
-                let log = decisionLog[idx-1];
-                tip = `งวดที่ ${log.round}: ${log.isWin?'✅ถูก':'❌ผิด'} (ใช้สูตร +${log.offset}) | ยอด: ${val}`;
+            const intData = currentData.map(r => [
+                parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), 
+                parseInt(r.down[0]), parseInt(r.down[1])
+            ]);
+
+            const getVal = (row, pos) => {
+                if (pos <= 4) return row[pos];
+                return NaN;
+            };
+
+            let startIndex = currentData.length - testCount;
+            if (startIndex < lookback + 1) return alert("ข้อมูลไม่พอสำหรับการย้อนหลัง");
+
+            let wins = 0, totalBets = 0, balance = 0;
+            let equityCurve = [0];
+            let decisionLog = [];
+
+            // --- 2. เริ่มวนลูปจำลองเหตุการณ์ ---
+            for (let i = startIndex; i < currentData.length; i++) {
+                let pastData = intData.slice(i - lookback, i);
+                let currentRound = intData[i];
+                let prediction = null, algoName = "", cost = 0, payout = 0;
+
+                // =========================================================
+                // 🟡 โหมด 1: ร้อยมาลัย (คู่/คี่ Base +0/+1)
+                // =========================================================
+                if (strategyType === 'garland_parity') {
+                    const getSeed = (r) => { if(r.some(isNaN))return null; let b=[];for(let k=0;k<4;k++)b.push((r[k]+r[k+1])%10); let c=[];for(let k=0;k<3;k++)c.push((b[k]+b[k+1])%10); let d=[];for(let k=0;k<2;k++)d.push((c[k]+c[k+1])%10); return (d[0]+d[1])%10; };
+                    const getTargets = (r) => { let t=r; switch(glTarget){case 0:return[t[0]]; case 1:return[t[1]]; case 2:return[t[2]]; case 3:return[t[3]]; case 4:return[t[4]]; default:return[t[2]]; } };
+
+                    let scoreZero = 0, scoreOne = 0;
+                    for(let p=0; p<pastData.length; p++) {
+                        let prev = (p===0) ? intData[i-lookback-1] : pastData[p-1]; 
+                        let curr = pastData[p];
+                        let seed = getSeed(prev); 
+                        let tgList = [getTargets(curr)]; 
+                        let valCheck = Array.isArray(tgList[0]) ? tgList[0][0] : tgList[0]; 
+                        if(seed === null) continue;
+                        if(valCheck % 2 === seed % 2) scoreZero++; else scoreOne++;
+                    }
+
+                    let realPrev = intData[i-1]; 
+                    let realSeed = getSeed(realPrev);
+                    if (realSeed !== null) {
+                        let playParity = (scoreZero >= scoreOne) ? (realSeed % 2) : ((realSeed + 1) % 2);
+                        algoName = (scoreZero >= scoreOne) ? `🌸 ฐานแม่น (+0)` : `🌸 ฐานพลิก (+1)`;
+                        if (playParity === 0) { prediction = [0, 2, 4, 6, 8]; algoName += " [คู่]"; }
+                        else { prediction = [1, 3, 5, 7, 9]; algoName += " [คี่]"; }
+                        
+                        // ปัก คู่/คี่ (5 ตัว) -> ทุน 50
+                        cost = 50; payout = 90;
+                    }
+                }
+
+                // =========================================================
+                // 🟢 โหมด 2: คู่/คี่ (Even/Odd) ปกติ
+                // =========================================================
+                else if (strategyType.startsWith('eo_')) {
+                    let pos = 2; let posName = "หน่วยบน";
+                    if (strategyType === 'eo_ten_up') { pos = 1; posName = "สิบบน"; }
+                    else if (strategyType === 'eo_unit_up') { pos = 2; posName = "หน่วยบน"; }
+                    else if (strategyType === 'eo_ten_down') { pos = 3; posName = "สิบล่าง"; }
+                    else if (strategyType === 'eo_unit_down') { pos = 4; posName = "หน่วยล่าง"; }
+
+                    let scoreFlow = 0; let scoreSwitch = 0;
+                    for(let p=1; p<pastData.length; p++) {
+                        let prevVal = getVal(pastData[p-1], pos);
+                        let currVal = getVal(pastData[p], pos);
+                        if(isNaN(prevVal) || isNaN(currVal)) continue;
+                        if ((prevVal % 2) === (currVal % 2)) scoreFlow++; else scoreSwitch++;
+                    }
+
+                    let lastVal = getVal(intData[i-1], pos);
+                    let lastParity = lastVal % 2;
+                    let predictParity = (scoreFlow >= scoreSwitch) ? lastParity : ((lastParity === 0) ? 1 : 0);
+                    algoName = (scoreFlow >= scoreSwitch) ? `🌊 ตามไหล (${posName})` : `⚡ ตัดสวน (${posName})`;
+
+                    if (predictParity === 0) { prediction = [0, 2, 4, 6, 8]; algoName += " [คู่]"; } 
+                    else { prediction = [1, 3, 5, 7, 9]; algoName += " [คี่]"; }
+                    
+                    // ปัก คู่/คี่ (5 ตัว) -> ทุน 50
+                    cost = 50; payout = 90;
+                }
+
+                // =========================================================
+                // 🔵 โหมด 3: ร้อยมาลัย (Garland Matrix 10 สูตร)
+                // =========================================================
+                else if (strategyType === 'garland') {
+                    const getSeed = (r) => { if(r.some(isNaN))return null; let b=[];for(let k=0;k<4;k++)b.push((r[k]+r[k+1])%10); let c=[];for(let k=0;k<3;k++)c.push((b[k]+b[k+1])%10); let d=[];for(let k=0;k<2;k++)d.push((c[k]+c[k+1])%10); return (d[0]+d[1])%10; };
+                    const getTargets = (r) => { 
+                        let t=r; 
+                        switch(glTarget){
+                            case 0:return[t[0]]; case 1:return[t[1]]; case 2:return[t[2]]; case 3:return[t[3]]; case 4:return[t[4]]; 
+                            case 5: case 7:return[t[1],t[2]]; 
+                            case 6: case 8:return[t[3],t[4]]; 
+                            case 9: return[t[1],t[2],t[3],t[4]]; 
+                            default:return[t[1],t[2]];
+                        } 
+                    };
+                    
+                    let scores = Array(10).fill(0);
+                    for(let p=0; p<pastData.length; p++) {
+                        let prev = (p===0) ? intData[i-lookback-1] : pastData[p-1]; let curr = pastData[p];
+                        let seed = getSeed(prev); let tg = getTargets(curr);
+                        if(seed===null) continue;
+                        for(let off=0; off<=9; off++) {
+                            let st = (seed+off)%10; let set=[]; for(let k=0; k<glLen; k++) set.push((st+k)%10);
+                            let hit=false; 
+                            if([7,8].includes(glTarget)){ 
+                                let u=[...new Set(tg)]; 
+                                hit=set.filter(n=>u.includes(n)).length===u.length; 
+                            } else if (glTarget === 9) { 
+                                hit=set.some(n=>tg.includes(n));
+                            } else { 
+                                hit=set.some(n=>tg.includes(n)); 
+                            }
+                            if(hit) scores[off]++;
+                        }
+                    }
+                    
+                    let bestOff = scores.indexOf(Math.max(...scores));
+                    let realPrev = intData[i-1]; let seed = getSeed(realPrev);
+                    if(seed !== null) {
+                        let st = (seed+bestOff)%10; prediction = []; for(let k=0; k<glLen; k++) prediction.push((st+k)%10);
+                        algoName = `สูตร +${bestOff}`;
+                        
+                        payout = 90;
+                        if(glTarget <= 4) { 
+                            // ปักหลัก: ทุน = จำนวนเลข x 10
+                            cost = glLen * 10; 
+                        } 
+                        else if(glTarget === 5 || glTarget === 6) { 
+                            // พิกัด/รูด: ทุน = (20 * len) - (len * len)
+                            cost = (20 * glLen) - (glLen * glLen); 
+                        } 
+                        else if(glTarget === 7 || glTarget === 8) { 
+                            // วิน: ทุน = len * (len - 1)
+                            cost = glLen * (glLen - 1); 
+                        }
+                        else if(glTarget === 9) { 
+                            // บน+ล่าง (รวม): ทุน = 2 * ((20 * len) - (len * len))
+                            cost = 2 * ((20 * glLen) - (glLen * glLen)); 
+                        }
+                    }
+                }
+                
+                // =========================================================
+                // 🟠 โหมด 4: อื่นๆ
+                // =========================================================
+                else {
+                    let targets = [];
+                    if (strategyType === 'cross' || strategyType === 'deep') {
+                        let tPos = parseInt(document.getElementById(strategyType==='cross'?'targetPos':'dfTargetPos').value) || 1;
+                        let sPos = parseInt(document.getElementById(strategyType==='cross'?'sourcePos':'dfSourcePos').value) || 1;
+                        let numStats = {};
+                        for(let p=0; p<pastData.length; p++) {
+                            let prev = (p===0) ? intData[i-lookback-1] : pastData[p-1]; let curr = pastData[p];
+                            let sVal = getVal(prev, sPos); let tVal = getVal(curr, tPos);
+                            if (!isNaN(sVal) && !isNaN(tVal)) {
+                                if(!numStats[sVal]) numStats[sVal] = { counts: Array(10).fill(0), total:0 };
+                                numStats[sVal].counts[tVal]++; numStats[sVal].total++;
+                            }
+                        }
+                        let lastRound = intData[i-1]; let triggerVal = getVal(lastRound, sPos);
+                        if (numStats[triggerVal] && numStats[triggerVal].total > 0) {
+                            let sorted = numStats[triggerVal].counts.map((c,n)=>({n,c})).sort((a,b)=>b.c-a.c);
+                            prediction = sorted.slice(0, 3).map(x=>x.n); algoName = `ตาม ${triggerVal}`; 
+                            cost = 30; payout = 90; // (สมมติปัก 3 ตัว = 30 บาท)
+                        }
+                    } else if (strategyType === 'pair') {
+                        let sPosStr = document.getElementById('pairSourcePos').value; 
+                        let tPosStr = document.getElementById('pairTargetPos').value;
+                        let wantLen = parseInt(document.getElementById('winLength').value) || 8;
+                        const getP = (r, type) => (type==='up') ? (r[1]*10+r[2]) : (r[3]*10+r[4]);
+                        let pairStats = {};
+                        for(let p=0; p<pastData.length; p++) {
+                            let prev = (p===0) ? intData[i-lookback-1] : pastData[p-1]; let curr = pastData[p];
+                            let sVal = getP(prev, sPosStr); let tVal = getP(curr, tPosStr);
+                            if(!isNaN(sVal) && !isNaN(tVal)) {
+                                if(!pairStats[sVal]) pairStats[sVal] = { digitCounts: Array(10).fill(0) };
+                                let d1 = Math.floor(tVal/10), d2 = tVal%10;
+                                pairStats[sVal].digitCounts[d1]++; pairStats[sVal].digitCounts[d2]++;
+                            }
+                        }
+                        let lastRound = intData[i-1]; let lastPair = getP(lastRound, sPosStr);
+                        if(pairStats[lastPair]) {
+                            let dCounts = pairStats[lastPair].digitCounts;
+                            let sorted = dCounts.map((c,n)=>({n,c})).sort((a,b)=>b.c-a.c);
+                            prediction = sorted.slice(0, wantLen).map(x=>x.n); 
+                            algoName = `คู่ ${lastPair}`; 
+                            cost = wantLen * (wantLen-1); payout = 90; 
+                        }
+                    }
+                }
+
+                // =========================================================
+                // 🏁 ตรวจสอบผลแพ้/ชนะ
+                // =========================================================
+                if (prediction !== null) {
+                    let targets = [];
+                    // กำหนดเป้าหมาย (เฉลย)
+                    if (strategyType.startsWith('eo_') || strategyType === 'garland_parity') {
+                        let pos = 2; // Default
+                        if (strategyType === 'eo_ten_up') pos = 1; else if (strategyType === 'eo_ten_down') pos = 3; else if (strategyType === 'eo_unit_down') pos = 4;
+                        if(strategyType === 'garland_parity') { 
+                            switch(glTarget){case 0:pos=0;break; case 1:pos=1;break; case 2:pos=2;break; case 3:pos=3;break; case 4:pos=4;break; default:pos=2;} 
+                        }
+                        targets = [getVal(currentRound, pos)];
+                    } else if (strategyType === 'garland') {
+                        const getT = (r, m) => { let t=r; switch(glTarget){case 0:return[t[0]];case 1:return[t[1]];case 2:return[t[2]];case 3:return[t[3]];case 4:return[t[4]];case 5:case 7:return[t[1],t[2]];case 6:case 8:return[t[3],t[4]];case 9: return[t[1],t[2],t[3],t[4]]; default:return[t[1],t[2]];} };
+                        targets = getT(currentRound, glTarget);
+                    } else if (strategyType === 'cross' || strategyType === 'deep') {
+                        let tPos = parseInt(document.getElementById(strategyType==='cross'?'targetPos':'dfTargetPos').value);
+                        targets = [getVal(currentRound, tPos)];
+                    } else if (strategyType === 'pair') {
+                        let tPosStr = document.getElementById('pairTargetPos').value;
+                        targets = (tPosStr==='up') ? [currentRound[1], currentRound[2]] : [currentRound[3], currentRound[4]];
+                    }
+
+                    // เช็คเงื่อนไขชนะ
+                    let isWin = false;
+                    if (strategyType === 'pair' || (strategyType === 'garland' && [7,8].includes(glTarget))) {
+                        let uniqT = [...new Set(targets)];
+                        isWin = prediction.filter(n => uniqT.includes(n)).length === uniqT.length;
+                    } else {
+                        isWin = prediction.some(n => targets.includes(n));
+                    }
+
+                    // คำนวณ P/L
+                    let pnl = isWin ? (payout - cost) : -cost;
+                    balance += pnl;
+                    equityCurve.push(balance);
+                    if (isWin) wins++; totalBets++;
+
+                    decisionLog.push({ round: totalBets, info: algoName, isWin: isWin, balance: balance, nums: prediction.join('') });
+                } else { equityCurve.push(balance); }
             }
 
-            chartHtml += `<div style="width:100%; background:${color}; height:${h}%; min-width:3px; opacity:0.8; cursor:pointer;" title="${tip}"></div>`;
-        });
-        
-        // ✅ สร้างส่วนแสดง Log ใต้กราฟ (เพิ่มใหม่)
-        let logHtml = `<div style="margin-top:10px; height:100px; overflow-y:auto; border:1px solid #e2e8f0; padding:5px; background:white; border-radius:5px; font-size:12px;">`;
-        decisionLog.slice().reverse().forEach(log => {
-            let color = log.isWin ? '#16a34a' : '#dc2626';
-            let icon = log.isWin ? '✓' : '✗';
-            logHtml += `<div style="border-bottom:1px dashed #f1f5f9; padding:2px;">
-                <span style="color:#64748b; font-weight:bold;">#${log.round}</span> 
-                ใช้สูตร <span style="background:#f1f5f9; padding:1px 4px; border-radius:4px; font-weight:bold;">+${log.offset}</span> 
-                (${log.nums}) = <span style="color:${color}; font-weight:bold;">${icon}</span> 
-                <span style="float:right; color:${log.balance>=0?'#16a34a':'#dc2626'}">${log.balance}</span>
-            </div>`;
-        });
-        logHtml += `</div>`;
+            // --- 3. ส่วนแสดงผล (Display Section) ---
+            document.getElementById('wfResult').style.display = 'block';
 
-        document.getElementById('wfEquityChart').innerHTML = chartHtml;
-        
-        // แทรก Log ต่อท้ายกราฟ
-        let existingLog = document.getElementById('wfLogBox');
-        if(existingLog) existingLog.remove(); // ลบอันเก่าถ้ามี
-        let logBox = document.createElement('div');
-        logBox.id = 'wfLogBox';
-        logBox.innerHTML = `<div style="font-size:11px; font-weight:bold; color:#64748b; margin-top:5px;">📜 บันทึกการเปลี่ยนสูตรของ AI (ล่าสุดอยู่บน)</div>` + logHtml;
-        document.getElementById('wfEquityChart').parentNode.appendChild(logBox);
+            let winRate = totalBets > 0 ? Math.round((wins / totalBets) * 100) : 0;
+            document.getElementById('wfWinRate').innerText = `${winRate}%`;
+            document.getElementById('wfWinRate').style.color = winRate >= 50 ? '#10b981' : '#ef4444';
+            document.getElementById('wfWinCount').innerText = `ถูก ${wins} / ผิด ${totalBets - wins}`;
+
+            let profElem = document.getElementById('wfProfit');
+            profElem.innerText = (balance > 0 ? '+' : '') + balance;
+            profElem.style.color = balance >= 0 ? '#10b981' : '#dc2626';
+
+            let chartHtml = ""; 
+            let minVal = Math.min(...equityCurve), maxVal = Math.max(...equityCurve), range = maxVal - minVal || 1;
+            equityCurve.forEach((val, idx) => {
+                let h = ((val - minVal) / range) * 80 + 10;
+                let color = val >= 0 ? '#22c55e' : '#ef4444';
+                let tip = idx===0 ? "Start" : `#${idx}: ${decisionLog[idx-1]?.isWin?'✅':'❌'} | ${val}`;
+                chartHtml += `<div style="width:100%; background:${color}; height:${h}%; min-width:3px; opacity:0.8; cursor:pointer;" title="${tip}"></div>`;
+            });
+            document.getElementById('wfEquityChart').innerHTML = chartHtml;
+
+            // 4. สร้าง Log และใส่ในกล่องล่างสุด
+            let logHtml = `<div style="padding:10px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0;">`;
+            logHtml += `<div style="font-size:12px; font-weight:bold; color:#64748b; margin-bottom:8px;">📜 บันทึกการเปลี่ยนสูตรของ AI (ล่าสุดอยู่บน)</div>`;
+            logHtml += `<div style="height:120px; overflow-y:auto; padding-right:5px;">`;
+            
+            decisionLog.slice().reverse().forEach(log => {
+                // ✅ กำหนดสีเครื่องหมาย: ถูก=เขียว (#16a34a), ผิด=แดง (#dc2626)
+                let icon = log.isWin ? '✓' : '✗';
+                let iconColor = log.isWin ? '#16a34a' : '#dc2626';
+                let balanceColor = log.balance >= 0 ? '#16a34a' : '#dc2626';
+                let numColor = '#334155';
+                
+                logHtml += `<div style="border-bottom:1px dashed #e2e8f0; padding:4px 0; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="color:#334155;">
+                        <span style="color:#94a3b8; margin-right:5px;">#${log.round}</span>
+                        <span>ใช้${log.info}</span>
+                        <span style="font-family:monospace; margin-left:2px; color:#64748b;">(${log.nums})</span>
+                        <span style="margin-left:5px; font-weight:bold; color:${iconColor};">= ${icon}</span>
+                    </div>
+                    <div style="font-weight:bold; color:${balanceColor};">${log.balance}</div>
+                </div>`;
+            });
+            logHtml += `</div></div>`;
+            
+            let logContainer = document.getElementById('wfLogContainer');
+            if(logContainer) logContainer.innerHTML = logHtml;
+
+            // 5. Advice
+            let adviceHtml = "", adviceColor = "", adviceBg = "";
+            if (balance < 0) { adviceBg = "#fee2e2"; adviceColor = "#b91c1c"; adviceHtml = `⛔ กราฟเป็นขาลง (ขาดทุน ${balance})<br><span style="font-size:12px; font-weight:normal;">AI แนะนำ: หยุดเล่นหรือเปลี่ยนสูตร</span>`; } 
+            else if (winRate < 50) { adviceBg = "#fef3c7"; adviceColor = "#b45309"; adviceHtml = `⚠️ สถานการณ์ผันผวน (${winRate}%)<br><span style="font-size:12px; font-weight:normal;">AI แนะนำ: ระวังการเดินเงิน</span>`; } 
+            else { adviceBg = "#dcfce7"; adviceColor = "#15803d"; adviceHtml = `✅ กำลังสวย (+${balance})<br><span style="font-size:12px; font-weight:normal;">AI แนะนำ: ลุยต่อได้เลย</span>`; }
+            let advBox = document.getElementById('aiAdviceBox'); advBox.innerHTML = adviceHtml; advBox.style.backgroundColor = adviceBg; advBox.style.color = adviceColor; advBox.style.border = `1px solid ${adviceColor}`;
+
+        } catch (err) { console.error(err); alert("Error: " + err.message); }
     }
 
 
-
-   
 </script>
 </body>
 </html>
