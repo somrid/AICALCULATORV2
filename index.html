@@ -453,9 +453,6 @@
                 <button class="btn-step" onclick="setStep('even', this)">คู่</button>
                 <button class="btn-step" onclick="setStep('step3', this)">ข้าม3</button>
                 <button class="btn-step" onclick="setStep('step5', this)">ข้าม5</button>
-                
-                <button class="btn-step" style="background:#f43f5e; color:white; border-color:#f43f5e;" onclick="setStep('auto_random', this)">🤖 สุ่มอิสระ</button>
-                
             </div>
             <div style="display:flex; gap:3px; align-items:center;">
                 <span style="font-weight:bold; font-size:13px;">จำนวน:</span>
@@ -691,54 +688,9 @@
                     <div id="wfEquityChart" style="display:flex; align-items:flex-end; height:120px; gap:2px; overflow-x:auto; padding-bottom:5px;"></div>
                 </div>
 
-               <div id="wfLogContainer" style="margin-top:15px;"></div>
+                <div id="wfLogContainer" style="margin-top:15px;"></div>
             </div>
 
-        </div>
-    </div>
-</div>
-
-<div class="collapsible-container" style="margin-top: 20px; border: 2px solid #8b5cf6;">
-    <div class="collapsible-header" onclick="toggleSection('blockHunterContent', 'bhIcon')" style="background:#f5f3ff;">
-        <span style="color:#6d28d9;">📦 วิเคราะห์แบ่งบล็อกล่า (Block Hunter)</span><span id="bhIcon">▼</span>
-    </div>
-    <div id="blockHunterContent" class="collapsible-content">
-        <div class="smart-flow-box" style="margin-top:0; border:none; box-shadow:none; background:#faf5ff; border:2px dashed #8b5cf6;">
-            <div class="sf-header" style="justify-content:center; flex-wrap:wrap; gap:10px;">
-                
-                <div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.8); padding:5px 10px; border-radius:10px; border:1px solid #ddd6fe;">
-                    <span style="font-weight:bold; color:#5b21b6; font-size:13px;">เป้าหมาย:</span>
-                    <select id="bhTarget" class="btn" style="padding:2px 5px; border-color:#c4b5fd;">
-                        <option value="1">สิบบน</option>
-                        <option value="2">หน่วยบน</option>
-                        <option value="3">สิบล่าง</option>
-                        <option value="4">หน่วยล่าง</option>
-                        <option value="5" selected>พิกัดบน (รูด)</option>
-                        <option value="6">พิกัดล่าง (รูด)</option>
-                        <option value="7">วินบน</option>
-                        <option value="8">วินล่าง</option>
-                    </select>
-                </div>
-
-                <div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.8); padding:5px 10px; border-radius:10px; border:1px solid #ddd6fe;">
-                    <span style="font-weight:bold; color:#5b21b6; font-size:13px;">ดึงเลข:</span>
-                    <input type="number" id="bhLen" value="5" min="1" max="9" style="width:40px; padding:2px; border-color:#c4b5fd;">
-                    <span style="font-size:12px;">ตัว</span>
-                </div>
-
-                <div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.8); padding:5px 10px; border-radius:10px; border:1px solid #ddd6fe;">
-                    <span style="font-weight:bold; color:#5b21b6; font-size:13px;">เงื่อนไข: ล่าภายใน</span>
-                    <input type="number" id="bhHuntSize" value="5" min="2" max="20" style="width:40px; padding:2px; border-color:#c4b5fd; font-weight:bold; color:#6d28d9;">
-                    <span style="font-size:12px;">งวด</span>
-                </div>
-
-                <button class="sf-btn" style="background:#8b5cf6; box-shadow:0 4px 10px rgba(139, 92, 246, 0.3);" onclick="calcBlockHunter()">
-                    🚀 ค้นหาสูตร
-                </button>
-            </div>
-            
-            <div id="bhInfoText" style="text-align:center; font-size:13px; color:#64748b; margin-top:10px; display:none;"></div>
-            <div id="bhOutput" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:15px; margin-top:15px;"></div>
         </div>
     </div>
 </div>
@@ -760,114 +712,67 @@
     self.onmessage = function(e) {
         try {
             const { intData, targetType, len, displayMode, startIdx, endIdx, manualLimit, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize, forwardTest } = e.data;
-            const targetCount = (displayMode === 'all') ? (manualLimit || 100) : 2000; // Auto สุ่ม 2000 สูตร
+            const targetCount = (displayMode === 'all') ? (manualLimit || 100) : 2000;
             let results = findFormulasLite(intData, targetType, len, displayMode, startIdx, endIdx, targetCount, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize, forwardTest);
             self.postMessage({status:'success', data:results});
         } catch(err) {
             self.postMessage({status:'error', msg:err.message});
         }
     };
-
     function sfc32(a, b, c, d) { return function() { a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0; var t = (a + b) | 0; a = b ^ b >>> 9; b = c + (c << 3) | 0; c = (c << 21 | c >>> 11); d = d + 1 | 0; t = t + d | 0; c = c + t | 0; return (t >>> 0) / 4294967296; } }
-    
-    // ฟังก์ชันสร้างเลขบวกเพิ่ม
-    function getAdditives(len, mode) { 
-        let arr = []; 
-        if (mode === 'step5') { let baseLen = Math.ceil(len / 2); for (let i = 0; i < baseLen; i++) arr.push(i); for (let i = 0; i < baseLen; i++) arr.push((i + 5) % 10); return arr.slice(0, len); } 
-        // ถ้ามีโหมดอื่นๆ ใส่เพิ่มตรงนี้ได้
-        let step = 1; let start = 0; 
-        if(mode === 'odd') { start=1; step=2; } else if(mode === 'even') { start=0; step=2; } else if(mode === 'step3') { start=0; step=3; } 
-        for(let i=0; i<len; i++) arr.push((start + (i*step)) % 10); return arr; 
-    }
-    
+    function getAdditives(len, mode) { let arr = []; if (mode === 'step5') { let baseLen = Math.ceil(len / 2); for (let i = 0; i < baseLen; i++) arr.push(i); for (let i = 0; i < baseLen; i++) arr.push((i + 5) % 10); return arr.slice(0, len); } let step = 1; let start = 0; if(mode === 'odd') { start=1; step=2; } else if(mode === 'even') { start=0; step=2; } else if(mode === 'step3') { start=0; step=3; } for(let i=0; i<len; i++) arr.push((start + (i*step)) % 10); return arr; }
     function getTargetValue(roundArr, type) { if (!roundArr) return []; if(type==='hundred') return [roundArr[0]]; if(type==='tens_up') return [roundArr[1]]; if(type==='units_up') return [roundArr[2]]; if(type==='tens_down') return [roundArr[3]]; if(type==='units_down') return [roundArr[4]]; if(type==='tf_up') return [roundArr[1], roundArr[2]]; if(type==='tf_down') return [roundArr[3], roundArr[4]]; if(type==='pair_up') return [roundArr[1], roundArr[2]]; if(type==='pair_down') return [roundArr[3], roundArr[4]]; if(type==='any_no_hundred') return [roundArr[1], roundArr[2], roundArr[3], roundArr[4]]; return []; }
-    
     function checkWin(targets, nums, type) { let match = 0; for (let t of targets) if (nums.includes(t)) match++; if (type.includes('pair')) return match === targets.length; if (type.includes('tf') || type.includes('any')) return match > 0; return match > 0; }
-    
     function findFormulasLite(intData, targetType, len, displayMode, startIdx, endIdx, targetCount, killDigits, isHuntingMode, huntMax, seed, stepMode, page, pageSize, forwardTest) {
         if ((stepMode === 'odd' || stepMode === 'even') && len > 5) len = 5;
         let activeEndIdx = Math.min(endIdx - (forwardTest || 0), intData.length - 1);
         const targetVals = new Array(intData.length).fill(null);
         for(let i=1; i < intData.length; i++) targetVals[i] = getTargetValue(intData[i], targetType);
-        
         let randFunc = Math.random;
-        // Seed การสุ่มเพื่อให้ผลคงที่เมื่อกดปุ่มเดิม
         if (displayMode === 'all' || isHuntingMode) { let seedVal = 12345 + (targetType.length * 100) + len; randFunc = sfc32(seedVal, seedVal+1, seedVal+2, seedVal+3); }
-        
         const positions = [0, 1, 2, 3, 4]; const operators = ['+', '-', '*']; const constants = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]; 
-        let allResults = []; 
-        let fixedAdditives = getAdditives(len, stepMode); // ค่าปกติ (เรียง/คู่/คี่)
-
+        let allResults = []; let additives = getAdditives(len, stepMode);
         for (let r = 0; r < targetCount; r++) {
-            // สุ่มโครงสร้างสูตร (X + Y + C)
-            let p1 = positions[Math.floor(randFunc() * 5)]; let p2 = positions[Math.floor(randFunc() * 5)]; 
-            let op = operators[Math.floor(randFunc() * 3)]; let con = constants[Math.floor(randFunc() * 10)]; let m1 = Math.floor(randFunc() * 5) + 1;
-            
-            // คำนวณค่า Base Sum ของทุกงวดเตรียมไว้
+            let p1 = positions[Math.floor(randFunc() * 5)]; let p2 = positions[Math.floor(randFunc() * 5)]; let op = operators[Math.floor(randFunc() * 3)]; let con = constants[Math.floor(randFunc() * 10)]; let m1 = Math.floor(randFunc() * 5) + 1;
             const baseSums = new Int8Array(intData.length);
-            for(let i=0; i<intData.length; i++) { 
-                let v1 = intData[i][p1]; let v2 = intData[i][p2]; let res = 0; 
-                if (op === '+') res = (v1 * m1) + v2; else if (op === '-') res = (v1 * m1) - v2; else if (op === '*') res = (v1 * m1) * v2; 
-                if (isNaN(res)) res = 0; baseSums[i] = Math.floor(Math.abs(res) + con) % 10; 
-            }
-            
-            let baseName = \`(\${m1>1?m1+'x':''}\${['ร','ส','น','ลส','ลน'][p1]} \${op} \${['ร','ส','น','ลส','ลน'][p2]}) + \${con}\`;
-
-            // ✅✅✅ ไฮไลท์: ส่วน AI สุ่มเลขอิสระ (เหมือน Supersootr) ✅✅✅
-            if (stepMode === 'auto_random') {
-                // สุ่มหยิบเลขมา X ตัว (เช่น 0,5,6,7)
-                let pool = [0,1,2,3,4,5,6,7,8,9];
-                for(let i=9; i>0; i--){ let j=Math.floor(randFunc()*(i+1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-                let rndAdds = pool.slice(0, len).sort((a,b)=>a-b);
-                
-                let score=0, currentLoss=0, maxCons=0, totalLoss=0; let loopStart = Math.max(1, startIdx);
+            for(let i=0; i<intData.length; i++) { let v1 = intData[i][p1]; let v2 = intData[i][p2]; let res = 0; if (op === '+') res = (v1 * m1) + v2; else if (op === '-') res = (v1 * m1) - v2; else if (op === '*') res = (v1 * m1) * v2; if (isNaN(res)) res = 0; baseSums[i] = Math.floor(Math.abs(res) + con) % 10; }
+            let name = \`(\${m1>1?m1+'x':''}\${['ร','ส','น','ลส','ลน'][p1]} \${op} \${['ร','ส','น','ลส','ลน'][p2]}) + \${con}\`;
+            for(let start=0; start<=9; start++) {
+                let score=0; let currentLoss = 0; let maxCons = 0; let totalLoss = 0; let loopStart = Math.max(1, startIdx);
                 for(let i=loopStart; i<=activeEndIdx; i++) { 
                     let sourceIdx = i - 1; let numsToCheck = [];
-                    // เอาค่า Base Sum มาบวกกับเลขที่สุ่มได้ทีละตัว
-                    for(let k=0; k<len; k++) numsToCheck.push((baseSums[sourceIdx] + rndAdds[k]) % 10);
-                    
+                    for(let k=0; k<len; k++) numsToCheck.push((baseSums[sourceIdx]+start+additives[k])%10);
                     if (targetVals[i]) { if(checkWin(targetVals[i], numsToCheck, targetType)) { score++; currentLoss = 0; } else { currentLoss++; totalLoss++; if(currentLoss > maxCons) maxCons = currentLoss; } }
                 }
-                // ตั้งชื่อสูตรแบบใหม่
-                let name = baseName + \` [ทรง \${rndAdds.join('')}]\`;
-                allResults.push({ name: name, score: score, totalLoss: totalLoss, maxCons: maxCons, p1, p2, op, con, m1, start: 0, myAdditives: rndAdds, baseSums, lastProcessedIdx: activeEndIdx });
-            } 
-            // โหมดปกติ (เรียง/คู่/คี่)
-            else {
-                for(let start=0; start<=9; start++) {
-                    let score=0, currentLoss=0, maxCons=0, totalLoss=0; let loopStart = Math.max(1, startIdx);
-                    for(let i=loopStart; i<=activeEndIdx; i++) { 
-                        let sourceIdx = i - 1; let numsToCheck = [];
-                        for(let k=0; k<len; k++) numsToCheck.push((baseSums[sourceIdx]+start+fixedAdditives[k])%10);
-                        if (targetVals[i]) { if(checkWin(targetVals[i], numsToCheck, targetType)) { score++; currentLoss = 0; } else { currentLoss++; totalLoss++; if(currentLoss > maxCons) maxCons = currentLoss; } }
-                    }
-                    allResults.push({ name: baseName+" (R"+start+")", score: score, totalLoss: totalLoss, maxCons: maxCons, p1, p2, op, con, m1, start: start, myAdditives: fixedAdditives, baseSums, lastProcessedIdx: activeEndIdx });
-                    if (allResults.length >= targetCount) break;
-                }
+                allResults.push({ name: name+" (R"+start+")", score: score, totalLoss: totalLoss, maxCons: maxCons, p1, p2, op, con, m1, start, baseSums, lastProcessedIdx: activeEndIdx });
+                if (allResults.length >= targetCount) break;
             }
-            if (allResults.length >= targetCount) break;
+             if (allResults.length >= targetCount) break;
         }
-        
-        // คัดสูตรที่แม่นที่สุดส่งกลับไปแสดง
         allResults.sort((a,b)=>b.score-a.score);
         if (displayMode === 'auto') allResults = allResults.slice(0, 5);
-        
         return allResults.map(res => {
-            let history = []; let huntState = { active: false, round: 0, nums: [] };
+            let history = [];
+            let huntState = { active: false, round: 0, nums: [] };
             for(let i=1; i < intData.length; i++) {
                  let sourceIdx = i - 1; let formulaNums = [];
-                 // คำนวณเลขที่ใช้เล่นจริง
-                 for(let k=0; k<len; k++) formulaNums.push((res.baseSums[sourceIdx] + res.start + res.myAdditives[k]) % 10);
-                 
+                 for(let k=0; k<len; k++) formulaNums.push((res.baseSums[sourceIdx]+res.start+additives[k])%10);
                  let playNums = formulaNums; let huntRoundInfo = 0;
-                 if (isHuntingMode) { if (huntState.active) { playNums = huntState.nums; huntState.round++; huntRoundInfo = huntState.round; } else { playNums = formulaNums; } }
-                 let target = getTargetValue(intData[i], targetType); let isWin = checkWin(target, playNums, targetType); let isTest = (i > res.lastProcessedIdx); 
+                 if (isHuntingMode) {
+                    if (huntState.active) { playNums = huntState.nums; huntState.round++; huntRoundInfo = huntState.round; } else { playNums = formulaNums; }
+                 }
+                 let target = getTargetValue(intData[i], targetType);
+                 let isWin = checkWin(target, playNums, targetType);
+                 let isTest = (i > res.lastProcessedIdx); 
                  let record = { nums: playNums, win: isWin, rowIdx: i, isTest: isTest, huntRound: huntRoundInfo, huntMax: huntMax }; 
                  if (i >= startIdx && i <= endIdx) { history.push(record); }
-                 if (isHuntingMode) { if (isWin) { huntState.active = false; huntState.round = 0; huntState.nums = []; } else { if (huntState.active) { if (huntState.round >= huntMax) { huntState.active = false; huntState.round = 0; huntState.nums = []; } } else { huntState.active = true; huntState.round = 0; huntState.nums = playNums; } } }
+                 if (isHuntingMode) {
+                     if (isWin) { huntState.active = false; huntState.round = 0; huntState.nums = []; } 
+                     else { if (huntState.active) { if (huntState.round >= huntMax) { huntState.active = false; huntState.round = 0; huntState.nums = []; } } else { huntState.active = true; huntState.round = 0; huntState.nums = playNums; } }
+                 }
             }
             let lastIdx = intData.length - 1; let predNums = [];
-            if (isHuntingMode && huntState.active) { predNums = huntState.nums; } else { for(let k=0; k<len; k++) predNums.push((res.baseSums[lastIdx] + res.start + res.myAdditives[k]) % 10); }
+            if (isHuntingMode && huntState.active) { predNums = huntState.nums; } else { for(let k=0; k<len; k++) predNums.push((res.baseSums[lastIdx]+res.start+additives[k])%10); }
             let nextHuntRound = (isHuntingMode && huntState.active) ? huntState.round + 1 : 0;
             history.push({ nums: predNums, win: null, rowIdx: -1, isTest: true, huntRound: nextHuntRound, huntMax: huntMax });
             return { name: res.name, score: res.score, totalLoss: res.totalLoss, maxCons: res.maxCons, history: history };
@@ -1854,147 +1759,6 @@ function calcGarlandMatrix() {
             let advBox = document.getElementById('aiAdviceBox'); advBox.innerHTML = adviceHtml; advBox.style.backgroundColor = adviceBg; advBox.style.color = adviceColor; advBox.style.border = `1px solid ${adviceColor}`;
 
         } catch (err) { console.error(err); alert("Error: " + err.message); }
-    }
-
-
-// 🔥 ฟังก์ชันวิเคราะห์แบบแบ่งบล็อก (Block Hunter AI) 🔥
-    function calcBlockHunter() {
-        if (!currentData || currentData.length < 15) return alert("ข้อมูลไม่เพียงพอ (ควรมีอย่างน้อย 15 งวด)");
-
-        const targetMode = parseInt(document.getElementById('bhTarget').value);
-        const len = parseInt(document.getElementById('bhLen').value) || 5;
-        const huntSize = parseInt(document.getElementById('bhHuntSize').value) || 5; // แบ่งบล็อกละกี่งวด
-
-        // ดึงข้อมูลสำหรับคำนวณ (ตัดงวดแรกสุดไปเป็นฐานเริ่มต้น)
-        const intData = currentData.map(r => [parseInt(r.up[0]), parseInt(r.up[1]), parseInt(r.up[2]), parseInt(r.down[0]), parseInt(r.down[1])]);
-        
-        // ฟังก์ชันเป้าหมาย
-        const getTargets = (r) => { 
-            switch(targetMode){
-                case 1:return[r[1]]; case 2:return[r[2]]; case 3:return[r[3]]; case 4:return[r[4]];
-                case 5:case 7:return[r[1],r[2]]; case 6:case 8:return[r[3],r[4]]; default:return[r[2]];
-            } 
-        };
-
-        // จำนวนงวดที่คำนวณผลได้
-        const totalResults = intData.length - 1; 
-        const fullBlocks = Math.floor(totalResults / huntSize); // จำนวนบรรทัดที่สมบูรณ์
-        const remCount = totalResults % huntSize; // เศษงวดที่เหลือในปัจจุบัน
-
-        let allFormulas = [];
-        const positions = [0, 1, 2, 3, 4]; const operators = ['+', '-', '*']; const constants = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]; 
-
-        // สุ่มสร้างสูตรขึ้นมา 1,000 รูปแบบเพื่อหาตัวที่ดีที่สุด
-        for(let i=0; i<1000; i++) {
-            let p1 = positions[Math.floor(Math.random()*5)]; let p2 = positions[Math.floor(Math.random()*5)];
-            let op = operators[Math.floor(Math.random()*3)]; let con = constants[Math.floor(Math.random()*10)];
-            let m1 = Math.floor(Math.random()*3)+1; let start = Math.floor(Math.random()*10);
-            
-            let blockWins = 0;
-            let blockDetail = []; // เก็บประวัติแต่ละบล็อก
-
-            // 1. เช็คในบล็อกที่สมบูรณ์ (Full Blocks)
-            for(let b=0; b<fullBlocks; b++) {
-                let isHit = false;
-                let hitAtStep = -1;
-                
-                // ไล่เช็คทีละงวดในบล็อกนั้น
-                for(let step=0; step<huntSize; step++) {
-                    let dataIdx = (b * huntSize) + step + 1; // index ที่จะตรวจผล
-                    let prevRow = intData[dataIdx - 1]; // ข้อมูลรอบที่แล้วสำหรับคำนวณ
-                    let currRow = intData[dataIdx]; // ผลรางวัลรอบนี้
-                    
-                    // คำนวณสูตร
-                    let v1 = prevRow[p1]; let v2 = prevRow[p2]; let res = 0;
-                    if (op === '+') res = (v1*m1)+v2; else if (op === '-') res = (v1*m1)-v2; else if (op === '*') res = (v1*m1)*v2;
-                    let baseSum = Math.floor(Math.abs(res) + con) % 10;
-                    
-                    let preds = []; for(let k=0; k<len; k++) preds.push((baseSum+start+k)%10);
-                    let tgs = getTargets(currRow);
-                    
-                    let win = false;
-                    if([7,8].includes(targetMode)) { let u=[...new Set(tgs)]; win = preds.filter(n=>u.includes(n)).length===u.length; } 
-                    else { win = preds.some(n=>tgs.includes(n)); }
-
-                    if(win) { isHit = true; hitAtStep = step + 1; break; } // แตกแล้ว หยุดล่าในบล็อกนี้ทันที
-                }
-                if(isHit) blockWins++;
-                blockDetail.push(hitAtStep); // -1 คือหลุด, >0 คือเข้าในไม้ที่เท่าไหร่
-            }
-
-            // 2. เช็คบล็อกปัจจุบันที่ยังไม่เต็ม (Remainder)
-            let remHit = false, remStep = -1;
-            for(let step=0; step<remCount; step++) {
-                let dataIdx = (fullBlocks * huntSize) + step + 1;
-                let prevRow = intData[dataIdx - 1]; let currRow = intData[dataIdx];
-                
-                let v1 = prevRow[p1]; let v2 = prevRow[p2]; let res = 0;
-                if (op === '+') res = (v1*m1)+v2; else if (op === '-') res = (v1*m1)-v2; else if (op === '*') res = (v1*m1)*v2;
-                let baseSum = Math.floor(Math.abs(res) + con) % 10;
-                
-                let preds = []; for(let k=0; k<len; k++) preds.push((baseSum+start+k)%10);
-                let tgs = getTargets(currRow);
-                
-                let win = false;
-                if([7,8].includes(targetMode)) { let u=[...new Set(tgs)]; win = preds.filter(n=>u.includes(n)).length===u.length; } 
-                else { win = preds.some(n=>tgs.includes(n)); }
-
-                if(win) { remHit = true; remStep = step + 1; break; }
-            }
-
-            let name = `(${m1>1?m1+'x':''}${['ร','ส','น','ลส','ลน'][p1]} ${op} ${['ร','ส','น','ลส','ลน'][p2]}) + ${con} (R${start})`;
-            allFormulas.push({ name, blockWins, fullBlocks, blockDetail, remHit, remStep, remCount });
-        }
-
-        // คัดเลือกสูตรที่ชนะบล็อกเยอะที่สุด
-        allFormulas.sort((a,b) => b.blockWins - a.blockWins);
-        let topFormulas = allFormulas.slice(0, 4);
-
-        // --- สร้าง HTML แสดงผล ---
-        let info = document.getElementById('bhInfoText');
-        info.innerHTML = `ตรวจพบผลคำนวณ <b>${totalResults} งวด</b> แบ่งเป็น <b>${fullBlocks} บรรทัด</b> (บรรทัดละ ${huntSize} งวด)<br>และเหลือ <b>${remCount} งวด</b> รอให้มีมาเพิ่มอีก ${huntSize - remCount} งวดจึงจะครบ 1 บรรทัด`;
-        info.style.display = 'block';
-
-        let html = '';
-        topFormulas.forEach((f, idx) => {
-            let winRate = Math.round((f.blockWins / f.fullBlocks) * 100);
-            
-            // สร้างกล่องสี่เหลี่ยมสีๆ แทนแต่ละบล็อก
-            let gridHtml = `<div style="display:flex; flex-wrap:wrap; gap:3px; margin:10px 0;">`;
-            f.blockDetail.forEach(hit => {
-                if (hit !== -1) {
-                    gridHtml += `<div style="width:20px; height:20px; background:#10b981; border-radius:4px; color:white; font-size:10px; display:flex; align-items:center; justify-content:center; font-weight:bold;" title="แตกไม้ที่ ${hit}">${hit}</div>`;
-                } else {
-                    gridHtml += `<div style="width:20px; height:20px; background:#ef4444; border-radius:4px; color:white; font-size:10px; display:flex; align-items:center; justify-content:center; font-weight:bold;" title="หลุด (ตาย)">X</div>`;
-                }
-            });
-            gridHtml += `</div>`;
-
-            // สถานะของบล็อกปัจจุบัน (เศษที่เหลือ)
-            let currentStatus = "";
-            if (remCount === 0) {
-                currentStatus = `<div style="font-size:12px; color:#64748b; background:#f1f5f9; padding:5px; border-radius:6px;">⚪ รอบล็อกล่าสุดจบแล้ว รองวดถัดไปเพื่อเริ่มไม้ 1</div>`;
-            } else {
-                if (f.remHit) {
-                    currentStatus = `<div style="font-size:12px; color:#065f46; background:#dcfce7; padding:5px; border-radius:6px; font-weight:bold;">✅ งวดล่าสุด: แตกแล้วในไม้ที่ ${f.remStep} (หยุดเล่นรอบล็อกใหม่)</div>`;
-                } else {
-                    currentStatus = `<div style="font-size:12px; color:#9a3412; background:#ffedd5; padding:5px; border-radius:6px; font-weight:bold;">⏳ งวดล่าสุด: ยังไม่แตก (กำลังตามไม้ที่ ${remCount + 1})</div>`;
-                }
-            }
-
-            html += `<div class="sf-card" style="height:auto; border-color:#c4b5fd;">
-                <div class="sf-card-header" style="color:#6d28d9; border-bottom-color:#c4b5fd;">
-                    <span>สูตรที่ ${idx+1}</span>
-                    <span style="background:${winRate>=90?'#10b981':'#f59e0b'}; color:white; padding:2px 8px; border-radius:10px; font-size:12px;">Win ${winRate}%</span>
-                </div>
-                <div style="font-weight:bold; color:#1e293b; font-size:14px; text-align:center;">${f.name}</div>
-                ${gridHtml}
-                <div style="font-size:12px; color:#475569; margin-bottom:10px;">สถิติ: เข้า ${f.blockWins} / ${f.fullBlocks} บรรทัด</div>
-                ${currentStatus}
-            </div>`;
-        });
-
-        document.getElementById('bhOutput').innerHTML = html;
     }
 
 // ✅ ฟังก์ชันสำหรับปุ่ม Copy ในส่วน Walk-Forward
